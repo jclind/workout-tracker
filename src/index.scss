@@ -1,0 +1,125 @@
+@import './helpers.scss';
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900&display=swap');
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  color: $primary;
+  position: relative;
+  width: 100%;
+  background: $primary-background;
+  padding: 0;
+}
+#root {
+  height: 100%;
+  padding: 0;
+}
+* {
+  color: $primary;
+  font-family: $font-family;
+}
+
+h3 {
+  margin: 0;
+}
+h5 {
+  color: $tertiary-text;
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+}
+.btn-no-styles {
+  margin: 0;
+  padding: 0;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  color: inherit;
+  background: none;
+}
+
+input {
+  background: $primary-background;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  font-weight: 700;
+  font-size: 0.95rem;
+  height: 40px;
+
+  &:focus {
+    outline: 2px solid $border-color;
+    outline-offset: 2px;
+  }
+  &::placeholder {
+    color: $tertiary-background;
+  }
+}
+input.fade {
+  // border-color: $faded;
+  border-color: $faded;
+}
+label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: $secondary-text;
+  margin-bottom: 0.35rem;
+}
+label.fade {
+  color: $faded;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 100%;
+  width: 100%;
+
+  button.google-signup-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: 1rem;
+    margin: 0 auto;
+    margin-top: 2rem;
+    .icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+}
+
+// Scroll bar
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.1);
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+*::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.9);
+}

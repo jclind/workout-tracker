@@ -1,0 +1,32 @@
+@import '../../helpers.scss';
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+
+  .input {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    input {
+      width: 100%;
+      padding-right: 1.5rem;
+    }
+    button.clear-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      right: 0.25rem;
+      margin: auto 0;
+      height: 100%;
+      padding: 0.5rem;
+      .icon {
+        height: 18px;
+        width: 18px;
+      }
+    }
+  }
+}
