@@ -1,3 +1,5 @@
+import { ExerciseDataType, WeightGroupType } from '../types'
+
 const getSubstringUntilNumber = (str: string) => {
   const match = str.match(/^(.*?)(?=\d)/)
   if (match) {
@@ -33,37 +35,46 @@ const formatSets = (sets: string[]): number[] => {
   return formattedSets
 }
 
-export const parseExercise = (str: string) => {
+export const parseExercise = (str: string): ExerciseDataType => {
   const exerciseName = getSubstringUntilNumber(str).trim()
 
   const titleWithoutName = str.replace(exerciseName, '').trim()
-  const weight = titleWithoutName
-    .substring(0, titleWithoutName.indexOf(' '))
-    .replaceAll('[^\\d.]', '')
-    .trim()
+  const weightGroupsStr = titleWithoutName.split('/')
 
-  const repsAndCommentStr = titleWithoutName.replace(weight, '').trim()
-  console.log(repsAndCommentStr)
+  const weightGroups: WeightGroupType[] = []
 
-  // console.log(repsAndCommentStr.split(','))
+  weightGroupsStr.forEach(weightGroup => {
+    const weightGroupStrTrimmed = weightGroup.trim()
+    const weight = weightGroupStrTrimmed
+      .substring(0, weightGroupStrTrimmed.indexOf(' '))
+      .replaceAll('[^\\d.]', '')
+      .trim()
+    // console.log(weightGroup)
 
-  const commentArr: string[] = []
-  const sets: string[] = []
+    const repsAndCommentStr = weightGroup.replace(weight, '').trim()
+    // console.log(repsAndCommentStr)
+    // console.log(repsAndCommentStr)
 
-  repsAndCommentStr.split(',').forEach(val => {
-    const { number, end } = getFirstNumber(val)
-    if (number) {
-      sets.push(number)
-    }
-    if (end.trim()) commentArr.push(end.trim())
+    const commentArr: string[] = []
+    const sets: string[] = []
+
+    repsAndCommentStr.split(',').forEach(val => {
+      const { number, end } = getFirstNumber(val)
+      if (number) {
+        sets.push(number)
+      }
+      if (end.trim()) commentArr.push(end.trim())
+    })
+
+    const comment = commentArr.join(', ')
+    const formattedSets: number[] = formatSets(sets)
+    weightGroups.push({ weight: Number(weight), sets: formattedSets, comment })
   })
 
-  const comment = commentArr.join(', ')
-  const formattedSets: number[] = formatSets(sets)
-  console.log(formattedSets)
+  const exerciseData: ExerciseDataType = {
+    name: exerciseName,
+    weights: weightGroups,
+  }
 
-  // return { sets, comment }
-
-  // console.log('name:', exerciseName)
-  // console.log('weight:', weight)
+  return exerciseData
 }
