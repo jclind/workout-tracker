@@ -11,6 +11,7 @@ import { signupWithGoogle } from './services/auth'
 import { User } from 'firebase/auth'
 import Nav from './Components/Nav/Nav'
 import FormInput from './Components/FormInput/FormInput'
+import Footer from './Components/Footer/Footer'
 
 const top100Films = [
   { label: 'The Shawshank Redemption', year: 1994 },
@@ -147,8 +148,6 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [loginLoading, setLoginLoading] = useState(false)
 
-  const [workoutTitle, setWorkoutTitle] = useState('')
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
       if (userInstance) {
@@ -188,13 +187,8 @@ function App() {
       {user ? (
         <>
           <Nav />
-          <FormInput
-            val={workoutTitle}
-            setVal={setWorkoutTitle}
-            label='Workout Title'
-          />
-          {/* <WorkoutInput /> */}
           <ExerciseList />
+          <Footer />
         </>
       ) : (
         <div className='login-container'>

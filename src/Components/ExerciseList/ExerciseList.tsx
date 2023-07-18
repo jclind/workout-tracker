@@ -6,6 +6,8 @@ import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
 
+const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
+
 type ExerciseInputsProps = {
   exercise: ExerciseType
   idx: number
@@ -14,8 +16,6 @@ type ExerciseInputsProps = {
   addExercise: () => string
   removeExercise: (id: string) => void
 }
-
-const test: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
 const ExerciseInputs = ({
   exercise,
@@ -34,15 +34,15 @@ const ExerciseInputs = ({
 
   useEffect(() => {
     if (exercise.id) {
-      test[exercise.id] = inputRef
+      idRefHash[exercise.id] = inputRef
     }
   }, [])
 
   const handleEnter = (id: string | null) => {
     console.log('Curr:', exercise.id, 'Next:', id)
     if (id) {
-      const focusRef = test[id]
-      console.log(test)
+      const focusRef = idRefHash[id]
+      console.log(idRefHash)
       console.log(focusRef)
       console.log(id)
       if (id && focusRef && focusRef.current) {
@@ -62,7 +62,7 @@ const ExerciseInputs = ({
 
       const nextExerciseFocus = exercises[idx - 1] || exercises[0]
       const nextExerciseFocusID = nextExerciseFocus.id
-      const focusRef = test[nextExerciseFocusID]
+      const focusRef = idRefHash[nextExerciseFocusID]
       if (nextExerciseFocusID && focusRef && focusRef.current) {
         focusRef.current.focus()
       }
@@ -83,6 +83,14 @@ const ExerciseInputs = ({
         nextID={nextID}
         inputRef={inputRef}
       />
+      {numExercises > 1 && (
+        <button
+          className='btn-no-styles remove-exercise-btn'
+          onClick={() => removeExercise(exercise.id)}
+        >
+          remove
+        </button>
+      )}
     </div>
   )
 }
@@ -103,9 +111,19 @@ const generateNewExercise = (): ExerciseType => {
 }
 
 const ExerciseList = () => {
+  // const [idRefHash, setIdRefHash] = useState<{ [x: string]: React.RefObject<HTMLInputElement> }>({})
+
   const [exercises, setExercises] = useState<ExerciseType[]>([
     generateNewExercise(),
   ])
+  const [workoutTitle, setWorkoutTitle] = useState('')
+
+  const [titleNextFocusRef, setTitleNextFocusRef] =
+    useState<React.RefObject<HTMLInputElement>>()
+
+  useEffect(() => {
+    setTitleNextFocusRef(idRefHash[exercises[0].id])
+  }, [exercises])
 
   const handleAddExercise = (): string => {
     const newExercise = generateNewExercise()
@@ -117,24 +135,32 @@ const ExerciseList = () => {
   }
 
   return (
-    <div className='exercise-list'>
-      {exercises.map((ex, idx, exercises) => {
-        return (
-          <ExerciseInputs
-            exercise={ex}
-            idx={idx}
-            numExercises={exercises.length}
-            addExercise={handleAddExercise}
-            removeExercise={handleRemoveExercise}
-            exercises={exercises}
-          />
-        )
-      })}
-      <div className='add-exercise'>
-        <button className='btn-no-styles' onClick={handleAddExercise}>
-          <AiOutlinePlusCircle className='icon' />
-          Add Exercise
-        </button>
+    <div className='exercise-form'>
+      <FormInput
+        val={workoutTitle}
+        setVal={setWorkoutTitle}
+        label='Workout Title'
+        nextFocusRef={titleNextFocusRef}
+      />
+      <div className='exercise-list'>
+        {exercises.map((ex, idx, exercises) => {
+          return (
+            <ExerciseInputs
+              exercise={ex}
+              idx={idx}
+              numExercises={exercises.length}
+              addExercise={handleAddExercise}
+              removeExercise={handleRemoveExercise}
+              exercises={exercises}
+            />
+          )
+        })}
+        <div className='add-exercise'>
+          <button className='btn-no-styles' onClick={handleAddExercise}>
+            <AiOutlinePlusCircle className='icon' />
+            Add Exercise
+          </button>
+        </div>
       </div>
     </div>
   )

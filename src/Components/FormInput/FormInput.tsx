@@ -13,6 +13,7 @@ type FormInputProps = {
   onBackspaceEmpty?: () => void
   nextID?: string | null
   inputRef?: React.RefObject<HTMLInputElement>
+  nextFocusRef?: React.RefObject<HTMLInputElement>
 }
 
 const FormInput = ({
@@ -26,6 +27,7 @@ const FormInput = ({
   onBackspaceEmpty,
   nextID = null,
   inputRef,
+  nextFocusRef,
 }: FormInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
 
@@ -48,9 +50,18 @@ const FormInput = ({
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (onEnter && e.key === 'Enter') {
-      e.preventDefault()
-      onEnter(nextID)
+    if (e.key === 'Enter') {
+      console.log('1', e.key)
+      console.log(nextFocusRef)
+      if (onEnter) {
+        console.log('2')
+        e.preventDefault()
+        onEnter(nextID)
+      } else if (nextFocusRef && nextFocusRef.current) {
+        console.log('3')
+        e.preventDefault()
+        nextFocusRef.current.focus()
+      }
     } else if (!val && onBackspaceEmpty && e.key === 'Backspace') {
       e.preventDefault()
       onBackspaceEmpty()

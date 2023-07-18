@@ -18,7 +18,7 @@ body {
   padding: 0;
 }
 * {
-  color: $primary;
+  // color: $primary;
   font-family: $font-family;
 }
 
@@ -32,6 +32,8 @@ h5 {
 
 button {
   cursor: pointer;
+  border-radius: $border-radius;
+  border: none;
 }
 .btn-no-styles {
   margin: 0;
@@ -41,6 +43,13 @@ button {
   border: none;
   color: inherit;
   background: none;
+}
+button.submit-btn {
+  background: $secondary;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $primary-background;
 }
 
 input {
@@ -52,6 +61,7 @@ input {
   font-weight: 700;
   font-size: 0.95rem;
   height: 40px;
+  color: $primary;
 
   &:focus {
     outline: 2px solid $border-color;
@@ -64,6 +74,9 @@ input {
 input.fade {
   // border-color: $faded;
   border-color: $faded;
+}
+textarea {
+  color: $primary;
 }
 label {
   display: flex;
@@ -81,7 +94,6 @@ label.fade {
 .App {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 
   height: 100%;
