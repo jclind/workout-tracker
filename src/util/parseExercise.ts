@@ -1,4 +1,5 @@
 import { ExerciseDataType, WeightGroupType } from '../types'
+import { v4 as uuidv4 } from 'uuid'
 
 const getSubstringUntilNumber = (str: string) => {
   const match = str.match(/^(.*?)(?=\d)/)
@@ -72,8 +73,10 @@ export const parseExercise = (str: string): ExerciseDataType => {
   })
 
   const exerciseData: ExerciseDataType = {
+    id: uuidv4(),
     name: exerciseName,
     weights: weightGroups,
+    originalString: str,
   }
 
   return exerciseData

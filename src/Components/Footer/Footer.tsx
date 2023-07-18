@@ -3,6 +3,9 @@ import Modal from 'react-modal'
 import './Footer.scss'
 import { getTitleAndDate } from '../../util/getTitleAndDate'
 import { parseExercise } from '../../util/parseExercise'
+import { ExerciseDataType, WorkoutDataType } from '../../types'
+import { v4 as uuidv4 } from 'uuid'
+import { importWorkouts } from '../../services/tracker'
 
 const customStyles = {
   content: {
@@ -27,20 +30,39 @@ const Footer = () => {
   const [isModalOpen, setIsModalOpen] = useState(true)
 
   const [importedText, setImportedText] = useState('')
+  const [importLoading, setImportLoading] = useState(false)
 
   const closeModal = () => {
     setIsModalOpen(false)
   }
 
   const handleImport = () => {
+    setImportLoading(true)
+
     const workouts = importedText.split(/\n{2,}/)
+
+    const formattedWorkouts: WorkoutDataType[] = []
+
     workouts.map(workoutString => {
       const workoutList = workoutString.split(/\n/)
       const { title, date } = getTitleAndDate(workoutList[0])
-      workoutList.slice(1).map(exercise => {
-        const parsedExercise = parseExercise(exercise)
-        return exercise
+      const exercises: ExerciseDataType[] = []
+      workoutList.slice(1).forEach(exercise => {
+        const parsedExercise: ExerciseDataType = parseExercise(exercise)
+        exercises.push(parsedExercise)
       })
+
+      const workoutData: WorkoutDataType = {
+        id: uuidv4(),
+        name: title,
+        date,
+        exercises,
+      }
+      formattedWorkouts.push(workoutData)
+    })
+
+    importWorkouts(formattedWorkouts).then(() => {
+      setImportLoading(false)
     })
   }
 
@@ -61,6 +83,7 @@ const Footer = () => {
             value={importedText}
             onChange={e => setImportedText(e.target.value)}
           ></textarea>
+          {importLoading && 'Loading...'}
           <button className='submit-btn' onClick={handleImport}>
             Import
           </button>
