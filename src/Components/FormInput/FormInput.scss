@@ -28,5 +28,30 @@
         width: 18px;
       }
     }
+    .suggested-text {
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.5rem;
+      top: 1px;
+      height: 100%;
+      font-weight: 700 !important;
+      font-size: 0.95rem !important;
+      color: $tertiary-background;
+      z-index: 0;
+      opacity: 0.5;
+      box-sizing: border-box;
+
+      border: 1px solid none;
+      pointer-events: none;
+      span.invisible {
+        color: none;
+        opacity: 0;
+      }
+      span {
+        white-space: pre;
+      }
+    }
   }
 }

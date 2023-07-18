@@ -1,4 +1,12 @@
-import { collection, doc, setDoc } from 'firebase/firestore'
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  query,
+  setDoc,
+  where,
+} from 'firebase/firestore'
 import { WorkoutDataType } from '../types'
 import { auth, db } from './firestore'
 
@@ -39,5 +47,35 @@ export const importWorkouts = async (workouts: WorkoutDataType[]) => {
     } catch (error: any) {
       throw new Error(error.message)
     }
+  }
+}
+
+export const searchExercises = async (queryText: string) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const exercisesRef = collection(userDataRef, 'exercises')
+
+    const q = query(
+      exercisesRef,
+      where('name', '>=', queryText),
+      where('name', '<=', queryText + '\uf8ff'),
+      limit(1)
+    )
+
+    let name = ''
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach(doc => {
+      name = doc.data().name
+    })
+
+    return name
+
+    // const names: string[] = []
+    // querySnapshot.forEach(doc => {
+    //   const data = doc.data()
+    //   names.push(data.name)
+    // })
+    // return names
   }
 }

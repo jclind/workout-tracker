@@ -1,9 +1,13 @@
 import React, { useRef, useState } from 'react'
 import './FormInput.scss'
 import { AiFillCloseCircle } from 'react-icons/ai'
+import {
+  removeTextAfterSubstring,
+  removeTextBeforeSubstring,
+} from '../../util/stringModifiers'
 
 type FormInputProps = {
-  val: string | number
+  val: string
   setVal: React.Dispatch<React.SetStateAction<string>>
   label: string
   LabelInfo?: React.ReactNode
@@ -14,6 +18,7 @@ type FormInputProps = {
   nextID?: string | null
   inputRef?: React.RefObject<HTMLInputElement>
   nextFocusRef?: React.RefObject<HTMLInputElement>
+  suggestedText?: string
 }
 
 const FormInput = ({
@@ -28,6 +33,7 @@ const FormInput = ({
   nextID = null,
   inputRef,
   nextFocusRef,
+  suggestedText,
 }: FormInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
 
@@ -51,21 +57,25 @@ const FormInput = ({
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      console.log('1', e.key)
-      console.log(nextFocusRef)
-      if (onEnter) {
-        console.log('2')
+      if (suggestedText && val && suggestedText.includes(val)) {
+        setVal(suggestedText + ' ')
+      } else if (onEnter) {
         e.preventDefault()
         onEnter(nextID)
       } else if (nextFocusRef && nextFocusRef.current) {
-        console.log('3')
         e.preventDefault()
         nextFocusRef.current.focus()
       }
     } else if (!val && onBackspaceEmpty && e.key === 'Backspace') {
       e.preventDefault()
       onBackspaceEmpty()
+    } else if (e.key === 'Tab') {
+      if (suggestedText && val && suggestedText.includes(val)) {
+        e.preventDefault()
+        setVal(suggestedText + ' ')
+      }
     }
+    console.log(e.key)
   }
 
   return (
@@ -95,6 +105,14 @@ const FormInput = ({
             <AiFillCloseCircle className='icon' />
           </button>
         ) : null}
+        {suggestedText && val && (
+          <div className='suggested-text'>
+            <span className='invisible'>
+              {removeTextAfterSubstring(suggestedText, val)}
+            </span>
+            <span>{`${removeTextBeforeSubstring(suggestedText, val)}`}</span>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -5,6 +5,8 @@ import { AiFillInfoCircle, AiOutlinePlusCircle } from 'react-icons/ai'
 import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
+import { searchExercises } from '../../services/tracker'
+import { parseExercise } from '../../util/parseExercise'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -25,8 +27,10 @@ const ExerciseInputs = ({
   addExercise,
   removeExercise,
 }: ExerciseInputsProps) => {
-  const [name, setName] = useState('')
+  const [exerciseStr, setExerciseStr] = useState('')
+  const [exerciseName, setExerciseName] = useState('')
   const [data, setData] = useState('')
+  const [suggestedName, setSuggestedName] = useState('')
 
   const nextID = exercises[idx + 1]?.id || null
 
@@ -37,6 +41,26 @@ const ExerciseInputs = ({
       idRefHash[exercise.id] = inputRef
     }
   }, [])
+
+  useEffect(() => {
+    const parsedExerciseData = parseExercise(exerciseStr)
+    setExerciseName(parsedExerciseData.name)
+  }, [exerciseStr])
+
+  useEffect(() => {
+    // if (!exerciseStr) setSuggestedName('')
+    const delayDebounce = setTimeout(() => {
+      if (exerciseStr) {
+        searchExercises(exerciseName.toLowerCase()).then(res => {
+          if (res) {
+            setSuggestedName(res)
+          }
+        })
+      }
+    }, 1000)
+
+    return () => clearTimeout(delayDebounce)
+  }, [exerciseName])
 
   const handleEnter = (id: string | null) => {
     console.log('Curr:', exercise.id, 'Next:', id)
@@ -72,8 +96,8 @@ const ExerciseInputs = ({
   return (
     <div className='exercise-container'>
       <FormInput
-        val={name}
-        setVal={setName}
+        val={exerciseStr}
+        setVal={setExerciseStr}
         label={`Exercise ${idx + 1}`}
         LabelInfo={idx === 0 ? <InfoModal /> : null}
         placeholder='deadlifts 100 3x8'
@@ -82,6 +106,7 @@ const ExerciseInputs = ({
         onBackspaceEmpty={handleBackspace}
         nextID={nextID}
         inputRef={inputRef}
+        suggestedText={suggestedName}
       />
       {numExercises > 1 && (
         <button

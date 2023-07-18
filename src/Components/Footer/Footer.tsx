@@ -27,7 +27,7 @@ const customStyles = {
 }
 
 const Footer = () => {
-  const [isModalOpen, setIsModalOpen] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [importedText, setImportedText] = useState('')
   const [importLoading, setImportLoading] = useState(false)
