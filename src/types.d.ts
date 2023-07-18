@@ -12,6 +12,16 @@ export type ExerciseDataType = {
   originalString: string
 }
 
+export type ExercisesServerDataType = {
+  id: string
+  index: number
+  name: string
+  originalString: string
+  weights: WeightGroupType[]
+  workoutDate: string
+  workoutID: string
+}
+
 export type WeightGroupType = {
   sets: number[]
   weight: number

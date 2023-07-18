@@ -7,6 +7,9 @@ import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
 import { searchExercises } from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
+import { WeightGroupType } from '../../types'
+import { getDataFromExercise } from '../../util/getDataFromExercise'
+import ViewAllExercisesModal from '../ViewAllExercisesModal/ViewAllExercisesModal'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -29,6 +32,7 @@ const ExerciseInputs = ({
 }: ExerciseInputsProps) => {
   const [exerciseStr, setExerciseStr] = useState('')
   const [exerciseName, setExerciseName] = useState('')
+  const [prevExerciseData, setPrevExerciseData] = useState<string>('')
   const [data, setData] = useState('')
   const [suggestedName, setSuggestedName] = useState('')
 
@@ -53,11 +57,14 @@ const ExerciseInputs = ({
       if (exerciseStr) {
         searchExercises(exerciseName.toLowerCase()).then(res => {
           if (res) {
-            setSuggestedName(res)
+            setSuggestedName(res.name)
+            const prevData = getDataFromExercise(res)
+            console.log(prevData)
+            setPrevExerciseData(prevData)
           }
         })
       }
-    }, 1000)
+    }, 300)
 
     return () => clearTimeout(delayDebounce)
   }, [exerciseName])
@@ -92,6 +99,7 @@ const ExerciseInputs = ({
       }
     }
   }
+  console.log(suggestedName, exerciseName)
 
   return (
     <div className='exercise-container'>
@@ -116,6 +124,16 @@ const ExerciseInputs = ({
           remove
         </button>
       )}
+      {suggestedName &&
+      exerciseName &&
+      suggestedName === exerciseName.toLowerCase() ? (
+        <div className='prev-exercise-data'>
+          <span>Prev weights / sets: </span>
+          {prevExerciseData}
+          <button className='btn-no-styles view-all-btn'>(view all)</button>
+          <ViewAllExercisesModal exerciseName={exerciseName.toLowerCase()} />
+        </div>
+      ) : null}
     </div>
   )
 }

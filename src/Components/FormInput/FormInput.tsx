@@ -39,13 +39,6 @@ const FormInput = ({
 
   const faded = val && !isFocused
 
-  // const focusInput = () => {
-  //   if (inputRef.current) {
-  //     console.log('test')
-  //     inputRef.current.focus()
-  //   }
-  // }
-
   const handleClearInput = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -57,7 +50,7 @@ const FormInput = ({
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      if (suggestedText && val && suggestedText.includes(val)) {
+      if (suggestedText && val && suggestedText.includes(val.toLowerCase())) {
         setVal(suggestedText + ' ')
       } else if (onEnter) {
         e.preventDefault()
@@ -70,12 +63,11 @@ const FormInput = ({
       e.preventDefault()
       onBackspaceEmpty()
     } else if (e.key === 'Tab') {
-      if (suggestedText && val && suggestedText.includes(val)) {
+      if (suggestedText && val && suggestedText.includes(val.toLowerCase())) {
         e.preventDefault()
         setVal(suggestedText + ' ')
       }
     }
-    console.log(e.key)
   }
 
   return (
@@ -105,12 +97,15 @@ const FormInput = ({
             <AiFillCloseCircle className='icon' />
           </button>
         ) : null}
-        {suggestedText && val && (
+        {isFocused && suggestedText && val && (
           <div className='suggested-text'>
             <span className='invisible'>
-              {removeTextAfterSubstring(suggestedText, val)}
+              {removeTextAfterSubstring(suggestedText, val.toLowerCase())}
             </span>
-            <span>{`${removeTextBeforeSubstring(suggestedText, val)}`}</span>
+            <span>{`${removeTextBeforeSubstring(
+              suggestedText,
+              val.toLowerCase()
+            )}`}</span>
           </div>
         )}
       </div>

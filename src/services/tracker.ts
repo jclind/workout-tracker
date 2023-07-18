@@ -1,13 +1,21 @@
 import {
+  DocumentData,
+  QueryDocumentSnapshot,
   collection,
   doc,
   getDocs,
   limit,
+  orderBy,
   query,
   setDoc,
+  startAfter,
   where,
 } from 'firebase/firestore'
-import { WorkoutDataType } from '../types'
+import {
+  ExerciseDataType,
+  ExercisesServerDataType,
+  WorkoutDataType,
+} from '../types'
 import { auth, db } from './firestore'
 
 export const importWorkouts = async (workouts: WorkoutDataType[]) => {
@@ -50,7 +58,9 @@ export const importWorkouts = async (workouts: WorkoutDataType[]) => {
   }
 }
 
-export const searchExercises = async (queryText: string) => {
+export const searchExercises = async (
+  queryText: string
+): Promise<ExerciseDataType | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
     const userDataRef = doc(db, 'usersData', uid)
@@ -60,22 +70,58 @@ export const searchExercises = async (queryText: string) => {
       exercisesRef,
       where('name', '>=', queryText),
       where('name', '<=', queryText + '\uf8ff'),
+      orderBy('name'),
+      orderBy('workoutDate', 'desc'),
       limit(1)
     )
 
-    let name = ''
+    const dataArr: ExerciseDataType[] = []
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach(doc => {
-      name = doc.data().name
+      console.log(doc.data())
+      dataArr.push(doc.data() as ExerciseDataType)
     })
 
-    return name
+    return dataArr[0]
+  }
+}
 
-    // const names: string[] = []
-    // querySnapshot.forEach(doc => {
-    //   const data = doc.data()
-    //   names.push(data.name)
-    // })
-    // return names
+export const queryAllSingleExercise = async (
+  exerciseName: string,
+  resultsPerPage = 10,
+  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const exercisesRef = collection(userDataRef, 'exercises')
+
+    let q
+    if (lastDoc) {
+      q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        orderBy('workoutDate', 'desc'),
+        startAfter(lastDoc),
+        limit(resultsPerPage)
+      )
+    } else {
+      q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        orderBy('workoutDate', 'desc'),
+        limit(resultsPerPage)
+      )
+    }
+
+    const results: ExercisesServerDataType[] = []
+    const querySnapshot = await getDocs(q)
+    const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
+    querySnapshot.forEach(doc => {
+      console.log(doc.data())
+      results.push(doc.data() as ExercisesServerDataType)
+    })
+
+    return { data: results, lastDoc: newLastDoc }
   }
 }
