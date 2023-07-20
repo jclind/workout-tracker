@@ -36,7 +36,10 @@ const formatSets = (sets: string[]): number[] => {
   return formattedSets
 }
 
-export const parseExercise = (str: string): ExerciseDataType => {
+export const parseExercise = (
+  str: string,
+  persistentID: string | null = null
+): ExerciseDataType => {
   const exerciseName = getSubstringUntilNumber(str).trim()
 
   const titleWithoutName = str.replace(exerciseName, '').trim()
@@ -73,7 +76,7 @@ export const parseExercise = (str: string): ExerciseDataType => {
   })
 
   const exerciseData: ExerciseDataType = {
-    id: uuidv4(),
+    id: persistentID || uuidv4(),
     name: exerciseName,
     weights: weightGroups,
     originalString: str,

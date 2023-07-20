@@ -1,7 +1,7 @@
 export type WorkoutDataType = {
   id: string
   name: string
-  date: string
+  date: number | null
   exercises: ExerciseDataType[]
 }
 
@@ -18,7 +18,7 @@ export type ExercisesServerDataType = {
   name: string
   originalString: string
   weights: WeightGroupType[]
-  workoutDate: string
+  workoutDate: number | null
   workoutID: string
 }
 

@@ -68,7 +68,12 @@ const Footer = () => {
 
   return (
     <footer className='footer'>
-      <button className='btn-no-styles import-btn'>import</button>
+      <button
+        className='btn-no-styles import-btn'
+        onClick={() => setIsModalOpen(true)}
+      >
+        import
+      </button>
       <Modal
         isOpen={isModalOpen}
         // onAfterOpen={afterOpenModal}

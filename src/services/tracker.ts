@@ -2,6 +2,7 @@ import {
   DocumentData,
   QueryDocumentSnapshot,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -9,6 +10,7 @@ import {
   query,
   setDoc,
   startAfter,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 import {
@@ -33,7 +35,7 @@ export const importWorkouts = async (workouts: WorkoutDataType[]) => {
         const workoutDate = workout.date
 
         const workoutsRefDoc = doc(workoutsRef, workoutID)
-        promises.push(setDoc(workoutsRefDoc, { workout }))
+        promises.push(setDoc(workoutsRefDoc, workout))
 
         workout.exercises.forEach((exercise, idx) => {
           const { id, name } = exercise
@@ -123,5 +125,107 @@ export const queryAllSingleExercise = async (
     })
 
     return { data: results, lastDoc: newLastDoc }
+  }
+}
+
+export const getWorkouts = async (
+  resultsPerPage = 10,
+  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutsRef = collection(userDataRef, 'workouts')
+
+      let q
+      if (lastDoc) {
+        q = query(
+          workoutsRef,
+          startAfter(lastDoc),
+          orderBy('date', 'desc'),
+          limit(resultsPerPage)
+        )
+      } else {
+        q = query(workoutsRef, orderBy('date', 'desc'), limit(resultsPerPage))
+      }
+
+      const querySnapshot = await getDocs(q)
+      const workouts: WorkoutDataType[] = []
+      const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
+      querySnapshot.forEach(doc => {
+        const data = doc.data() as WorkoutDataType
+        workouts.push(data)
+      })
+
+      return { data: workouts, lastDoc: newLastDoc }
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+export const updateExercise = async (
+  exerciseID: string,
+  workoutID: string,
+  exerciseList: ExerciseDataType[],
+  updatedExerciseData: ExerciseDataType
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const promises: Promise<void>[] = []
+
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
+      const exerciseDocRef = doc(userDataRef, 'exercises', exerciseID)
+
+      const updatedExerciseList = exerciseList.map(ex => {
+        if (ex.id === exerciseID) return updatedExerciseData
+        return ex
+      })
+
+      await updateDoc(workoutDocRef, {
+        exercises: updatedExerciseList,
+      })
+
+      await updateDoc(exerciseDocRef, {
+        name: updatedExerciseData.name,
+        weights: updatedExerciseData.weights,
+        originalSring: updatedExerciseData.originalString,
+      })
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+//8080de8f-c12c-414f-8438-9665e9e222f7 smith bench
+//2daf1b2a-04c1-4914-a117-1cd0e06462db incline dumbbell bench
+
+export const modifyData = async () => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const workoutsRef = collection(userDataRef, 'workouts')
+    const exercisesRef = collection(userDataRef, 'exercises')
+
+    const exercisesQ = query(exercisesRef)
+
+    const exercisesQuerySnapshot = await getDocs(exercisesQ)
+
+    exercisesQuerySnapshot.forEach(doc => {
+      deleteDoc(doc.ref)
+    })
+
+    const workoutsQ = query(workoutsRef)
+
+    const workoutsQuerySnapshot = await getDocs(workoutsQ)
+
+    workoutsQuerySnapshot.forEach(doc => {
+      deleteDoc(doc.ref)
+    })
+
+    console.log('HERE')
   }
 }

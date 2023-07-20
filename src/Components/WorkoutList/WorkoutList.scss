@@ -1,0 +1,48 @@
+@import '../../helpers.scss';
+
+.workout-list-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+  .workout-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    width: 80%;
+    // width: fit-content;
+    .single-workout {
+      h3 {
+        // padding: 0;
+        // margin: 0;
+      }
+      .head {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        .date {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: $tertiary-text;
+        }
+      }
+      .exercise-list {
+        display: flex;
+        flex-direction: column;
+        input {
+          padding: 0;
+          // height: 1;
+          height: fit-content;
+        }
+        input.focused {
+          z-index: 2;
+        }
+        input.blurred {
+          border: 1px solid $primary-background;
+        }
+      }
+    }
+  }
+}

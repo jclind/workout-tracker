@@ -12,6 +12,7 @@ import { User } from 'firebase/auth'
 import Nav from './Components/Nav/Nav'
 import FormInput from './Components/FormInput/FormInput'
 import Footer from './Components/Footer/Footer'
+import WorkoutList from './Components/WorkoutList/WorkoutList'
 
 const top100Films = [
   { label: 'The Shawshank Redemption', year: 1994 },
@@ -188,6 +189,7 @@ function App() {
         <>
           <Nav />
           <ExerciseList />
+          <WorkoutList />
           <Footer />
         </>
       ) : (

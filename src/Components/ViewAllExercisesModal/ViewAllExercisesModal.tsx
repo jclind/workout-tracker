@@ -5,6 +5,7 @@ import { ExerciseDataType, ExercisesServerDataType } from '../../types'
 import { queryAllSingleExercise } from '../../services/tracker'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
+import { formatDateToString } from '../../util/dateUtil'
 
 const customStyles = {
   content: {
@@ -17,6 +18,7 @@ const customStyles = {
     background: '#09090b',
     borderRadius: '5px',
     maxWidth: '80%',
+    maxHeight: '80%',
   },
   overlay: {
     zIndex: '1000',
@@ -40,7 +42,7 @@ const ViewAllExercisesModal = ({
   > | null>(null)
 
   useEffect(() => {
-    queryData(10, null)
+    queryData(20, null)
   }, [])
 
   const queryData = (
@@ -75,10 +77,28 @@ const ViewAllExercisesModal = ({
         <h3>Previous {exerciseName} Data</h3>
         <div className='data'>
           {data.map(exercise => {
+            const date = exercise.workoutDate
+            const comment =
+              exercise.weights[exercise.weights.length - 1].comment
             return (
-              <div className='single-exercise'>
-                <h5>{exercise.workoutDate}</h5>
+              <div key={exercise.id} className='single-exercise'>
                 <h4>{getDataFromExercise(exercise)}</h4>
+                <div className='footer-data'>
+                  <span className='date'>
+                    {date && formatDateToString(date)}
+                  </span>
+                  {comment && (
+                    <span className='comment'>
+                      <span className='dark-text'>(</span>
+                      <span className='inner'>
+                        {comment} Lorem ipsum dolor, sit amet consectetur
+                        adipisicing elit. Sunt, suscipit? Expedita vero ipsam
+                        tempora exercitationem.
+                      </span>
+                      <span className='dark-text'>)</span>
+                    </span>
+                  )}
+                </div>
               </div>
             )
           })}

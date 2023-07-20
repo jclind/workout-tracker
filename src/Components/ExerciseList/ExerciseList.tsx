@@ -99,7 +99,6 @@ const ExerciseInputs = ({
       }
     }
   }
-  console.log(suggestedName, exerciseName)
 
   return (
     <div className='exercise-container'>
@@ -176,6 +175,10 @@ const ExerciseList = () => {
   const handleRemoveExercise = (id: string) => {
     setExercises(prev => prev.filter(exercise => exercise.id !== id))
   }
+
+  // useEffect(() => {
+  //   modifyData()
+  // }, [])
 
   return (
     <div className='exercise-form'>
