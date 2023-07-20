@@ -5,7 +5,11 @@ import { AiFillInfoCircle, AiOutlinePlusCircle } from 'react-icons/ai'
 import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
-import { searchExercises } from '../../services/tracker'
+import {
+  getCurrentWorkoutData,
+  searchExercises,
+  updateCurrentWorkout,
+} from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
 import { WeightGroupType } from '../../types'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
@@ -20,6 +24,7 @@ type ExerciseInputsProps = {
   exercises: ExerciseType[]
   addExercise: () => string
   removeExercise: (id: string) => void
+  updateExercise: (exerciseID: string, text: string) => void
 }
 
 const ExerciseInputs = ({
@@ -29,12 +34,15 @@ const ExerciseInputs = ({
   exercises,
   addExercise,
   removeExercise,
+  updateExercise,
 }: ExerciseInputsProps) => {
-  const [exerciseStr, setExerciseStr] = useState('')
+  const [exerciseStr, setExerciseStr] = useState(exercise.text)
   const [exerciseName, setExerciseName] = useState('')
   const [prevExerciseData, setPrevExerciseData] = useState<string>('')
   const [data, setData] = useState('')
   const [suggestedName, setSuggestedName] = useState('')
+
+  const [showViewAllModal, setShowViewAllModal] = useState(false)
 
   const nextID = exercises[idx + 1]?.id || null
 
@@ -49,17 +57,16 @@ const ExerciseInputs = ({
   useEffect(() => {
     const parsedExerciseData = parseExercise(exerciseStr)
     setExerciseName(parsedExerciseData.name)
+    updateExercise(exercise.id, exerciseStr)
   }, [exerciseStr])
 
   useEffect(() => {
-    // if (!exerciseStr) setSuggestedName('')
     const delayDebounce = setTimeout(() => {
       if (exerciseStr) {
         searchExercises(exerciseName.toLowerCase()).then(res => {
           if (res) {
             setSuggestedName(res.name)
             const prevData = getDataFromExercise(res)
-            console.log(prevData)
             setPrevExerciseData(prevData)
           }
         })
@@ -70,12 +77,8 @@ const ExerciseInputs = ({
   }, [exerciseName])
 
   const handleEnter = (id: string | null) => {
-    console.log('Curr:', exercise.id, 'Next:', id)
     if (id) {
       const focusRef = idRefHash[id]
-      console.log(idRefHash)
-      console.log(focusRef)
-      console.log(id)
       if (id && focusRef && focusRef.current) {
         focusRef.current.focus()
       }
@@ -129,8 +132,19 @@ const ExerciseInputs = ({
         <div className='prev-exercise-data'>
           <span>Prev weights / sets: </span>
           {prevExerciseData}
-          <button className='btn-no-styles view-all-btn'>(view all)</button>
-          <ViewAllExercisesModal exerciseName={exerciseName.toLowerCase()} />
+          <button
+            className='btn-no-styles view-all-btn'
+            onClick={() => setShowViewAllModal(true)}
+          >
+            (view all)
+          </button>
+          {showViewAllModal && (
+            <ViewAllExercisesModal
+              exerciseName={exerciseName.toLowerCase()}
+              isOpen={showViewAllModal}
+              setIsOpen={setShowViewAllModal}
+            />
+          )}
         </div>
       ) : null}
     </div>
@@ -139,33 +153,52 @@ const ExerciseInputs = ({
 
 type ExerciseType = {
   id: string
-  name: string
-  sets: { reps: number | null; weight: number | null }[]
+  text: string
 }
 
 const generateNewExercise = (): ExerciseType => {
   const id = uuidv4()
   return {
     id,
-    name: '',
-    sets: [{ reps: null, weight: null }],
+    text: '',
   }
 }
 
 const ExerciseList = () => {
-  // const [idRefHash, setIdRefHash] = useState<{ [x: string]: React.RefObject<HTMLInputElement> }>({})
-
   const [exercises, setExercises] = useState<ExerciseType[]>([
     generateNewExercise(),
   ])
   const [workoutTitle, setWorkoutTitle] = useState('')
 
+  const [loading, setLoading] = useState(true)
+
   const [titleNextFocusRef, setTitleNextFocusRef] =
     useState<React.RefObject<HTMLInputElement>>()
 
   useEffect(() => {
+    setLoading(true)
+    getCurrentWorkoutData().then(res => {
+      if (res) {
+        setExercises(res.exercises)
+        setWorkoutTitle(res.workoutTitle)
+      }
+      setLoading(false)
+    })
+  }, [])
+
+  useEffect(() => {
     setTitleNextFocusRef(idRefHash[exercises[0].id])
   }, [exercises])
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (!loading) {
+        updateCurrentWorkout(workoutTitle, exercises)
+      }
+    }, 1000)
+
+    return () => clearTimeout(delayDebounce)
+  }, [workoutTitle, exercises])
 
   const handleAddExercise = (): string => {
     const newExercise = generateNewExercise()
@@ -175,6 +208,21 @@ const ExerciseList = () => {
   const handleRemoveExercise = (id: string) => {
     setExercises(prev => prev.filter(exercise => exercise.id !== id))
   }
+
+  const updateExercise = (exerciseID: string, text: string) => {
+    if (!loading) {
+      setExercises(prev => {
+        const newObj = prev.map(ex => {
+          if (ex.id === exerciseID) {
+            return { id: exerciseID, text }
+          }
+          return ex
+        })
+        return [...newObj]
+      })
+    }
+  }
+  if (loading) return <>'LOADING'</>
 
   // useEffect(() => {
   //   modifyData()
@@ -198,6 +246,7 @@ const ExerciseList = () => {
               addExercise={handleAddExercise}
               removeExercise={handleRemoveExercise}
               exercises={exercises}
+              updateExercise={updateExercise}
             />
           )
         })}
@@ -207,6 +256,9 @@ const ExerciseList = () => {
             Add Exercise
           </button>
         </div>
+        {workoutTitle && exercises[0].text ? (
+          <button className='submit-btn'>Add Workout</button>
+        ) : null}
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   limit,
   orderBy,
@@ -14,6 +15,7 @@ import {
   where,
 } from 'firebase/firestore'
 import {
+  CurrentWorkoutType,
   ExerciseDataType,
   ExercisesServerDataType,
   WorkoutDataType,
@@ -174,8 +176,6 @@ export const updateExercise = async (
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
-      const promises: Promise<void>[] = []
-
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
       const exerciseDocRef = doc(userDataRef, 'exercises', exerciseID)
@@ -194,6 +194,39 @@ export const updateExercise = async (
         weights: updatedExerciseData.weights,
         originalSring: updatedExerciseData.originalString,
       })
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+export const getCurrentWorkoutData = async () => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+
+      const result = await getDoc(userDataRef)
+      const data = result.data()?.currentWorkout as CurrentWorkoutType
+      return data
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+export const updateCurrentWorkout = async (
+  workoutTitle: string,
+  exercises: { id: string; text: string }[]
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+
+      const currWorkoutData = { workoutTitle, exercises }
+
+      await updateDoc(userDataRef, { currentWorkout: currWorkoutData })
     } catch (error: any) {
       throw new Error(error.message)
     }

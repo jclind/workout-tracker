@@ -5,6 +5,11 @@ export type WorkoutDataType = {
   exercises: ExerciseDataType[]
 }
 
+export type CurrentWorkoutType = {
+  workoutTitle: string
+  exercises: { id: string; text: string }[]
+}
+
 export type ExerciseDataType = {
   id: string
   name: string

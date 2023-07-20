@@ -28,12 +28,15 @@ const customStyles = {
 
 type ViewAllExercisesModalProps = {
   exerciseName: string
+  isOpen: boolean
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const ViewAllExercisesModal = ({
   exerciseName,
+  isOpen,
+  setIsOpen,
 }: ViewAllExercisesModalProps) => {
-  const [isOpen, setIsOpen] = useState(true)
   const [data, setData] = useState<ExercisesServerDataType[]>([])
 
   const [lastQueryDoc, setLastQueryDoc] = useState<QueryDocumentSnapshot<
