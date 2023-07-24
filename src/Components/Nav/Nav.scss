@@ -1,12 +1,12 @@
 @import '../../helpers.scss';
 
 nav {
-  position: absolute;
-  top: 0;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   width: 100%;
   box-sizing: border-box;
+  height: $navbar-height;
 
   padding: 0.5rem 1rem;
   button.logout-btn {

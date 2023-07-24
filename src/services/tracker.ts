@@ -137,7 +137,6 @@ export const searchExercises = async (
     const dataArr: ExerciseDataType[] = []
     const querySnapshot = await getDocs(q)
     querySnapshot.forEach(doc => {
-      console.log(doc.data())
       dataArr.push(doc.data() as ExerciseDataType)
     })
 
@@ -177,7 +176,6 @@ export const queryAllSingleExercise = async (
     const querySnapshot = await getDocs(q)
     const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
     querySnapshot.forEach(doc => {
-      console.log(doc.data())
       results.push(doc.data() as ExercisesServerDataType)
     })
 
@@ -313,7 +311,5 @@ export const modifyData = async () => {
     workoutsQuerySnapshot.forEach(doc => {
       deleteDoc(doc.ref)
     })
-
-    console.log('HERE')
   }
 }

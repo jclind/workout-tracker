@@ -5,7 +5,6 @@ export const removeTextBeforeSubstring = (
   const index = str.indexOf(substring)
 
   if (index !== -1) {
-    console.log(str.substring(index + substring.length))
     return str.substring(index + substring.length)
   }
 

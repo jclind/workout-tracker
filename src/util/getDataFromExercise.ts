@@ -1,4 +1,4 @@
-import { ExerciseDataType, WeightGroupType } from '../types'
+import { ExerciseDataType } from '../types'
 
 export const getDataFromExercise = (exercise: ExerciseDataType) => {
   let originalStr = exercise.originalString.toLowerCase()

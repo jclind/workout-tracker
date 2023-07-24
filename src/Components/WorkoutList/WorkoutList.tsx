@@ -5,6 +5,7 @@ import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import { getWorkouts, updateExercise } from '../../services/tracker'
 import { formatDateToString } from '../../util/dateUtil'
 import { parseExercise } from '../../util/parseExercise'
+import { BsChevronCompactDown } from 'react-icons/bs'
 
 type ExerciseItemProps = {
   exercise: ExerciseDataType
@@ -58,9 +59,18 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
     DocumentData
   > | null>(null)
 
+  const titleRef = useRef<HTMLHeadingElement>(null)
+
   useEffect(() => {
     getNextWorkouts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const handleScroll = () => {
+    if (titleRef?.current) {
+      titleRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   const getNextWorkouts = () => {
     getWorkouts(10, lastDoc).then(res => {
@@ -73,8 +83,28 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
 
   return (
     <div className='workout-list-container'>
+      <button
+        className='scroll-to-workouts-btn btn-no-styles'
+        onClick={handleScroll}
+      >
+        Workouts{' '}
+        <div className='icons'>
+          <BsChevronCompactDown className='icon' />
+          <BsChevronCompactDown className='icon' />
+        </div>
+      </button>
+      <h5 className='title' ref={titleRef}>
+        Past Workouts
+      </h5>
       <div className='workout-list'>
-        {workoutList.map(workout => {
+        {[
+          ...workoutList,
+          ...workoutList,
+          ...workoutList,
+          ...workoutList,
+          ...workoutList,
+          ...workoutList,
+        ].map(workout => {
           const handleUpdateExercise = (
             exerciseID: string,
             updatedExerciseStr: string

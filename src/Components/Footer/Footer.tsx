@@ -43,7 +43,7 @@ const Footer = () => {
 
     const formattedWorkouts: WorkoutDataType[] = []
 
-    workouts.map(workoutString => {
+    workouts.forEach(workoutString => {
       const workoutList = workoutString.split(/\n/)
       const { title, date } = getTitleAndDate(workoutList[0])
       const exercises: ExerciseDataType[] = []

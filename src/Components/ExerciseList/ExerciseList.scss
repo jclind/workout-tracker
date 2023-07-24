@@ -5,10 +5,11 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  // height: 100%;
+  min-height: calc(100vh - #{$navbar-height} - 7rem);
   width: 100%;
-  margin-top: 50%;
   max-width: $max-width;
+  box-sizing: border-box;
+  padding: 2rem 0;
 
   .exercise-list {
     width: 100%;
@@ -52,18 +53,28 @@
         }
       }
     }
-    .add-exercise {
+    .btns {
       display: flex;
-      justify-content: center;
-      width: 100%;
-      button {
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 auto;
+      margin-top: 2rem;
+      width: 90%;
+      .add-exercise {
         display: flex;
         justify-content: center;
-        align-items: center;
-        gap: 0.5rem;
-        margin-top: 2rem;
-        font-size: 1rem;
-        color: $tertiary-text !important;
+        button {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 1rem;
+          color: $tertiary-text !important;
+        }
+      }
+
+      button.submit-btn {
+        width: 140px;
       }
     }
   }
@@ -80,8 +91,5 @@
       text-decoration: underline;
       font-weight: 700;
     }
-  }
-  button.submit-btn {
-    width: 140px;
   }
 }
