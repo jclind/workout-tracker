@@ -282,26 +282,28 @@ const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
             />
           )
         })}
-        <div className='add-exercise'>
-          <button className='btn-no-styles' onClick={handleAddExercise}>
-            <AiOutlinePlusCircle className='icon' />
-            Add Exercise
-          </button>
+        <div className='btns'>
+          <div className='add-exercise'>
+            <button className='btn-no-styles' onClick={handleAddExercise}>
+              <AiOutlinePlusCircle className='icon' />
+              Add Exercise
+            </button>
+          </div>
+          {workoutTitle && exercises[0].text ? (
+            <button className='submit-btn' onClick={handleAddWorkout}>
+              {addWorkoutLoading ? (
+                <TailSpin
+                  height='25'
+                  width='25'
+                  color='#303841'
+                  ariaLabel='loading'
+                />
+              ) : (
+                'Add Workout'
+              )}
+            </button>
+          ) : null}
         </div>
-        {workoutTitle && exercises[0].text ? (
-          <button className='submit-btn' onClick={handleAddWorkout}>
-            {addWorkoutLoading ? (
-              <TailSpin
-                height='25'
-                width='25'
-                color='#303841'
-                ariaLabel='loading'
-              />
-            ) : (
-              'Add Workout'
-            )}
-          </button>
-        ) : null}
       </div>
     </div>
   )

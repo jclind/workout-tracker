@@ -2,16 +2,31 @@
 
 .workout-list-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  margin-top: 1rem;
-  .workout-list {
+  flex-direction: column;
+  width: 90%;
+  max-width: $max-width;
+  margin: 0 auto;
+  gap: 1rem;
+  button.scroll-to-workouts-btn {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    color: $tertiary-text;
+    font-size: 0.8rem;
+    margin: 0 auto;
+    margin-bottom: 3rem;
+    .icon {
+      animation: upAndDown 4s ease-in-out infinite;
+    }
+  }
+  .workout-list {
+    display: flex;
+    flex-direction: column;
+    // justify-content: center;
     gap: 1rem;
-    width: 80%;
+    width: 90%;
+    // width: 100%;
     // width: fit-content;
     .single-workout {
       h3 {
@@ -22,6 +37,7 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        color: $secondary-text;
         .date {
           font-size: 0.8rem;
           font-weight: 700;
@@ -35,6 +51,7 @@
           padding: 0;
           // height: 1;
           height: fit-content;
+          color: $secondary-text;
         }
         input.focused {
           z-index: 2;
@@ -44,5 +61,15 @@
         }
       }
     }
+  }
+}
+
+@keyframes upAndDown {
+  0%,
+  100% {
+    transform: translateY(-2px); /* Start and end position (no translation) */
+  }
+  50% {
+    transform: translateY(1px); /* Middle position (move up) */
   }
 }
