@@ -16,23 +16,25 @@
     font-size: 0.8rem;
     margin: 0 auto;
     margin-bottom: 3rem;
-    .icon {
+    .icons {
+      display: flex;
+      flex-direction: column;
       animation: upAndDown 4s ease-in-out infinite;
+      .icon {
+        margin-bottom: -9px;
+      }
     }
+  }
+  h5 {
+    padding-top: 1rem;
   }
   .workout-list {
     display: flex;
     flex-direction: column;
-    // justify-content: center;
     gap: 1rem;
     width: 90%;
-    // width: 100%;
-    // width: fit-content;
+
     .single-workout {
-      h3 {
-        // padding: 0;
-        // margin: 0;
-      }
       .head {
         display: flex;
         align-items: center;
@@ -67,9 +69,9 @@
 @keyframes upAndDown {
   0%,
   100% {
-    transform: translateY(-2px); /* Start and end position (no translation) */
+    transform: translateY(-3px); /* Start and end position (no translation) */
   }
   50% {
-    transform: translateY(1px); /* Middle position (move up) */
+    transform: translateY(0px); /* Middle position (move up) */
   }
 }

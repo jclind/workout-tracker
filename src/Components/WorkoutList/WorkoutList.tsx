@@ -87,7 +87,11 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
         className='scroll-to-workouts-btn btn-no-styles'
         onClick={handleScroll}
       >
-        Workouts <BsChevronCompactDown className='icon' />
+        Workouts{' '}
+        <div className='icons'>
+          <BsChevronCompactDown className='icon' />
+          <BsChevronCompactDown className='icon' />
+        </div>
       </button>
       <h5 className='title' ref={titleRef}>
         Past Workouts
