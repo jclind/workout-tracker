@@ -47,8 +47,12 @@ const ExerciseItem = ({
   )
 }
 
-const WorkoutList = () => {
-  const [workoutList, setWorkoutList] = useState<WorkoutDataType[]>([])
+type WorkoutListProps = {
+  workoutList: WorkoutDataType[]
+  setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
+}
+
+const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
     DocumentData

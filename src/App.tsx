@@ -13,6 +13,7 @@ import Nav from './Components/Nav/Nav'
 import FormInput from './Components/FormInput/FormInput'
 import Footer from './Components/Footer/Footer'
 import WorkoutList from './Components/WorkoutList/WorkoutList'
+import { WorkoutDataType } from './types'
 
 const top100Films = [
   { label: 'The Shawshank Redemption', year: 1994 },
@@ -149,6 +150,8 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [loginLoading, setLoginLoading] = useState(false)
 
+  const [workoutList, setWorkoutList] = useState<WorkoutDataType[]>([])
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
       if (userInstance) {
@@ -188,8 +191,11 @@ function App() {
       {user ? (
         <>
           <Nav />
-          <ExerciseList />
-          <WorkoutList />
+          <ExerciseList setWorkoutList={setWorkoutList} />
+          <WorkoutList
+            workoutList={workoutList}
+            setWorkoutList={setWorkoutList}
+          />
           <Footer />
         </>
       ) : (

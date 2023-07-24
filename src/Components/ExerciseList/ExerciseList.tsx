@@ -6,14 +6,16 @@ import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
 import {
+  addWorkout,
   getCurrentWorkoutData,
   searchExercises,
   updateCurrentWorkout,
 } from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
-import { WeightGroupType } from '../../types'
+import { WeightGroupType, WorkoutDataType } from '../../types'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import ViewAllExercisesModal from '../ViewAllExercisesModal/ViewAllExercisesModal'
+import { TailSpin } from 'react-loader-spinner'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -59,6 +61,11 @@ const ExerciseInputs = ({
     setExerciseName(parsedExerciseData.name)
     updateExercise(exercise.id, exerciseStr)
   }, [exerciseStr])
+  useEffect(() => {
+    if (exercise.text !== exerciseStr) {
+      setExerciseStr(exercise.text)
+    }
+  }, [exercise])
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -164,16 +171,27 @@ const generateNewExercise = (): ExerciseType => {
   }
 }
 
-const ExerciseList = () => {
+type ExerciseListProps = {
+  setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
+}
+
+const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
   const [exercises, setExercises] = useState<ExerciseType[]>([
     generateNewExercise(),
   ])
   const [workoutTitle, setWorkoutTitle] = useState('')
 
   const [loading, setLoading] = useState(true)
+  const [addWorkoutLoading, setAddWorkoutLoading] = useState(false)
 
   const [titleNextFocusRef, setTitleNextFocusRef] =
     useState<React.RefObject<HTMLInputElement>>()
+
+  const clearCurrWorkout = async () => {
+    await updateCurrentWorkout('', [generateNewExercise()])
+    setWorkoutTitle('')
+    setExercises([generateNewExercise()])
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -192,7 +210,7 @@ const ExerciseList = () => {
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      if (!loading) {
+      if (!loading && !addWorkoutLoading) {
         updateCurrentWorkout(workoutTitle, exercises)
       }
     }, 1000)
@@ -210,7 +228,7 @@ const ExerciseList = () => {
   }
 
   const updateExercise = (exerciseID: string, text: string) => {
-    if (!loading) {
+    if (!loading && !addWorkoutLoading) {
       setExercises(prev => {
         const newObj = prev.map(ex => {
           if (ex.id === exerciseID) {
@@ -221,6 +239,20 @@ const ExerciseList = () => {
         return [...newObj]
       })
     }
+  }
+
+  const handleAddWorkout = () => {
+    setAddWorkoutLoading(true)
+    addWorkout(workoutTitle, exercises)
+      .then(workoutData => {
+        if (!workoutData) throw new Error('Something went wrong')
+        clearCurrWorkout().then(() => setAddWorkoutLoading(false))
+        setWorkoutList(prev => [workoutData, ...prev])
+      })
+      .catch((error: any) => {
+        setAddWorkoutLoading(false)
+        throw new Error(error.message)
+      })
   }
   if (loading) return <>'LOADING'</>
 
@@ -257,7 +289,18 @@ const ExerciseList = () => {
           </button>
         </div>
         {workoutTitle && exercises[0].text ? (
-          <button className='submit-btn'>Add Workout</button>
+          <button className='submit-btn' onClick={handleAddWorkout}>
+            {addWorkoutLoading ? (
+              <TailSpin
+                height='25'
+                width='25'
+                color='#303841'
+                ariaLabel='loading'
+              />
+            ) : (
+              'Add Workout'
+            )}
+          </button>
         ) : null}
       </div>
     </div>

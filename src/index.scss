@@ -47,11 +47,15 @@ button {
   background: none;
 }
 button.submit-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   background: $secondary;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 600;
   color: $primary-background;
+  height: 35px;
 }
 
 input {

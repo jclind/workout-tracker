@@ -21,6 +21,61 @@ import {
   WorkoutDataType,
 } from '../types'
 import { auth, db } from './firestore'
+import { v4 as uuidv4 } from 'uuid'
+import { parseExercise } from '../util/parseExercise'
+
+export const addWorkout = async (
+  name: string,
+  exercises: {
+    id: string
+    text: string
+  }[],
+  date = new Date().getTime()
+): Promise<WorkoutDataType | undefined> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const promises: Promise<void>[] = []
+      const workoutID = uuidv4()
+      const parsedExercises: ExerciseDataType[] = exercises.map(ex => {
+        return parseExercise(ex.text, ex.id)
+      })
+
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
+      const exercisesRef = collection(userDataRef, 'exercises')
+      const workoutData: WorkoutDataType = {
+        name,
+        date,
+        exercises: parsedExercises,
+        id: workoutID,
+      }
+
+      await setDoc(workoutDocRef, { ...workoutData })
+
+      parsedExercises.forEach((exercise, idx) => {
+        const { id, name } = exercise
+        const exercisesRefDoc = doc(exercisesRef, id)
+        if (name) {
+          promises.push(
+            setDoc(exercisesRefDoc, {
+              ...exercise,
+              name: name.toLowerCase(),
+              workoutID,
+              workoutDate: date,
+              index: idx,
+            })
+          )
+        }
+      })
+      await Promise.all(promises)
+
+      return workoutData
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
 
 export const importWorkouts = async (workouts: WorkoutDataType[]) => {
   const uid = auth?.currentUser?.uid
