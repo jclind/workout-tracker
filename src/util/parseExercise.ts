@@ -53,11 +53,8 @@ export const parseExercise = (
       .substring(0, weightGroupStrTrimmed.indexOf(' '))
       .replaceAll('[^\\d.]', '')
       .trim()
-    // console.log(weightGroup)
 
     const repsAndCommentStr = weightGroup.replace(weight, '').trim()
-    // console.log(repsAndCommentStr)
-    // console.log(repsAndCommentStr)
 
     const commentArr: string[] = []
     const sets: string[] = []

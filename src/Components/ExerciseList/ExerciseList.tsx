@@ -1,7 +1,6 @@
-import React, { RefObject, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './ExerciseList.scss'
-import { parseExerciseData } from '../../util/parseExerciseData'
-import { AiFillInfoCircle, AiOutlinePlusCircle } from 'react-icons/ai'
+import { AiOutlinePlusCircle } from 'react-icons/ai'
 import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
 import { v4 as uuidv4 } from 'uuid'
@@ -12,7 +11,7 @@ import {
   updateCurrentWorkout,
 } from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
-import { WeightGroupType, WorkoutDataType } from '../../types'
+import { WorkoutDataType } from '../../types'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import ViewAllExercisesModal from '../ViewAllExercisesModal/ViewAllExercisesModal'
 import { TailSpin } from 'react-loader-spinner'
@@ -41,7 +40,6 @@ const ExerciseInputs = ({
   const [exerciseStr, setExerciseStr] = useState(exercise.text)
   const [exerciseName, setExerciseName] = useState('')
   const [prevExerciseData, setPrevExerciseData] = useState<string>('')
-  const [data, setData] = useState('')
   const [suggestedName, setSuggestedName] = useState('')
 
   const [showViewAllModal, setShowViewAllModal] = useState(false)
@@ -54,17 +52,20 @@ const ExerciseInputs = ({
     if (exercise.id) {
       idRefHash[exercise.id] = inputRef
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     const parsedExerciseData = parseExercise(exerciseStr)
     setExerciseName(parsedExerciseData.name)
     updateExercise(exercise.id, exerciseStr)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exerciseStr])
   useEffect(() => {
     if (exercise.text !== exerciseStr) {
       setExerciseStr(exercise.text)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exercise])
 
   useEffect(() => {
@@ -81,6 +82,7 @@ const ExerciseInputs = ({
     }, 300)
 
     return () => clearTimeout(delayDebounce)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [exerciseName])
 
   const handleEnter = (id: string | null) => {
@@ -216,6 +218,7 @@ const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
     }, 1000)
 
     return () => clearTimeout(delayDebounce)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workoutTitle, exercises])
 
   const handleAddExercise = (): string => {

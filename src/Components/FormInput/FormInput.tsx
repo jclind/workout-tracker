@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import './FormInput.scss'
 import { AiFillCloseCircle } from 'react-icons/ai'
 import {
@@ -44,7 +44,6 @@ const FormInput = ({
   ) => {
     e.preventDefault()
     e.stopPropagation()
-    console.log('test')
     setVal('')
   }
 

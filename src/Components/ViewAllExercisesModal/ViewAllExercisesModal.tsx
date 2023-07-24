@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import './ViewAllExercisesModal.scss'
-import { ExerciseDataType, ExercisesServerDataType } from '../../types'
+import { ExercisesServerDataType } from '../../types'
 import { queryAllSingleExercise } from '../../services/tracker'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
@@ -46,6 +46,7 @@ const ViewAllExercisesModal = ({
 
   useEffect(() => {
     queryData(20, null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const queryData = (
@@ -58,6 +59,7 @@ const ViewAllExercisesModal = ({
           if (res) {
             setLastQueryDoc(res.lastDoc)
             setData(res.data)
+            console.log(lastQueryDoc)
           }
         }
       )

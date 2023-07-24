@@ -63,6 +63,7 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
 
   useEffect(() => {
     getNextWorkouts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleScroll = () => {
