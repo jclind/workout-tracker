@@ -245,7 +245,7 @@ export const updateExercise = async (
       await updateDoc(exerciseDocRef, {
         name: updatedExerciseData.name,
         weights: updatedExerciseData.weights,
-        originalSring: updatedExerciseData.originalString,
+        originalString: updatedExerciseData.originalString,
       })
     } catch (error: any) {
       throw new Error(error.message)
@@ -280,6 +280,28 @@ export const updateCurrentWorkout = async (
       const currWorkoutData = { workoutTitle, exercises }
 
       await updateDoc(userDataRef, { currentWorkout: currWorkoutData })
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+
+export const deleteWorkout = async (workoutID: string) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
+      const exercisesRef = collection(userDataRef, 'exercises')
+
+      await deleteDoc(workoutDocRef)
+
+      const q = query(exercisesRef, where('workoutID', '==', workoutID))
+      const exercisesQuerySnapshot = await getDocs(q)
+
+      exercisesQuerySnapshot.forEach(doc => {
+        deleteDoc(doc.ref)
+      })
     } catch (error: any) {
       throw new Error(error.message)
     }

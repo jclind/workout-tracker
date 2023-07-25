@@ -2,10 +2,18 @@ import React, { useEffect, useRef, useState } from 'react'
 import './WorkoutList.scss'
 import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
-import { getWorkouts, updateExercise } from '../../services/tracker'
+import {
+  deleteWorkout,
+  getWorkouts,
+  updateExercise,
+} from '../../services/tracker'
 import { formatDateToString } from '../../util/dateUtil'
 import { parseExercise } from '../../util/parseExercise'
 import { BsChevronCompactDown } from 'react-icons/bs'
+import ActionsDropdown from '../ActionsDropdown/ActionsDropdown'
+import { BsTrashFill } from 'react-icons/bs'
+import toast from 'react-hot-toast'
+import TextareaAutosize from '@mui/base/TextareaAutosize'
 
 type ExerciseItemProps = {
   exercise: ExerciseDataType
@@ -18,12 +26,12 @@ const ExerciseItem = ({
   const [editedStr, setEditedStr] = useState(exercise.originalString)
   const [isFocused, setIsFocused] = useState(false)
 
-  const inputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
-      if (inputRef.current) {
-        inputRef.current.blur()
+      if (textareaRef.current) {
+        textareaRef.current.blur()
       }
     }
   }
@@ -36,14 +44,14 @@ const ExerciseItem = ({
   }
 
   return (
-    <input
+    <TextareaAutosize
       className={`exercise ${isFocused ? 'focused' : 'blurred'}`}
       value={editedStr}
       onChange={e => setEditedStr(e.target.value)}
       onFocus={() => setIsFocused(true)}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
-      ref={inputRef}
+      ref={textareaRef}
     />
   )
 }
@@ -97,14 +105,7 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
         Past Workouts
       </h5>
       <div className='workout-list'>
-        {[
-          ...workoutList,
-          ...workoutList,
-          ...workoutList,
-          ...workoutList,
-          ...workoutList,
-          ...workoutList,
-        ].map(workout => {
+        {workoutList.map(workout => {
           const handleUpdateExercise = (
             exerciseID: string,
             updatedExerciseStr: string
@@ -114,7 +115,10 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
             )
             if (currExercise?.originalString !== updatedExerciseStr)
               if (currExercise) {
-                const parsedExercise = parseExercise(updatedExerciseStr)
+                const parsedExercise = parseExercise(
+                  updatedExerciseStr,
+                  exerciseID
+                )
                 updateExercise(
                   exerciseID,
                   workout.id,
@@ -124,11 +128,42 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
               }
           }
           const date = workout.date
+
+          const handleDeleteWorkout = () => {
+            const deletePromise = deleteWorkout(workout.id)
+            deletePromise.then(() => {
+              setWorkoutList(prev => prev.filter(w => w.id !== workout.id))
+            })
+            toast.promise(
+              deletePromise,
+              {
+                loading: 'Deleting...',
+                success: 'Workout Deleted',
+                error: 'Failed To Delete',
+              },
+              {
+                position: 'bottom-center',
+              }
+            )
+          }
+
           return (
             <div className='single-workout' key={workout.id}>
               <div className='head'>
                 <h3 className='title'>{workout.name}</h3>
                 {date && <div className='date'>{formatDateToString(date)}</div>}
+                <div className='actions'>
+                  <ActionsDropdown
+                    buttons={[
+                      {
+                        text: 'Delete',
+                        icon: <BsTrashFill className='icon' />,
+                        type: 'danger',
+                        action: handleDeleteWorkout,
+                      },
+                    ]}
+                  />
+                </div>
               </div>
               <div className='exercise-list'>
                 {workout.exercises.map(exercise => {
