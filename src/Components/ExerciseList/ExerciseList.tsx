@@ -175,15 +175,20 @@ const generateNewExercise = (): ExerciseType => {
 
 type ExerciseListProps = {
   setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
+const ExerciseList = ({
+  setWorkoutList,
+  loading,
+  setLoading,
+}: ExerciseListProps) => {
   const [exercises, setExercises] = useState<ExerciseType[]>([
     generateNewExercise(),
   ])
   const [workoutTitle, setWorkoutTitle] = useState('')
 
-  const [loading, setLoading] = useState(true)
   const [addWorkoutLoading, setAddWorkoutLoading] = useState(false)
 
   const [titleNextFocusRef, setTitleNextFocusRef] =
@@ -204,6 +209,7 @@ const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
       }
       setLoading(false)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -257,11 +263,6 @@ const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
         throw new Error(error.message)
       })
   }
-  if (loading) return <>'LOADING'</>
-
-  // useEffect(() => {
-  //   modifyData()
-  // }, [])
 
   return (
     <div className='exercise-form'>
@@ -293,7 +294,11 @@ const ExerciseList = ({ setWorkoutList }: ExerciseListProps) => {
             </button>
           </div>
           {workoutTitle && exercises[0].text ? (
-            <button className='submit-btn' onClick={handleAddWorkout}>
+            <button
+              className='submit-btn'
+              onClick={handleAddWorkout}
+              disabled={addWorkoutLoading}
+            >
               {addWorkoutLoading ? (
                 <TailSpin
                   height='25'

@@ -59,9 +59,15 @@ const ExerciseItem = ({
 type WorkoutListProps = {
   workoutList: WorkoutDataType[]
   setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
+const WorkoutList = ({
+  workoutList,
+  setWorkoutList,
+  setLoading,
+}: WorkoutListProps) => {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
     DocumentData
@@ -81,13 +87,21 @@ const WorkoutList = ({ workoutList, setWorkoutList }: WorkoutListProps) => {
   }
 
   const getNextWorkouts = () => {
-    getWorkouts(10, lastDoc).then(res => {
-      if (res?.data) {
-        setWorkoutList(res.data)
-        setLastDoc(res.lastDoc)
-      }
-    })
+    setLoading(true)
+    getWorkouts(10, lastDoc)
+      .then(res => {
+        if (res?.data) {
+          setWorkoutList(res.data)
+          setLastDoc(res.lastDoc)
+        }
+        setLoading(false)
+      })
+      .catch((error: any) => {
+        setLoading(false)
+      })
   }
+
+  if (workoutList.length <= 0) return null
 
   return (
     <div className='workout-list-container'>

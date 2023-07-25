@@ -6,6 +6,8 @@ import { parseExercise } from '../../util/parseExercise'
 import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { v4 as uuidv4 } from 'uuid'
 import { importWorkouts } from '../../services/tracker'
+import { TailSpin } from 'react-loader-spinner'
+import { toast } from 'react-hot-toast'
 
 const customStyles = {
   content: {
@@ -26,7 +28,11 @@ const customStyles = {
   },
 }
 
-const Footer = () => {
+type FooterProps = {
+  setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
+}
+
+const Footer = ({ setWorkoutList }: FooterProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const [importedText, setImportedText] = useState('')
@@ -61,9 +67,28 @@ const Footer = () => {
       formattedWorkouts.push(workoutData)
     })
 
-    importWorkouts(formattedWorkouts).then(() => {
-      setImportLoading(false)
-    })
+    importWorkouts(formattedWorkouts)
+      .then(workouts => {
+        if (workouts) {
+          setImportLoading(false)
+          toast.success('Workouts Imported', { position: 'bottom-center' })
+          setIsModalOpen(false)
+
+          setWorkoutList(prev => {
+            const combinedWorkouts: WorkoutDataType[] = [...prev, ...workouts]
+            const workoutsWithDate = combinedWorkouts
+              .filter(workout => workout.date !== null)
+              .sort((a, b) => a.date! - b.date!)
+            return [
+              ...workoutsWithDate,
+              ...combinedWorkouts.filter(workout => workout.date === null),
+            ]
+          })
+        }
+      })
+      .catch((error: any) => {
+        toast.error(error, { position: 'bottom-center' })
+      })
   }
 
   return (
@@ -88,9 +113,21 @@ const Footer = () => {
             value={importedText}
             onChange={e => setImportedText(e.target.value)}
           ></textarea>
-          {importLoading && 'Loading...'}
-          <button className='submit-btn' onClick={handleImport}>
-            Import
+          <button
+            className='submit-btn'
+            onClick={handleImport}
+            disabled={importLoading}
+          >
+            {importLoading ? (
+              <TailSpin
+                height='25'
+                width='25'
+                color='#303841'
+                ariaLabel='loading'
+              />
+            ) : (
+              'Import'
+            )}
           </button>
         </div>
       </Modal>
