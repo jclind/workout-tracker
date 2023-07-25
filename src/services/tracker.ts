@@ -77,7 +77,9 @@ export const addWorkout = async (
   }
 }
 
-export const importWorkouts = async (workouts: WorkoutDataType[]) => {
+export const importWorkouts = async (
+  workouts: WorkoutDataType[]
+): Promise<WorkoutDataType[] | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
@@ -111,6 +113,7 @@ export const importWorkouts = async (workouts: WorkoutDataType[]) => {
         })
       })
       await Promise.all(promises)
+      return workouts
     } catch (error: any) {
       throw new Error(error.message)
     }

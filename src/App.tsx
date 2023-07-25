@@ -96,7 +96,7 @@ function App() {
             loading={workoutListLoading}
             setLoading={setWorkoutListLoading}
           />
-          <Footer />
+          <Footer setWorkoutList={setWorkoutList} />
         </>
       ) : (
         <div className='login-container'>
