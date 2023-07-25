@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './WorkoutList.scss'
 import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
@@ -38,24 +38,12 @@ const ExerciseItem = ({
 
   const handleBlur = () => {
     setIsFocused(false)
-    console.log('here', editedStr)
     if (editedStr.trim() && editedStr.trim() !== exercise.originalString) {
       handleUpdateExercise(exercise.id, editedStr)
     }
   }
 
   return (
-    // <textarea
-    //   className={`exercise ${isFocused ? 'focused' : 'blurred'}`}
-    //   onChange={e => {
-    //     setEditedStr(e.target.value)
-    //   }}
-    //   value={editedStr}
-    // onFocus={() => setIsFocused(true)}
-    // onBlur={handleBlur}
-    // onKeyDown={handleKeyDown}
-    // ref={textareaRef}
-    // />
     <TextareaAutosize
       className={`exercise ${isFocused ? 'focused' : 'blurred'}`}
       value={editedStr}
