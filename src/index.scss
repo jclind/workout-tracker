@@ -110,6 +110,7 @@ label.fade {
 
   // height: 100%;
   height: fit-content;
+  min-height: 100%;
 
   width: 100%;
 
@@ -127,6 +128,37 @@ label.fade {
       height: 18px;
       width: 18px;
     }
+  }
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    background: $secondary-background;
+    transition: top 1s ease-in-out, opacity 0.5s ease-out 1s;
+    opacity: 1;
+    .animation {
+      height: 100px;
+      width: 100px;
+    }
+  }
+  .loading-overlay.hidden {
+    top: -100%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .loading-overlay.visible {
+  }
+  .login-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
   }
 }
 

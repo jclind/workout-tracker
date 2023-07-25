@@ -6,6 +6,7 @@ import { parseExercise } from '../../util/parseExercise'
 import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { v4 as uuidv4 } from 'uuid'
 import { importWorkouts } from '../../services/tracker'
+import { TailSpin } from 'react-loader-spinner'
 
 const customStyles = {
   content: {
@@ -88,9 +89,21 @@ const Footer = () => {
             value={importedText}
             onChange={e => setImportedText(e.target.value)}
           ></textarea>
-          {importLoading && 'Loading...'}
-          <button className='submit-btn' onClick={handleImport}>
-            Import
+          <button
+            className='submit-btn'
+            onClick={handleImport}
+            disabled={importLoading}
+          >
+            {importLoading ? (
+              <TailSpin
+                height='25'
+                width='25'
+                color='#303841'
+                ariaLabel='loading'
+              />
+            ) : (
+              'Import'
+            )}
           </button>
         </div>
       </Modal>
