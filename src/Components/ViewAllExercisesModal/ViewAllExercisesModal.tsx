@@ -6,6 +6,8 @@ import { queryAllSingleExercise } from '../../services/tracker'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import { formatDateToString } from '../../util/dateUtil'
+import { toast } from 'react-hot-toast'
+import { TailSpin } from 'react-loader-spinner'
 
 const customStyles = {
   content: {
@@ -38,6 +40,8 @@ const ViewAllExercisesModal = ({
   setIsOpen,
 }: ViewAllExercisesModalProps) => {
   const [data, setData] = useState<ExercisesServerDataType[]>([])
+  const [isMoreData, setIsMoreData] = useState(true)
+  const [moreLoading, setMoreLoading] = useState(false)
 
   const [lastQueryDoc, setLastQueryDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
@@ -45,24 +49,27 @@ const ViewAllExercisesModal = ({
   > | null>(null)
 
   useEffect(() => {
-    queryData(20, null)
+    getNextExercises()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const queryData = (
-    resultsPerPage: number,
-    lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
-  ) => {
+  const getNextExercises = () => {
     if (exerciseName) {
-      queryAllSingleExercise(exerciseName, resultsPerPage, lastDoc).then(
-        res => {
+      setMoreLoading(true)
+      queryAllSingleExercise(exerciseName, 5, lastQueryDoc)
+        .then(res => {
           if (res) {
+            const updatedExercises = [...data, ...res.data]
             setLastQueryDoc(res.lastDoc)
-            setData(res.data)
-            console.log(lastQueryDoc)
+            setData(updatedExercises)
+            setIsMoreData(res.totalResults > updatedExercises.length)
           }
-        }
-      )
+          setMoreLoading(false)
+        })
+        .catch((error: any) => {
+          toast.error(error.message || error)
+          setMoreLoading(false)
+        })
     }
   }
 
@@ -71,13 +78,7 @@ const ViewAllExercisesModal = ({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      // onAfterOpen={afterOpenModal}
-      onRequestClose={closeModal}
-      style={customStyles}
-      // contentLabel='Example Modal'
-    >
+    <Modal isOpen={isOpen} onRequestClose={closeModal} style={customStyles}>
       <div className='view-all-exercises-content'>
         <h3>Previous {exerciseName} Data</h3>
         <div className='data'>
@@ -95,11 +96,7 @@ const ViewAllExercisesModal = ({
                   {comment && (
                     <span className='comment'>
                       <span className='dark-text'>(</span>
-                      <span className='inner'>
-                        {comment} Lorem ipsum dolor, sit amet consectetur
-                        adipisicing elit. Sunt, suscipit? Expedita vero ipsam
-                        tempora exercitationem.
-                      </span>
+                      <span className='inner'>{comment}</span>
                       <span className='dark-text'>)</span>
                     </span>
                   )}
@@ -107,6 +104,24 @@ const ViewAllExercisesModal = ({
               </div>
             )
           })}
+          {isMoreData && (
+            <button
+              className='btn-no-styles load-more'
+              disabled={moreLoading}
+              onClick={getNextExercises}
+            >
+              {moreLoading ? (
+                <TailSpin
+                  height='25'
+                  width='25'
+                  color='#303841'
+                  ariaLabel='loading'
+                />
+              ) : (
+                'Load More'
+              )}
+            </button>
+          )}
         </div>
       </div>
     </Modal>

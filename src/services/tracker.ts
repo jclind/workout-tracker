@@ -175,6 +175,12 @@ export const queryAllSingleExercise = async (
         limit(resultsPerPage)
       )
     }
+    const countQuery = query(
+      exercisesRef,
+      where('name', '==', exerciseName.toLowerCase())
+    )
+    const totalResultsSnapshot = await getCountFromServer(countQuery)
+    const totalResults = totalResultsSnapshot.data().count
 
     const results: ExercisesServerDataType[] = []
     const querySnapshot = await getDocs(q)
@@ -183,7 +189,7 @@ export const queryAllSingleExercise = async (
       results.push(doc.data() as ExercisesServerDataType)
     })
 
-    return { data: results, lastDoc: newLastDoc }
+    return { data: results, lastDoc: newLastDoc, totalResults }
   }
 }
 
@@ -286,7 +292,11 @@ export const updateCurrentWorkout = async (
 
       const currWorkoutData = { workoutTitle, exercises }
 
-      await updateDoc(userDataRef, { currentWorkout: currWorkoutData })
+      await setDoc(
+        userDataRef,
+        { currentWorkout: currWorkoutData },
+        { merge: true }
+      )
     } catch (error: any) {
       throw new Error(error.message)
     }

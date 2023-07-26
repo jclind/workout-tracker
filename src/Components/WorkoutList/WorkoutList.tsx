@@ -206,7 +206,7 @@ const WorkoutList = ({
         })}
         {isMoreData && (
           <button
-            className='btn-no-styles load-more-workouts-btn'
+            className='btn-no-styles load-more'
             disabled={moreLoading}
             onClick={getNextWorkouts}
           >
