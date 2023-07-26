@@ -14,6 +14,7 @@ import ActionsDropdown from '../ActionsDropdown/ActionsDropdown'
 import { BsTrashFill } from 'react-icons/bs'
 import toast from 'react-hot-toast'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
+import { TailSpin } from 'react-loader-spinner'
 
 type ExerciseItemProps = {
   exercise: ExerciseDataType
@@ -52,6 +53,7 @@ const ExerciseItem = ({
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       ref={textareaRef}
+      key={exercise.id}
     />
   )
 }
@@ -72,10 +74,14 @@ const WorkoutList = ({
     DocumentData,
     DocumentData
   > | null>(null)
+  const [isMoreData, setIsMoreData] = useState(true)
+  const [moreLoading, setMoreLoading] = useState(false)
 
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const scrollParentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    setLoading(true)
     getNextWorkouts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -87,24 +93,29 @@ const WorkoutList = ({
   }
 
   const getNextWorkouts = () => {
-    setLoading(true)
-    getWorkouts(10, lastDoc)
+    setMoreLoading(true)
+    getWorkouts(15, lastDoc)
       .then(res => {
         if (res?.data) {
-          setWorkoutList(res.data)
+          const updatedWorkoutList = [...workoutList, ...res.data]
+          setWorkoutList(updatedWorkoutList)
           setLastDoc(res.lastDoc)
+          setIsMoreData(res.totalResults > updatedWorkoutList.length)
         }
         setLoading(false)
+        setMoreLoading(false)
       })
       .catch((error: any) => {
+        toast.error(error.message || error)
         setLoading(false)
+        setMoreLoading(false)
       })
   }
 
   if (workoutList.length <= 0) return null
 
   return (
-    <div className='workout-list-container'>
+    <div className='workout-list-container' ref={scrollParentRef}>
       <button
         className='scroll-to-workouts-btn btn-no-styles'
         onClick={handleScroll}
@@ -193,6 +204,24 @@ const WorkoutList = ({
             </div>
           )
         })}
+        {isMoreData && (
+          <button
+            className='btn-no-styles load-more-workouts-btn'
+            disabled={moreLoading}
+            onClick={getNextWorkouts}
+          >
+            {moreLoading ? (
+              <TailSpin
+                height='25'
+                width='25'
+                color='#303841'
+                ariaLabel='loading'
+              />
+            ) : (
+              'Load More'
+            )}
+          </button>
+        )}
       </div>
     </div>
   )

@@ -76,6 +76,12 @@
       }
     }
   }
+  button.load-more-workouts-btn {
+    // border: 1px solid $tertiary-background;
+    padding: 0.25rem;
+    color: $tertiary-background;
+    width: 85px;
+  }
 }
 
 @keyframes upAndDown {

@@ -283,6 +283,7 @@ const ExerciseList = ({
               removeExercise={handleRemoveExercise}
               exercises={exercises}
               updateExercise={updateExercise}
+              key={ex.id}
             />
           )
         })}
