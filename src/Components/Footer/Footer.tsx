@@ -78,7 +78,7 @@ const Footer = ({ setWorkoutList }: FooterProps) => {
             const combinedWorkouts: WorkoutDataType[] = [...prev, ...workouts]
             const workoutsWithDate = combinedWorkouts
               .filter(workout => workout.date !== null)
-              .sort((a, b) => a.date! - b.date!)
+              .sort((a, b) => b.date! - a.date!)
             return [
               ...workoutsWithDate,
               ...combinedWorkouts.filter(workout => workout.date === null),

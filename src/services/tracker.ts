@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
   getDocs,
   limit,
@@ -200,13 +201,16 @@ export const getWorkouts = async (
       if (lastDoc) {
         q = query(
           workoutsRef,
-          startAfter(lastDoc),
           orderBy('date', 'desc'),
-          limit(resultsPerPage)
+          limit(resultsPerPage),
+          startAfter(lastDoc)
         )
       } else {
         q = query(workoutsRef, orderBy('date', 'desc'), limit(resultsPerPage))
       }
+
+      const totalResultsSnapshot = await getCountFromServer(workoutsRef)
+      const totalResults = totalResultsSnapshot.data().count
 
       const querySnapshot = await getDocs(q)
       const workouts: WorkoutDataType[] = []
@@ -216,7 +220,7 @@ export const getWorkouts = async (
         workouts.push(data)
       })
 
-      return { data: workouts, lastDoc: newLastDoc }
+      return { data: workouts, lastDoc: newLastDoc, totalResults }
     } catch (error: any) {
       throw new Error(error.message)
     }
@@ -310,9 +314,6 @@ export const deleteWorkout = async (workoutID: string) => {
     }
   }
 }
-
-//8080de8f-c12c-414f-8438-9665e9e222f7 smith bench
-//2daf1b2a-04c1-4914-a117-1cd0e06462db incline dumbbell bench
 
 export const modifyData = async () => {
   const uid = auth?.currentUser?.uid
