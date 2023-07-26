@@ -59,6 +59,11 @@ button.submit-btn {
   color: $primary-background;
   height: 35px;
 }
+button.load-more {
+  padding: 0.25rem;
+  color: $tertiary-background;
+  width: 85px;
+}
 
 input {
   background: $primary-background;
