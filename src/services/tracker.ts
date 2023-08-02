@@ -24,14 +24,14 @@ import {
 import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
+import { getTitleAndDate } from '../util/getTitleAndDate'
 
 export const addWorkout = async (
   name: string,
   exercises: {
     id: string
     text: string
-  }[],
-  date = new Date().getTime()
+  }[]
 ): Promise<WorkoutDataType | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
@@ -42,12 +42,23 @@ export const addWorkout = async (
         return parseExercise(ex.text, ex.id)
       })
 
+      const { title: workoutTitle, date } = getTitleAndDate(name)
+      const workoutDate = date || new Date().getTime()
+
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
       const exercisesRef = collection(userDataRef, 'exercises')
+      const userDataDoc = await getDoc(userDataRef)
+      const workoutTitles = userDataDoc.data()?.workoutTitles || {} // holds unique workout titles
+      // Add workout title the workoutTitles object
+      workoutTitles[workoutTitle] = ++workoutTitles[workoutTitle] || 1
+      updateDoc(userDataRef, {
+        workoutTitles,
+      })
+
       const workoutData: WorkoutDataType = {
-        name,
-        date,
+        name: workoutTitle,
+        date: workoutDate,
         exercises: parsedExercises,
         id: workoutID,
       }
@@ -90,12 +101,20 @@ export const importWorkouts = async (
       const workoutsRef = collection(userDataRef, 'workouts')
       const exercisesRef = collection(userDataRef, 'exercises')
 
+      const userDataDoc = await getDoc(userDataRef)
+      const workoutTitles = userDataDoc.data()?.workoutTitles || {} // holds unique workout titles
+
       workouts.forEach(workout => {
         const workoutID = workout.id
         const workoutDate = workout.date
+        const workoutData = { ...workout, name: workout.name.toLowerCase() }
 
         const workoutsRefDoc = doc(workoutsRef, workoutID)
-        promises.push(setDoc(workoutsRefDoc, workout))
+
+        // Add workout title the workoutTitles object
+        workoutTitles[workoutData.name] = ++workoutTitles[workoutData.name] || 1
+
+        promises.push(setDoc(workoutsRefDoc, workoutData))
 
         workout.exercises.forEach((exercise, idx) => {
           const { id, name } = exercise
@@ -112,6 +131,9 @@ export const importWorkouts = async (
             )
           }
         })
+      })
+      await updateDoc(userDataRef, {
+        workoutTitles,
       })
       await Promise.all(promises)
       return workouts
@@ -145,6 +167,28 @@ export const searchExercises = async (
     })
 
     return dataArr[0]
+  }
+}
+export const getUniqueWorkoutTitles = async (): Promise<
+  string[] | undefined
+> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+
+      const userDataDoc = await getDoc(userDataRef)
+      const workoutTitles = userDataDoc.data()?.workoutTitles || null
+
+      if (!workoutTitles) return []
+
+      const sortedTitles = Object.keys(workoutTitles).sort(function (a, b) {
+        return workoutTitles[b] - workoutTitles[a]
+      })
+      return sortedTitles
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
   }
 }
 
@@ -195,7 +239,8 @@ export const queryAllSingleExercise = async (
 
 export const getWorkouts = async (
   resultsPerPage = 10,
-  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null
+  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null,
+  workoutNameQuery: string | null
 ) => {
   const uid = auth?.currentUser?.uid
   if (uid) {
@@ -203,16 +248,13 @@ export const getWorkouts = async (
       const userDataRef = doc(db, 'usersData', uid)
       const workoutsRef = collection(userDataRef, 'workouts')
 
-      let q
+      let q = query(workoutsRef)
+      if (workoutNameQuery) {
+        q = query(q, where('name', '==', workoutNameQuery))
+      }
+      q = query(q, orderBy('date', 'desc'), limit(resultsPerPage))
       if (lastDoc) {
-        q = query(
-          workoutsRef,
-          orderBy('date', 'desc'),
-          limit(resultsPerPage),
-          startAfter(lastDoc)
-        )
-      } else {
-        q = query(workoutsRef, orderBy('date', 'desc'), limit(resultsPerPage))
+        q = query(q, startAfter(lastDoc))
       }
 
       const totalResultsSnapshot = await getCountFromServer(workoutsRef)
@@ -337,7 +379,7 @@ export const modifyData = async () => {
     const exercisesQuerySnapshot = await getDocs(exercisesQ)
 
     exercisesQuerySnapshot.forEach(doc => {
-      deleteDoc(doc.ref)
+      // deleteDoc(doc.ref)
     })
 
     const workoutsQ = query(workoutsRef)
@@ -345,7 +387,35 @@ export const modifyData = async () => {
     const workoutsQuerySnapshot = await getDocs(workoutsQ)
 
     workoutsQuerySnapshot.forEach(doc => {
-      deleteDoc(doc.ref)
+      // deleteDoc(doc.ref)
+    })
+  }
+}
+
+export const findUniqueWorkoutTitlesFromCollection = async () => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const workoutsRef = collection(userDataRef, 'workouts')
+    const workoutsQ = query(workoutsRef)
+    const workoutsQuerySnapshot = await getDocs(workoutsQ)
+    const workoutTitles: { [key: string]: number } = {}
+
+    workoutsQuerySnapshot.forEach(doc => {
+      const workoutData = doc.data() as WorkoutDataType
+      let workoutTitle = workoutData.name.toLowerCase().trim()
+      workoutTitles[workoutTitle] = ++workoutTitles[workoutTitle] || 1
+      // workoutTitle = workoutTitle.replace('day', '').toLowerCase()
+      // if (workoutTitle === 'leg') workoutTitle = 'legs'
+
+      // console.log(workoutData.name, workoutTitle)
+      // updateDoc(doc.ref, {
+      //   name: workoutTitle,
+      // })
+    })
+
+    updateDoc(userDataRef, {
+      workoutTitles,
     })
   }
 }

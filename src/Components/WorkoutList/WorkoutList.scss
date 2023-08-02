@@ -25,8 +25,30 @@
       }
     }
   }
-  h5 {
-    padding-top: 1rem;
+  .title-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    h5 {
+      padding-top: 1rem;
+    }
+    .workout-titles-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      button {
+        border: 1px solid $border-color;
+        border-radius: 10px;
+        padding: 0.25rem 0.5rem;
+        width: fit-content !important;
+        color: $tertiary-text;
+      }
+      button.active {
+        background: $primary;
+        color: $primary-background;
+      }
+    }
   }
   .workout-list {
     display: flex;
@@ -73,6 +95,26 @@
         textarea.blurred {
           border: 1px solid $primary-background;
         }
+      }
+      input.workout-title {
+        color: $secondary-text;
+        outline: none;
+        height: fit-content !important;
+        border: 1px solid $tertiary-text;
+        border-radius: $border-radius;
+        background: $primary-background;
+        padding: 0 !important;
+        text-transform: capitalize;
+      }
+      input.workout-title.focused {
+        z-index: 2;
+      }
+      input.workout-title.blurred {
+        border: 1px solid $primary-background;
+        text-transform: capitalize;
+      }
+      .workout-title {
+        text-transform: capitalize;
       }
     }
   }

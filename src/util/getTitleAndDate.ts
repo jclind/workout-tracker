@@ -15,9 +15,9 @@ export const getTitleAndDate = (
     } else {
       formattedDate = new Date(Date.parse(dateMatch[1])).getTime()
     }
-    title = str.replace(dateMatch[0], '').trim()
+    title = str.replace(dateMatch[0], '').trim().toLowerCase()
   } else {
-    title = str.trim()
+    title = str.trim().toLowerCase()
   }
   return { title, date: formattedDate }
 }

@@ -4,6 +4,7 @@ import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import {
   deleteWorkout,
+  getUniqueWorkoutTitles,
   getWorkouts,
   updateExercise,
 } from '../../services/tracker'
@@ -58,17 +59,63 @@ const ExerciseItem = ({
   )
 }
 
+type WorkoutTitleProps = {
+  title: string
+}
+
+const WorkoutTitle = ({ title }: WorkoutTitleProps) => {
+  // const [editedStr, setEditedStr] = useState(title)
+  // const [isFocused, setIsFocused] = useState(false)
+
+  // const inputRef = useRef<HTMLInputElement>(null)
+
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     if (inputRef.current) {
+  //       inputRef.current.blur()
+  //     }
+  //   }
+  // }
+
+  // const handleBlur = () => {
+  //   setIsFocused(false)
+  //   if (editedStr.trim() && editedStr.trim() !== title) {
+  //     // handleUpdateExercise(exercise.id, editedStr)
+  //   }
+  // }
+
+  return (
+    // <input
+    //   className={`workout-title ${isFocused ? 'focused' : 'blurred'}`}
+    //   value={editedStr}
+    //   onChange={e => {
+    //     setEditedStr(e.target.value)
+    //     console.log('here', e.target.value)
+    //   }}
+    //   onFocus={() => setIsFocused(true)}
+    //   onBlur={handleBlur}
+    //   onKeyDown={handleKeyDown}
+    //   ref={inputRef}
+    //   // style={{ width: `${editedStr.length}ch` }}
+    //   // style={{ width: `${editedStr.length}ch` }}
+    // />
+    <h3 className='workout-title'>{title}</h3>
+  )
+}
+
 type WorkoutListProps = {
   workoutList: WorkoutDataType[]
   setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
   loading: boolean
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  currWorkoutTitle: string
 }
 
 const WorkoutList = ({
   workoutList,
   setWorkoutList,
   setLoading,
+  currWorkoutTitle,
 }: WorkoutListProps) => {
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
@@ -76,15 +123,29 @@ const WorkoutList = ({
   > | null>(null)
   const [isMoreData, setIsMoreData] = useState(true)
   const [moreLoading, setMoreLoading] = useState(false)
+  const [nameFilter, setNameFilter] = useState<string | null>(null)
+  const [workoutTitles, setWorkoutTitles] = useState<string[]>([])
 
   const titleRef = useRef<HTMLHeadingElement>(null)
   const scrollParentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setLoading(true)
-    getNextWorkouts()
+    getUniqueWorkoutTitles().then(res => {
+      if (res) {
+        setWorkoutTitles(res)
+        getNextWorkouts(lastDoc)
+      }
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    if (nameFilter !== null) {
+      getNextWorkouts(null, true)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nameFilter])
 
   const handleScroll = () => {
     if (titleRef?.current) {
@@ -92,13 +153,20 @@ const WorkoutList = ({
     }
   }
 
-  const getNextWorkouts = () => {
+  const getNextWorkouts = (
+    lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null,
+    newQuery: boolean = false
+  ) => {
     setMoreLoading(true)
-    getWorkouts(15, lastDoc)
+    getWorkouts(15, lastDoc, nameFilter)
       .then(res => {
         if (res?.data) {
           const updatedWorkoutList = [...workoutList, ...res.data]
-          setWorkoutList(updatedWorkoutList)
+          if (newQuery) {
+            setWorkoutList(res.data)
+          } else {
+            setWorkoutList(updatedWorkoutList)
+          }
           setLastDoc(res.lastDoc)
           setIsMoreData(res.totalResults > updatedWorkoutList.length)
         }
@@ -107,10 +175,15 @@ const WorkoutList = ({
       })
       .catch((error: any) => {
         toast.error(error.message || error)
+        console.log(error)
         setLoading(false)
         setMoreLoading(false)
       })
   }
+
+  // useEffect(() => {
+  //   console.log(workoutList)
+  // }, [workoutList])
 
   if (workoutList.length <= 0) return null
 
@@ -126,9 +199,31 @@ const WorkoutList = ({
           <BsChevronCompactDown className='icon' />
         </div>
       </button>
-      <h5 className='title' ref={titleRef}>
-        Past Workouts
-      </h5>
+      <div className='title-content'>
+        <h5 className='title' ref={titleRef}>
+          Past Workouts
+        </h5>
+
+        <div className='workout-titles-list'>
+          {workoutTitles.slice(0, 3).map(title => {
+            return (
+              <button
+                className={`btn-no-styles ${
+                  title === nameFilter ? 'active' : ''
+                }`}
+                onClick={() =>
+                  setNameFilter(() => {
+                    if (nameFilter === title) return ''
+                    return title
+                  })
+                }
+              >
+                {title}
+              </button>
+            )
+          })}
+        </div>
+      </div>
       <div className='workout-list'>
         {workoutList.map(workout => {
           const handleUpdateExercise = (
@@ -175,7 +270,7 @@ const WorkoutList = ({
           return (
             <div className='single-workout' key={workout.id}>
               <div className='head'>
-                <h3 className='title'>{workout.name}</h3>
+                <WorkoutTitle title={workout.name} />
                 {date && <div className='date'>{formatDateToString(date)}</div>}
                 <div className='actions'>
                   <ActionsDropdown
@@ -208,7 +303,7 @@ const WorkoutList = ({
           <button
             className='btn-no-styles load-more'
             disabled={moreLoading}
-            onClick={getNextWorkouts}
+            onClick={() => getNextWorkouts(lastDoc)}
           >
             {moreLoading ? (
               <TailSpin
