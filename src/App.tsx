@@ -12,6 +12,7 @@ import { WorkoutDataType } from './types'
 import toast, { Toaster } from 'react-hot-toast'
 import Lottie from 'lottie-react'
 import loadingAnimationData from './assets/animations/page-loading.json'
+// import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
 Modal.setAppElement('#root')
 
@@ -24,6 +25,8 @@ function App() {
   const [loginLoading, setLoginLoading] = useState(false)
 
   const [workoutList, setWorkoutList] = useState<WorkoutDataType[]>([])
+
+  const [currWorkoutTitle, setCurrWorkoutTitle] = useState('')
 
   useEffect(() => {
     if (!user && (exerciseListLoading || workoutListLoading)) {
@@ -43,6 +46,12 @@ function App() {
       }, 100)
     }
   }, [authLoading, loginLoading])
+
+  // useEffect(() => {
+  //   if (user) {
+  //     findUniqueWorkoutTitlesFromCollection()
+  //   }
+  // }, [user])
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
@@ -89,12 +98,15 @@ function App() {
             setWorkoutList={setWorkoutList}
             loading={exerciseListLoading}
             setLoading={setExerciseListLoading}
+            workoutTitle={currWorkoutTitle}
+            setWorkoutTitle={setCurrWorkoutTitle}
           />
           <WorkoutList
             workoutList={workoutList}
             setWorkoutList={setWorkoutList}
             loading={workoutListLoading}
             setLoading={setWorkoutListLoading}
+            currWorkoutTitle={currWorkoutTitle}
           />
           <Footer setWorkoutList={setWorkoutList} />
         </>

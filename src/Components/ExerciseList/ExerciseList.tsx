@@ -177,17 +177,20 @@ type ExerciseListProps = {
   setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
   loading: boolean
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  workoutTitle: string
+  setWorkoutTitle: React.Dispatch<React.SetStateAction<string>>
 }
 
 const ExerciseList = ({
   setWorkoutList,
   loading,
   setLoading,
+  workoutTitle,
+  setWorkoutTitle,
 }: ExerciseListProps) => {
   const [exercises, setExercises] = useState<ExerciseType[]>([
     generateNewExercise(),
   ])
-  const [workoutTitle, setWorkoutTitle] = useState('')
 
   const [addWorkoutLoading, setAddWorkoutLoading] = useState(false)
 
