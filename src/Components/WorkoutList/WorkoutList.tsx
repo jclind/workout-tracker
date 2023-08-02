@@ -64,25 +64,25 @@ type WorkoutTitleProps = {
 }
 
 const WorkoutTitle = ({ title }: WorkoutTitleProps) => {
-  const [editedStr, setEditedStr] = useState(title)
-  const [isFocused, setIsFocused] = useState(false)
+  // const [editedStr, setEditedStr] = useState(title)
+  // const [isFocused, setIsFocused] = useState(false)
 
-  const inputRef = useRef<HTMLInputElement>(null)
+  // const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      if (inputRef.current) {
-        inputRef.current.blur()
-      }
-    }
-  }
+  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  //   if (e.key === 'Enter') {
+  //     if (inputRef.current) {
+  //       inputRef.current.blur()
+  //     }
+  //   }
+  // }
 
-  const handleBlur = () => {
-    setIsFocused(false)
-    if (editedStr.trim() && editedStr.trim() !== title) {
-      // handleUpdateExercise(exercise.id, editedStr)
-    }
-  }
+  // const handleBlur = () => {
+  //   setIsFocused(false)
+  //   if (editedStr.trim() && editedStr.trim() !== title) {
+  //     // handleUpdateExercise(exercise.id, editedStr)
+  //   }
+  // }
 
   return (
     // <input
@@ -181,9 +181,9 @@ const WorkoutList = ({
       })
   }
 
-  useEffect(() => {
-    console.log(workoutList)
-  }, [workoutList])
+  // useEffect(() => {
+  //   console.log(workoutList)
+  // }, [workoutList])
 
   if (workoutList.length <= 0) return null
 

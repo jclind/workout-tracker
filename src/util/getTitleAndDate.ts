@@ -19,6 +19,5 @@ export const getTitleAndDate = (
   } else {
     title = str.trim().toLowerCase()
   }
-  console.log(title, formattedDate)
   return { title, date: formattedDate }
 }
