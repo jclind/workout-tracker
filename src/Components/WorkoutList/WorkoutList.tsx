@@ -21,7 +21,11 @@ import { calculateInputWidth } from '../../util/calculateInputWidth'
 
 type ExerciseItemProps = {
   exercise: ExerciseDataType
-  handleUpdateExercise: (exerciseID: string, updatedExerciseStr: string) => void
+  handleUpdateExercise: (
+    exerciseID: string,
+    updatedExerciseStr: string,
+    originalExerciseStr: string
+  ) => void
 }
 const ExerciseItem = ({
   exercise,
@@ -29,6 +33,7 @@ const ExerciseItem = ({
 }: ExerciseItemProps) => {
   const [editedStr, setEditedStr] = useState(exercise.originalString)
   const [isFocused, setIsFocused] = useState(false)
+  const [prevTitle, setPrevTitle] = useState('')
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -40,12 +45,16 @@ const ExerciseItem = ({
     }
   }
 
+  const handleFocus = () => {
+    setIsFocused(true)
+    setPrevTitle(editedStr)
+  }
   const handleBlur = () => {
     setIsFocused(false)
     if (!editedStr.trim()) {
       setEditedStr(exercise.originalString)
     } else if (editedStr.trim() !== exercise.originalString) {
-      handleUpdateExercise(exercise.id, editedStr.trim())
+      handleUpdateExercise(exercise.id, editedStr.trim(), prevTitle)
     }
   }
 
@@ -54,7 +63,7 @@ const ExerciseItem = ({
       className={`exercise ${isFocused ? 'focused' : 'blurred'}`}
       value={editedStr}
       onChange={e => setEditedStr(e.target.value)}
-      onFocus={() => setIsFocused(true)}
+      onFocus={handleFocus}
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       ref={textareaRef}
@@ -238,7 +247,8 @@ const WorkoutList = ({
         {workoutList.map(workout => {
           const handleUpdateExercise = (
             exerciseID: string,
-            updatedExerciseStr: string
+            updatedExerciseStr: string,
+            originalExerciseStr: string
           ) => {
             const currExercise = workout.exercises.find(
               ex => ex.id === exerciseID
@@ -249,11 +259,32 @@ const WorkoutList = ({
                   updatedExerciseStr,
                   exerciseID
                 )
+                // const updatedWorkoutList: WorkoutDataType[] = workoutList.map(
+                //   currWorkout => {
+                //     if (currWorkout.id === workout.id) {
+                //       const updatedExercises = workout.exercises.map(ex => {
+                //         if (ex.id === exerciseID) return currExercise
+                //         return ex
+                //       })
+                //       const updatedWorkout: WorkoutDataType = {
+                //         ...currWorkout,
+                //         exercises: updatedExercises,
+                //       }
+                //       return updatedWorkout
+                //     }
+                //     return currWorkout
+                //   }
+                // )
+                // setWorkoutList(updatedWorkoutList)
+                const originalExerciseName =
+                  parseExercise(originalExerciseStr).name
+                console.log(originalExerciseName)
                 updateExercise(
                   exerciseID,
                   workout.id,
                   workout.exercises,
-                  parsedExercise
+                  parsedExercise,
+                  originalExerciseName
                 )
               }
           }

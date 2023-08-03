@@ -16,6 +16,7 @@ import Home from './Components/Pages/Home'
 import { Route, Routes } from 'react-router-dom'
 import Charts from './Components/Pages/Charts'
 import Layout from './Components/Layout/Layout'
+// import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
 Modal.setAppElement('#root')
@@ -38,11 +39,13 @@ function App() {
     }
   }, [authLoading, loginLoading])
 
-  // useEffect(() => {
-  //   if (user) {
-  //     findUniqueWorkoutTitlesFromCollection()
-  //   }
-  // }, [user])
+  useEffect(() => {
+    if (user) {
+      // findUniqueWorkoutTitlesFromCollection()
+      // findUniqueExerciseTitlesFromCollection()
+      // console.log('HERE')
+    }
+  }, [user])
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {

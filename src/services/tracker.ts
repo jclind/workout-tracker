@@ -48,7 +48,7 @@ export const addWorkout = async (
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
       const exercisesRef = collection(userDataRef, 'exercises')
-      await updateUniqueWorkoutTitles(workoutTitle)
+      await updateUniqueTitles('workoutTitles', workoutTitle)
 
       const workoutData: WorkoutDataType = {
         name: workoutTitle,
@@ -59,10 +59,13 @@ export const addWorkout = async (
 
       await setDoc(workoutDocRef, { ...workoutData })
 
+      const exerciseTitles: string[] = []
+
       parsedExercises.forEach((exercise, idx) => {
         const { id, name } = exercise
         const exercisesRefDoc = doc(exercisesRef, id)
         if (name) {
+          exerciseTitles.push(name)
           promises.push(
             setDoc(exercisesRefDoc, {
               ...exercise,
@@ -74,6 +77,7 @@ export const addWorkout = async (
           )
         }
       })
+      await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
 
       return workoutData
@@ -96,6 +100,7 @@ export const importWorkouts = async (
       const exercisesRef = collection(userDataRef, 'exercises')
 
       const workoutTitles: string[] = []
+      const exerciseTitles: string[] = []
 
       workouts.forEach(workout => {
         const workoutID = workout.id
@@ -112,6 +117,7 @@ export const importWorkouts = async (
           const { id, name } = exercise
           const exercisesRefDoc = doc(exercisesRef, id)
           if (name) {
+            exerciseTitles.push(name)
             promises.push(
               setDoc(exercisesRefDoc, {
                 ...exercise,
@@ -124,7 +130,8 @@ export const importWorkouts = async (
           }
         })
       })
-      await updateUniqueWorkoutTitles(workoutTitles)
+      await updateUniqueTitles('workoutTitles', workoutTitles)
+      await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
       return workouts
     } catch (error: any) {
@@ -269,7 +276,8 @@ export const updateExercise = async (
   exerciseID: string,
   workoutID: string,
   exerciseList: ExerciseDataType[],
-  updatedExerciseData: ExerciseDataType
+  updatedExerciseData: ExerciseDataType,
+  originalExerciseName: string
 ) => {
   const uid = auth?.currentUser?.uid
   if (uid) {
@@ -280,6 +288,7 @@ export const updateExercise = async (
 
       const updatedExerciseList = exerciseList.map(ex => {
         if (ex.id === exerciseID) return updatedExerciseData
+
         return ex
       })
 
@@ -292,6 +301,11 @@ export const updateExercise = async (
         weights: updatedExerciseData.weights,
         originalString: updatedExerciseData.originalString,
       })
+      await updateUniqueTitles(
+        'exerciseTitles',
+        updatedExerciseData.name,
+        originalExerciseName
+      )
     } catch (error: any) {
       throw new Error(error.message)
     }
@@ -314,7 +328,7 @@ export const updateWorkout = async (
       if (updatedData.name) {
         const addedTitle = updatedData.name
         const removedTitle = currWorkoutData.name
-        await updateUniqueWorkoutTitles(addedTitle, removedTitle)
+        await updateUniqueTitles('workoutTitles', addedTitle, removedTitle)
       }
     } catch (error: any) {
       throw new Error(error.message)
@@ -406,7 +420,8 @@ export const modifyData = async () => {
   }
 }
 
-export const updateUniqueWorkoutTitles = async (
+export const updateUniqueTitles = async (
+  field: 'workoutTitles' | 'exerciseTitles',
   addedTitles: string | string[] | null,
   removedTitles: string | string[] | null = null
 ) => {
@@ -415,44 +430,93 @@ export const updateUniqueWorkoutTitles = async (
     try {
       const userDataRef = doc(db, 'usersData', uid)
       const userDataDoc = await getDoc(userDataRef)
-      const workoutTitles = userDataDoc.data()?.workoutTitles || {}
-      console.log(workoutTitles, addedTitles, removedTitles)
+      const titlesDocData = userDataDoc.data()
+      const titles = titlesDocData?.[field] || {}
 
       if (addedTitles) {
         if (typeof addedTitles === 'string') {
-          const title = addedTitles
+          const title = addedTitles.toLowerCase().trim()
           // Add workout title the workoutTitles object
-          workoutTitles[title] = ++workoutTitles[title] || 1
+          titles[title] = ++titles[title] || 1
         } else {
           addedTitles.forEach(title => {
-            workoutTitles[title] = ++workoutTitles[title] || 1
+            titles[title] = ++titles[title] || 1
           })
         }
       }
       if (removedTitles) {
         if (typeof removedTitles === 'string') {
-          const title = removedTitles
-          workoutTitles[title] = --workoutTitles[title] || 0
+          const title = removedTitles.toLowerCase().trim()
+          titles[title] = --titles[title] || 0
         } else {
           removedTitles.forEach(title => {
-            workoutTitles[title] = --workoutTitles[title] || 0
+            titles[title] = --titles[title] || 0
           })
         }
       }
+      console.log(addedTitles, removedTitles)
       const filteredTitles: { [key: string]: number } = {}
-      for (const [key, value] of Object.entries(workoutTitles)) {
+      for (const [key, value] of Object.entries(titles)) {
         if (typeof value === 'number' && value > 0) {
           filteredTitles[key] = value
         }
       }
+      console.log(filteredTitles)
       await updateDoc(userDataRef, {
-        workoutTitles: filteredTitles,
+        [field]: filteredTitles,
       })
     } catch (error: any) {
       throw new Error(error.message)
     }
   }
 }
+// export const updateUniqueExerciseTitles = async (
+//   addedExercises: ExerciseDataType | ExerciseDataType[] | null,
+//   removedExercises: ExerciseDataType | ExerciseDataType[] | null = null
+// ) => {
+//   const uid = auth?.currentUser?.uid
+//   if (uid) {
+//     try {
+//       const userDataRef = doc(db, 'usersData', uid)
+//       const userDataDoc = await getDoc(userDataRef)
+//       const exerciseTitles = userDataDoc.data()?.exerciseTitles || {}
+
+//       if (addedExercises) {
+//         if (Array.isArray(addedExercises)) {
+//           addedExercises.forEach(exercise => {
+//             const title = exercise.name
+//             exerciseTitles[title] = ++exerciseTitles[title] || 1
+//           })
+//         } else {
+//           const title = addedExercises.name
+//           exerciseTitles[title] = ++exerciseTitles[title] || 1
+//         }
+//       }
+//       if (removedExercises) {
+//         if (Array.isArray(removedExercises)) {
+//           removedExercises.forEach(exercise => {
+//             const title = exercise.name
+//             exerciseTitles[title] = ++exerciseTitles[title] || 1
+//           })
+//         } else {
+//           const title = removedExercises.name
+//           exerciseTitles[title] = ++exerciseTitles[title] || 1
+//         }
+//       }
+//       const filteredTitles: { [key: string]: number } = {}
+//       for (const [key, value] of Object.entries(exerciseTitles)) {
+//         if (typeof value === 'number' && value > 0) {
+//           filteredTitles[key] = value
+//         }
+//       }
+//       await updateDoc(userDataRef, {
+//         exerciseTitles: filteredTitles,
+//       })
+//     } catch (error: any) {
+//       throw new Error(error.message)
+//     }
+//   }
+// }
 
 export const findUniqueWorkoutTitlesFromCollection = async () => {
   const uid = auth?.currentUser?.uid
@@ -479,5 +543,35 @@ export const findUniqueWorkoutTitlesFromCollection = async () => {
     updateDoc(userDataRef, {
       workoutTitles,
     })
+  }
+}
+export const findUniqueExerciseTitlesFromCollection = async () => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const exercisesRef = collection(userDataRef, 'exercises')
+    const exerciseQ = query(exercisesRef)
+    const exerciseQuerySnapshot = await getDocs(exerciseQ)
+
+    const titles: string[] = []
+
+    exerciseQuerySnapshot.forEach(doc => {
+      const exerciseData = doc.data() as WorkoutDataType
+      let exerciseTitle = exerciseData.name.toLowerCase().trim()
+      titles.push(exerciseTitle)
+      // workoutTitles[exerciseTitle] = ++workoutTitles[exerciseTitle] || 1
+      // workoutTitle = workoutTitle.replace('day', '').toLowerCase()
+      // if (workoutTitle === 'leg') workoutTitle = 'legs'
+
+      // console.log(workoutData.name, workoutTitle)
+      // updateDoc(doc.ref, {
+      //   name: workoutTitle,
+      // })
+    })
+
+    // updateDoc(userDataRef, {
+    //   workoutTitles,
+    // })
+    await updateUniqueTitles('exerciseTitles', titles)
   }
 }
