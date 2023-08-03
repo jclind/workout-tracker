@@ -30,6 +30,7 @@
     align-items: center;
     gap: 1rem;
     h5 {
+      width: fit-content;
       padding-top: 1rem;
     }
     .workout-titles-list {
@@ -38,6 +39,8 @@
       gap: 0.5rem;
       margin-top: 1rem;
       button {
+        font-size: 0.9rem;
+        font-weight: 700;
         border: 1px solid $border-color;
         border-radius: 10px;
         padding: 0.25rem 0.5rem;

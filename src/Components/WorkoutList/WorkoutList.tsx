@@ -7,6 +7,7 @@ import {
   getUniqueWorkoutTitles,
   getWorkouts,
   updateExercise,
+  updateWorkout,
 } from '../../services/tracker'
 import { formatDateToString } from '../../util/dateUtil'
 import { parseExercise } from '../../util/parseExercise'
@@ -16,6 +17,7 @@ import { BsTrashFill } from 'react-icons/bs'
 import toast from 'react-hot-toast'
 import TextareaAutosize from '@mui/base/TextareaAutosize'
 import { TailSpin } from 'react-loader-spinner'
+import { calculateInputWidth } from '../../util/calculateInputWidth'
 
 type ExerciseItemProps = {
   exercise: ExerciseDataType
@@ -40,8 +42,10 @@ const ExerciseItem = ({
 
   const handleBlur = () => {
     setIsFocused(false)
-    if (editedStr.trim() && editedStr.trim() !== exercise.originalString) {
-      handleUpdateExercise(exercise.id, editedStr)
+    if (!editedStr.trim()) {
+      setEditedStr(exercise.originalString)
+    } else if (editedStr.trim() !== exercise.originalString) {
+      handleUpdateExercise(exercise.id, editedStr.trim())
     }
   }
 
@@ -61,45 +65,51 @@ const ExerciseItem = ({
 
 type WorkoutTitleProps = {
   title: string
+  handleUpdateTitle: (updatedTitle: string) => void
 }
 
-const WorkoutTitle = ({ title }: WorkoutTitleProps) => {
-  // const [editedStr, setEditedStr] = useState(title)
-  // const [isFocused, setIsFocused] = useState(false)
+const WorkoutTitle = ({ title, handleUpdateTitle }: WorkoutTitleProps) => {
+  const [editedStr, setEditedStr] = useState(title)
+  const [isFocused, setIsFocused] = useState(false)
 
-  // const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  // const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (e.key === 'Enter') {
-  //     if (inputRef.current) {
-  //       inputRef.current.blur()
-  //     }
-  //   }
-  // }
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (inputRef.current) {
+        inputRef.current.blur()
+      }
+    }
+  }
 
-  // const handleBlur = () => {
-  //   setIsFocused(false)
-  //   if (editedStr.trim() && editedStr.trim() !== title) {
-  //     // handleUpdateExercise(exercise.id, editedStr)
-  //   }
-  // }
+  const handleBlur = () => {
+    setIsFocused(false)
+    if (!editedStr.trim()) {
+      setEditedStr(title)
+    } else if (editedStr.trim() !== title) {
+      handleUpdateTitle(editedStr.trim())
+    }
+  }
 
   return (
-    // <input
-    //   className={`workout-title ${isFocused ? 'focused' : 'blurred'}`}
-    //   value={editedStr}
-    //   onChange={e => {
-    //     setEditedStr(e.target.value)
-    //     console.log('here', e.target.value)
-    //   }}
-    //   onFocus={() => setIsFocused(true)}
-    //   onBlur={handleBlur}
-    //   onKeyDown={handleKeyDown}
-    //   ref={inputRef}
-    //   // style={{ width: `${editedStr.length}ch` }}
-    //   // style={{ width: `${editedStr.length}ch` }}
-    // />
-    <h3 className='workout-title'>{title}</h3>
+    <input
+      className={`workout-title ${isFocused ? 'focused' : 'blurred'}`}
+      value={editedStr}
+      onChange={e => {
+        setEditedStr(e.target.value)
+        console.log('here', e.target.value)
+      }}
+      onFocus={e => {
+        setIsFocused(true)
+        e.target.select()
+      }}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      ref={inputRef}
+      style={{ width: calculateInputWidth(editedStr, 'Nunito', 10) }}
+      // style={{ width: `${editedStr.length}ch` }}
+    />
+    // <h3 className='workout-title'>{title}</h3>
   )
 }
 
@@ -185,7 +195,7 @@ const WorkoutList = ({
   //   console.log(workoutList)
   // }, [workoutList])
 
-  if (workoutList.length <= 0) return null
+  if (workoutList.length <= 0 && !nameFilter) return null
 
   return (
     <div className='workout-list-container' ref={scrollParentRef}>
@@ -247,6 +257,11 @@ const WorkoutList = ({
                 )
               }
           }
+          const handleUpdateTitle = (updatedTitle: string) => {
+            if (workout.name !== updatedTitle) {
+              updateWorkout(workout, { name: updatedTitle })
+            }
+          }
           const date = workout.date
 
           const handleDeleteWorkout = () => {
@@ -270,7 +285,10 @@ const WorkoutList = ({
           return (
             <div className='single-workout' key={workout.id}>
               <div className='head'>
-                <WorkoutTitle title={workout.name} />
+                <WorkoutTitle
+                  title={workout.name}
+                  handleUpdateTitle={handleUpdateTitle}
+                />
                 {date && <div className='date'>{formatDateToString(date)}</div>}
                 <div className='actions'>
                   <ActionsDropdown

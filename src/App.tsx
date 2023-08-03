@@ -12,6 +12,10 @@ import { WorkoutDataType } from './types'
 import toast, { Toaster } from 'react-hot-toast'
 import Lottie from 'lottie-react'
 import loadingAnimationData from './assets/animations/page-loading.json'
+import Home from './Components/Pages/Home'
+import { Route, Routes } from 'react-router-dom'
+import Charts from './Components/Pages/Charts'
+import Layout from './Components/Layout/Layout'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
 Modal.setAppElement('#root')
@@ -19,24 +23,11 @@ Modal.setAppElement('#root')
 function App() {
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
-  const [exerciseListLoading, setExerciseListLoading] = useState(true)
-  const [workoutListLoading, setWorkoutListLoading] = useState(true)
-  const [showLoadingOverlay, setShowLoadingOverlay] = useState(true)
+
   const [loginLoading, setLoginLoading] = useState(false)
 
-  const [workoutList, setWorkoutList] = useState<WorkoutDataType[]>([])
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(true)
 
-  const [currWorkoutTitle, setCurrWorkoutTitle] = useState('')
-
-  useEffect(() => {
-    if (!user && (exerciseListLoading || workoutListLoading)) {
-      setShowLoadingOverlay(true)
-    } else {
-      setTimeout(() => {
-        setShowLoadingOverlay(false)
-      }, 300)
-    }
-  }, [user, exerciseListLoading, workoutListLoading])
   useEffect(() => {
     if (authLoading || loginLoading) {
       setShowLoadingOverlay(true)
@@ -92,24 +83,28 @@ function App() {
       </div>
       <Toaster />
       {user ? (
-        <>
-          <Nav />
-          <ExerciseList
-            setWorkoutList={setWorkoutList}
-            loading={exerciseListLoading}
-            setLoading={setExerciseListLoading}
-            workoutTitle={currWorkoutTitle}
-            setWorkoutTitle={setCurrWorkoutTitle}
+        <Routes>
+          <Route
+            path='/'
+            element={
+              <Layout>
+                <Home
+                  user={user}
+                  setShowLoadingOverlay={setShowLoadingOverlay}
+                />
+              </Layout>
+            }
           />
-          <WorkoutList
-            workoutList={workoutList}
-            setWorkoutList={setWorkoutList}
-            loading={workoutListLoading}
-            setLoading={setWorkoutListLoading}
-            currWorkoutTitle={currWorkoutTitle}
+
+          <Route
+            path='/charts'
+            element={
+              <Layout>
+                <Charts />
+              </Layout>
+            }
           />
-          <Footer setWorkoutList={setWorkoutList} />
-        </>
+        </Routes>
       ) : (
         <div className='login-container'>
           <h1>Workout Tracker</h1>
