@@ -4,7 +4,7 @@ import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import {
   deleteWorkout,
-  getUniqueWorkoutTitles,
+  getUniqueTitles,
   getWorkouts,
   updateExercise,
   updateWorkout,
@@ -149,7 +149,7 @@ const WorkoutList = ({
 
   useEffect(() => {
     setLoading(true)
-    getUniqueWorkoutTitles().then(res => {
+    getUniqueTitles('workoutTitles').then(res => {
       if (res) {
         setWorkoutTitles(res)
         getNextWorkouts(lastDoc)

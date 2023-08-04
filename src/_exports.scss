@@ -1,0 +1,8 @@
+@import './helpers.scss';
+
+:export {
+  borderColor: $border-color;
+  primaryText: $primary;
+  primaryBackground: $primary-background;
+  secondary: $secondary;
+}
