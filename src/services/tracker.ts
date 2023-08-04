@@ -315,7 +315,6 @@ export const updateWorkout = async (
   currWorkoutData: WorkoutDataType,
   updatedData: { name?: string; date?: number }
 ) => {
-  console.log(updatedData)
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
@@ -454,14 +453,12 @@ export const updateUniqueTitles = async (
           })
         }
       }
-      console.log(addedTitles, removedTitles)
       const filteredTitles: { [key: string]: number } = {}
       for (const [key, value] of Object.entries(titles)) {
         if (typeof value === 'number' && value > 0) {
           filteredTitles[key] = value
         }
       }
-      console.log(filteredTitles)
       await updateDoc(userDataRef, {
         [field]: filteredTitles,
       })

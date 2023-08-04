@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import Nav from '../Nav/Nav'
 import ExerciseList from '../ExerciseList/ExerciseList'
 import WorkoutList from '../WorkoutList/WorkoutList'
 import Footer from '../Footer/Footer'

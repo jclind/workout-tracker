@@ -106,7 +106,6 @@ const WorkoutTitle = ({ title, handleUpdateTitle }: WorkoutTitleProps) => {
       value={editedStr}
       onChange={e => {
         setEditedStr(e.target.value)
-        console.log('here', e.target.value)
       }}
       onFocus={e => {
         setIsFocused(true)
@@ -278,7 +277,6 @@ const WorkoutList = ({
                 // setWorkoutList(updatedWorkoutList)
                 const originalExerciseName =
                   parseExercise(originalExerciseStr).name
-                console.log(originalExerciseName)
                 updateExercise(
                   exerciseID,
                   workout.id,

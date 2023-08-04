@@ -1,20 +1,15 @@
-import React, { useEffect, useState } from 'react'
-import ExerciseList from './Components/ExerciseList/ExerciseList'
+import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import { signupWithGoogle } from './services/auth'
 import { User } from 'firebase/auth'
-import Nav from './Components/Nav/Nav'
-import Footer from './Components/Footer/Footer'
-import WorkoutList from './Components/WorkoutList/WorkoutList'
-import { WorkoutDataType } from './types'
 import toast, { Toaster } from 'react-hot-toast'
 import Lottie from 'lottie-react'
 import loadingAnimationData from './assets/animations/page-loading.json'
 import Home from './Components/Pages/Home'
 import { Route, Routes } from 'react-router-dom'
-import Charts from './Components/Pages/Charts'
+// import Charts from './Components/Pages/Charts'
 import Layout from './Components/Layout/Layout'
 // import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
@@ -99,14 +94,14 @@ function App() {
             }
           />
 
-          <Route
+          {/* <Route
             path='/charts'
             element={
               <Layout>
                 <Charts />
               </Layout>
             }
-          />
+          /> */}
         </Routes>
       ) : (
         <div className='login-container'>
