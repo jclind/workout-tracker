@@ -9,7 +9,7 @@ import Lottie from 'lottie-react'
 import loadingAnimationData from './assets/animations/page-loading.json'
 import Home from './Components/Pages/Home'
 import { Route, Routes } from 'react-router-dom'
-// import Charts from './Components/Pages/Charts'
+import Charts from './Components/Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
 // import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
@@ -94,14 +94,14 @@ function App() {
             }
           />
 
-          {/* <Route
+          <Route
             path='/charts'
             element={
               <Layout>
                 <Charts />
               </Layout>
             }
-          /> */}
+          />
         </Routes>
       ) : (
         <div className='login-container'>

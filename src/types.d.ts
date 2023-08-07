@@ -32,3 +32,13 @@ export type WeightGroupType = {
   weight: number
   comment: string
 }
+
+export type ExerciseSelectType = { label: string; value: string }
+
+export type TimePeriodType =
+  | 'week'
+  | 'month'
+  | '3-month'
+  | '6-month'
+  | 'year'
+  | 'allTime'

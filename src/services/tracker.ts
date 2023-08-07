@@ -71,7 +71,7 @@ export const addWorkout = async (
               ...exercise,
               name: name.toLowerCase(),
               workoutID,
-              workoutDate: date,
+              workoutDate,
               index: idx,
             })
           )
@@ -166,21 +166,22 @@ export const searchExercises = async (
     return dataArr[0]
   }
 }
-export const getUniqueWorkoutTitles = async (): Promise<
-  string[] | undefined
-> => {
+
+export const getUniqueTitles = async (
+  field: 'workoutTitles' | 'exerciseTitles'
+): Promise<string[] | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
       const userDataRef = doc(db, 'usersData', uid)
 
       const userDataDoc = await getDoc(userDataRef)
-      const workoutTitles = userDataDoc.data()?.workoutTitles || null
+      const titles = userDataDoc.data()?.[field] || null
 
-      if (!workoutTitles) return []
+      if (!titles) return []
 
-      const sortedTitles = Object.keys(workoutTitles).sort(function (a, b) {
-        return workoutTitles[b] - workoutTitles[a]
+      const sortedTitles = Object.keys(titles).sort(function (a, b) {
+        return titles[b] - titles[a]
       })
       return sortedTitles
     } catch (error: any) {
@@ -231,6 +232,32 @@ export const queryAllSingleExercise = async (
     })
 
     return { data: results, lastDoc: newLastDoc, totalResults }
+  }
+}
+export const queryChartExerciseData = async (
+  exerciseName: string,
+  earliestDate: number
+): Promise<{ data: ExercisesServerDataType[] } | undefined> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const exercisesRef = collection(userDataRef, 'exercises')
+
+    const q = query(
+      exercisesRef,
+      where('name', '==', exerciseName.toLowerCase()),
+      where('workoutDate', '>=', earliestDate),
+      orderBy('workoutDate', 'desc'),
+      limit(100)
+    )
+
+    const results: ExercisesServerDataType[] = []
+    const querySnapshot = await getDocs(q)
+    querySnapshot.forEach(doc => {
+      results.push(doc.data() as ExercisesServerDataType)
+    })
+
+    return { data: results }
   }
 }
 
