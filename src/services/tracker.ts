@@ -71,7 +71,7 @@ export const addWorkout = async (
               ...exercise,
               name: name.toLowerCase(),
               workoutID,
-              workoutDate: date,
+              workoutDate,
               index: idx,
             })
           )
