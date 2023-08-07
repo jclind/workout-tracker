@@ -1,5 +1,32 @@
 @import '../../helpers.scss';
 
+.chart-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 1rem;
+  h4 {
+    padding: 0;
+    margin: 0;
+  }
+  .time-range {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    button {
+      color: $tertiary-text;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 0.25rem;
+    }
+    button.active {
+      color: $primary;
+    }
+  }
+}
+
 .chart {
   width: 100%;
 }

@@ -1,6 +1,6 @@
 import React from 'react'
 import './ChartSelect.scss'
-import Select, { ControlProps, GroupBase, StylesConfig } from 'react-select'
+import Select from 'react-select'
 import { ExerciseSelectType } from '../../types'
 import styles from '../../_exports.scss'
 
