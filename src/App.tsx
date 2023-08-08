@@ -11,6 +11,7 @@ import Home from './Pages/Home'
 import { Route, Routes } from 'react-router-dom'
 import Charts from './Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
+import Account from './Pages/Account/Account'
 // import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
@@ -94,6 +95,14 @@ function App() {
             }
           />
 
+          <Route
+            path='/account'
+            element={
+              <Layout>
+                <Account />
+              </Layout>
+            }
+          />
           <Route
             path='/charts'
             element={

@@ -55,3 +55,12 @@ export const formatDateToString = (input: Date | number): string => {
     return getMonthDay(inputDate)
   }
 }
+
+export const formatDateToMMMDDYYYY = (date: Date): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }
+  return date.toLocaleDateString('en-US', options)
+}
