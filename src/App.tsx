@@ -7,10 +7,11 @@ import { User } from 'firebase/auth'
 import toast, { Toaster } from 'react-hot-toast'
 import Lottie from 'lottie-react'
 import loadingAnimationData from './assets/animations/page-loading.json'
-import Home from './Components/Pages/Home'
+import Home from './Pages/Home'
 import { Route, Routes } from 'react-router-dom'
-import Charts from './Components/Pages/Charts/Charts'
+import Charts from './Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
+import Account from './Pages/Account/Account'
 // import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
@@ -94,6 +95,14 @@ function App() {
             }
           />
 
+          <Route
+            path='/account'
+            element={
+              <Layout>
+                <Account />
+              </Layout>
+            }
+          />
           <Route
             path='/charts'
             element={

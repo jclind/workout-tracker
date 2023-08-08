@@ -29,4 +29,23 @@
 
 .chart {
   width: 100%;
+  height: 100%;
+}
+.no-chart-data {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid $border-color;
+  height: 100%;
+  color: $tertiary-text;
+  .icon {
+    height: 25px;
+    width: 25px;
+  }
+  h4 {
+    padding: 0;
+    margin: 0;
+  }
 }

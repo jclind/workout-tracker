@@ -226,6 +226,7 @@ const WorkoutList = ({
           {workoutTitles.slice(0, 3).map(title => {
             return (
               <button
+                key={title}
                 className={`btn-no-styles ${
                   title === nameFilter ? 'active' : ''
                 }`}

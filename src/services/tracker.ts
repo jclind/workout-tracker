@@ -298,6 +298,38 @@ export const getWorkouts = async (
     }
   }
 }
+export const getNumberOfTotalWorkouts = async (): Promise<
+  number | undefined
+> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutsRef = collection(userDataRef, 'workouts')
+      const totalResultsSnapshot = await getCountFromServer(workoutsRef)
+      const totalResults = totalResultsSnapshot.data().count
+      return totalResults
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+export const getNumberOfTotalExercises = async (): Promise<
+  number | undefined
+> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
+      const totalResultsSnapshot = await getCountFromServer(exercisesRef)
+      const totalResults = totalResultsSnapshot.data().count
+      return totalResults
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
 
 export const updateExercise = async (
   exerciseID: string,
@@ -599,3 +631,22 @@ export const findUniqueExerciseTitlesFromCollection = async () => {
     await updateUniqueTitles('exerciseTitles', titles)
   }
 }
+
+// export const updateUsersData = async () => {
+//   const userDataCollection = collection(db, 'usersData')
+//   const usersQ = query(userDataCollection)
+//   const usersQuerySnapshot = await getDocs(usersQ)
+//   // const publicUserDataRef = doc(db, 'publicUserData', currUserID)
+
+//   const userIDs: string[] = []
+
+//   usersQuerySnapshot.forEach(doc => {
+//     const currUserID = doc.id
+//     userIDs.push(currUserID)
+//   })
+
+//   userIDs.forEach(userID => {
+//     // getAdminAuth.getAuth(userID).then((res: any) => console.log(res))
+//     // getAuth().getUser(userID)
+//   })
+// }

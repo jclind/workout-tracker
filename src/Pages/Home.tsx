@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import ExerciseList from '../ExerciseList/ExerciseList'
-import WorkoutList from '../WorkoutList/WorkoutList'
-import Footer from '../Footer/Footer'
+import ExerciseList from '../Components/ExerciseList/ExerciseList'
+import WorkoutList from '../Components/WorkoutList/WorkoutList'
+import Footer from '../Components/Footer/Footer'
 import { User } from 'firebase/auth'
-import { WorkoutDataType } from '../../types'
+import { WorkoutDataType } from '../types'
 
 type HomeProps = {
   user: User

@@ -2,7 +2,11 @@ import React from 'react'
 import './Nav.scss'
 import { logout } from '../../services/auth'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { AiOutlineHome, AiOutlineLineChart } from 'react-icons/ai'
+import {
+  AiOutlineHome,
+  AiOutlineLineChart,
+  AiOutlineUser,
+} from 'react-icons/ai'
 
 const Nav = () => {
   const navigate = useNavigate()
@@ -19,6 +23,14 @@ const Nav = () => {
           onClick={() => navigate('/')}
         >
           <AiOutlineHome className='icon' />
+        </button>
+        <button
+          className={`btn-no-styles account-btn ${
+            currPage === 'account' ? 'active' : ''
+          }`}
+          onClick={() => navigate('/account')}
+        >
+          <AiOutlineUser className='icon' />
         </button>
         <button
           className={`btn-no-styles exercise-charts-btn ${

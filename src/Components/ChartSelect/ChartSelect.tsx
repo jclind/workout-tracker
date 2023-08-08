@@ -94,6 +94,7 @@ const ChartSelect = ({
       className='select'
       value={selectedOption}
       onChange={handleSelectChange}
+      placeholder='Select Exercise...'
     />
   )
 }
