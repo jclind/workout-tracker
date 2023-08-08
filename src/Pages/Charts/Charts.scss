@@ -1,4 +1,4 @@
-@import '../../../helpers.scss';
+@import '../../helpers.scss';
 
 .charts-page {
   display: flex;
@@ -6,12 +6,13 @@
   align-items: center;
   width: 100%;
   min-height: 50vh;
-  gap: 6rem;
+  gap: 3rem;
   .search-container {
     width: 90%;
     max-width: 350px;
     height: 100%;
     z-index: 10;
+    margin-top: 2rem;
     // .MuiAutocomplete-input {
     //   align-items: center;
     //   border: 1px solid $border-color;
@@ -23,6 +24,6 @@
   .chart-container {
     width: 90%;
     max-width: 500px;
-    height: 500px;
+    height: 200px;
   }
 }

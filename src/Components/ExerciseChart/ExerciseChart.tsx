@@ -24,6 +24,8 @@ import {
   getStartOfDayArrayByPeriod,
   getStepSize,
 } from '../../util/chartUtil'
+import { TailSpin } from 'react-loader-spinner'
+import { AiOutlineLineChart } from 'react-icons/ai'
 
 ChartJS.register(
   TimeScale, //Register timescale instead of category for X axis
@@ -47,6 +49,7 @@ type ExerciseChartProps = {
   timeSpan: TimePeriodType
   selectedExercise: ExerciseSelectType | null
   setTimeSpan: React.Dispatch<React.SetStateAction<TimePeriodType>>
+  loading: boolean
 }
 
 const ExerciseChart = ({
@@ -54,6 +57,7 @@ const ExerciseChart = ({
   timeSpan,
   selectedExercise,
   setTimeSpan,
+  loading,
 }: ExerciseChartProps) => {
   const { formattedData, yMin, yMax } = formatChartData(exerciseData)
   const dates = getStartOfDayArrayByPeriod(timeSpan)
@@ -96,7 +100,11 @@ const ExerciseChart = ({
   return (
     <>
       <div className='chart-head'>
-        <h4>{selectedExercise?.label} Chart</h4>
+        <h4>
+          {formattedData
+            ? `${selectedExercise?.label} Chart`
+            : 'Select Exercise...'}
+        </h4>
         <div className='time-range'>
           {timeSpanButtons.map(val => {
             return (
@@ -113,7 +121,29 @@ const ExerciseChart = ({
           })}
         </div>
       </div>
-      {data ? <Line data={data} options={options} className='chart' /> : null}
+      {loading ? (
+        <div className='no-chart-data chart-data-loading'>
+          <TailSpin
+            height='25'
+            width='25'
+            color={styles.secondary}
+            ariaLabel='loading'
+          />
+          <h4>Data Loading</h4>
+        </div>
+      ) : !selectedExercise ? (
+        <div className='no-chart-data chart'>
+          <AiOutlineLineChart className='icon' />
+          <h4>Exercise Data Shown Here</h4>
+        </div>
+      ) : formattedData ? (
+        <Line data={data} options={options} className='chart' />
+      ) : (
+        <div className='no-chart-data chart'>
+          <AiOutlineLineChart className='icon' />
+          <h4>No Data!</h4>
+        </div>
+      )}
     </>
   )
 }

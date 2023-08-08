@@ -1,19 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import {
-  getUniqueTitles,
-  queryChartExerciseData,
-} from '../../../services/tracker'
+import { getUniqueTitles, queryChartExerciseData } from '../../services/tracker'
 
 import './Charts.scss'
-import { stringArrToSelectArr } from '../../../util/stringArrToSelectArr'
-import ChartSelect from '../../ChartSelect/ChartSelect'
+import { stringArrToSelectArr } from '../../util/stringArrToSelectArr'
+import ChartSelect from '../../Components/ChartSelect/ChartSelect'
 import {
   ExerciseSelectType,
   ExercisesServerDataType,
   TimePeriodType,
-} from '../../../types'
-import ExerciseChart from '../../ExerciseChart/ExerciseChart'
-import { convertToTimeNumber } from '../../../util/chartUtil'
+} from '../../types'
+import ExerciseChart from '../../Components/ExerciseChart/ExerciseChart'
+import { convertToTimeNumber } from '../../util/chartUtil'
 
 const Charts = () => {
   const [selectedExercise, setSelectedExercise] =
@@ -25,6 +22,7 @@ const Charts = () => {
   const [exerciseData, setExerciseData] = useState<
     ExercisesServerDataType[] | null
   >(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     getUniqueTitles('exerciseTitles').then(res => {
@@ -37,6 +35,7 @@ const Charts = () => {
 
   useEffect(() => {
     if (selectedExercise) {
+      setLoading(true)
       queryChartExerciseData(
         selectedExercise.value,
         convertToTimeNumber(timeSpan)
@@ -46,6 +45,7 @@ const Charts = () => {
         } else {
           setExerciseData(null)
         }
+        setLoading(false)
       })
     } else {
       setExerciseData(null)
@@ -67,6 +67,7 @@ const Charts = () => {
           timeSpan={timeSpan}
           selectedExercise={selectedExercise}
           setTimeSpan={setTimeSpan}
+          loading={loading}
         />
       </div>
     </div>
