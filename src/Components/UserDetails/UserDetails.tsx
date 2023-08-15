@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import './UserDetails.scss'
-import { auth } from '../../services/firestore'
 import { AiOutlineUser } from 'react-icons/ai'
 import {
   getNumberOfTotalExercises,
   getNumberOfTotalWorkouts,
 } from '../../services/tracker'
 import { formatDateToMMMDDYYYY } from '../../util/dateUtil'
+import { UserProfileDataType } from '../../types'
 
-const UserDetails = () => {
+type UserDetailsProps = {
+  userData: UserProfileDataType
+}
+
+const UserDetails = ({ userData }: UserDetailsProps) => {
   const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null)
   const [totalExercises, setTotalExercises] = useState<number | null>(null)
 
-  const currUserAuth = auth.currentUser
-  const displayName = currUserAuth?.displayName
-  const profileURL = currUserAuth?.photoURL
-  const dateJoined = currUserAuth?.metadata.creationTime
-    ? new Date(currUserAuth?.metadata.creationTime)
-    : null
+  const { displayName, createdAt, photoUrl } = userData
+  console.log(photoUrl)
+  const dateJoined = new Date(createdAt)
 
   const handleRender = async () => {
     await getNumberOfTotalWorkouts().then(res => {
@@ -39,9 +40,9 @@ const UserDetails = () => {
   return (
     <div className='user-details'>
       <div className='profile-image-container'>
-        {profileURL ? (
+        {photoUrl ? (
           <img
-            src={profileURL}
+            src={photoUrl}
             alt={displayName || 'profile'}
             className='profile-image'
           />

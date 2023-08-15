@@ -33,6 +33,13 @@ export type WeightGroupType = {
   comment: string
 }
 
+export type UserProfileDataType = {
+  createdAt: number
+  displayName: string
+  photoUrl: string
+  username: string
+}
+
 export type ExerciseSelectType = { label: string; value: string }
 
 export type TimePeriodType =

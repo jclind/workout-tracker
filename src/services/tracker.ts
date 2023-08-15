@@ -25,6 +25,8 @@ import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
+import userProfileData from '../assets/save_file.json'
+import { addUsername } from './auth'
 
 export const addWorkout = async (
   name: string,
@@ -631,6 +633,27 @@ export const findUniqueExerciseTitlesFromCollection = async () => {
     await updateUniqueTitles('exerciseTitles', titles)
   }
 }
+
+// export const addUsersData = () => {
+//   const userProfileDataRef = collection(db, 'userProfileData')
+//   console.log(userProfileData)
+//   userProfileData.users.forEach(user => {
+//     const { displayName, photoUrl, localId, createdAt } = user
+//     const username =
+//       displayName.trim().split(' ').join('').toLowerCase() +
+//       createdAt.toString().slice(-7)
+//     addUsername(localId, username)
+//     const userProfileDataDoc = doc(userProfileDataRef, username)
+//     const userData = {
+//       displayName,
+//       photoUrl,
+//       username,
+//       createdAt: Number(createdAt),
+//     }
+//     setDoc(userProfileDataDoc, userData)
+//   })
+//   console.log('done')
+// }
 
 // export const updateUsersData = async () => {
 //   const userDataCollection = collection(db, 'usersData')

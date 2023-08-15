@@ -7,11 +7,13 @@ import {
   AiOutlineLineChart,
   AiOutlineUser,
 } from 'react-icons/ai'
+import { useUsername } from '../../App'
 
 const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const currPage = location.pathname.split('/').pop()
+  const { username } = useUsername()
 
   return (
     <nav>
@@ -28,7 +30,7 @@ const Nav = () => {
           className={`btn-no-styles account-btn ${
             currPage === 'account' ? 'active' : ''
           }`}
-          onClick={() => navigate('/account')}
+          onClick={() => navigate(`/user/${username}`)}
         >
           <AiOutlineUser className='icon' />
         </button>
