@@ -1,47 +1,29 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import './UserDetails.scss'
-import { auth } from '../../services/firestore'
 import { AiOutlineUser } from 'react-icons/ai'
-import {
-  getNumberOfTotalExercises,
-  getNumberOfTotalWorkouts,
-} from '../../services/tracker'
-import { formatDateToMMMDDYYYY } from '../../util/dateUtil'
 
-const UserDetails = () => {
-  const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null)
-  const [totalExercises, setTotalExercises] = useState<number | null>(null)
+import { UserProfileDataType } from '../../types'
 
-  const currUserAuth = auth.currentUser
-  const displayName = currUserAuth?.displayName
-  const profileURL = currUserAuth?.photoURL
-  const dateJoined = currUserAuth?.metadata.creationTime
-    ? new Date(currUserAuth?.metadata.creationTime)
-    : null
+type UserDetailsProps = {
+  userData: UserProfileDataType
+}
 
-  const handleRender = async () => {
-    await getNumberOfTotalWorkouts().then(res => {
-      if (res) {
-        setTotalWorkouts(res)
-      }
-    })
-    await getNumberOfTotalExercises().then(res => {
-      if (res) {
-        setTotalExercises(res)
-      }
-    })
-  }
-
-  useEffect(() => {
-    handleRender()
-  }, [])
+const UserDetails = ({ userData }: UserDetailsProps) => {
+  const {
+    displayName,
+    // createdAt,
+    photoUrl,
+    username,
+    totalWorkouts,
+    totalExercises,
+  } = userData
 
   return (
     <div className='user-details'>
       <div className='profile-image-container'>
-        {profileURL ? (
+        {photoUrl ? (
           <img
-            src={profileURL}
+            src={photoUrl}
             alt={displayName || 'profile'}
             className='profile-image'
           />
@@ -52,11 +34,7 @@ const UserDetails = () => {
         )}
       </div>
       <h3 className='display-name'>{displayName}</h3>
-      {dateJoined && (
-        <div className='date-joined'>
-          Joined {formatDateToMMMDDYYYY(dateJoined)}
-        </div>
-      )}
+      <div className='username'>@{username}</div>
       <div className='small-data'>
         <div className='item'>
           <div className='value'>{totalWorkouts}</div>

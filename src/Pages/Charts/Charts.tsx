@@ -11,6 +11,7 @@ import {
 } from '../../types'
 import ExerciseChart from '../../Components/ExerciseChart/ExerciseChart'
 import { convertToTimeNumber } from '../../util/chartUtil'
+import toast from 'react-hot-toast'
 
 const Charts = () => {
   const [selectedExercise, setSelectedExercise] =
@@ -39,14 +40,18 @@ const Charts = () => {
       queryChartExerciseData(
         selectedExercise.value,
         convertToTimeNumber(timeSpan)
-      ).then(res => {
-        if (res?.data) {
-          setExerciseData(res.data ?? null)
-        } else {
-          setExerciseData(null)
-        }
-        setLoading(false)
-      })
+      )
+        .then(res => {
+          if (res?.data) {
+            setExerciseData(res.data ?? null)
+          } else {
+            setExerciseData(null)
+          }
+          setLoading(false)
+        })
+        .catch((error: any) => {
+          toast.error(error, { position: 'bottom-center' })
+        })
     } else {
       setExerciseData(null)
     }

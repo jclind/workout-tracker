@@ -12,9 +12,19 @@
     overflow: hidden;
     margin-bottom: 1rem;
     .profile-image {
+      display: flex;
+      justify-content: center;
+      align-items: center;
       height: 100%;
       width: 100%;
     }
+  }
+  .username {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $tertiary-text;
+    margin-bottom: 1.5rem;
+    margin-top: 0.25rem;
   }
   .date-joined {
     font-size: 0.8rem;
