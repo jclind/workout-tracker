@@ -18,24 +18,26 @@ export const signupWithGoogle = async () => {
   const cred = await signInWithPopup(auth, provider)
   const user = cred.user
 
-  const { displayName, email, photoURL: photoUrl, uid } = user
-  const createdAt = user.metadata.creationTime
-    ? new Date(user.metadata.creationTime).getTime()
-    : new Date().getTime()
-  const name = displayName || email?.split('@')[0] || ''
-  const username = generateUsername(name, createdAt.toString())
-  await addUsername(uid, username)
+  if (user.metadata.creationTime === user.metadata.lastSignInTime) {
+    const { displayName, email, photoURL: photoUrl, uid } = user
+    const createdAt = user.metadata.creationTime
+      ? new Date(user.metadata.creationTime).getTime()
+      : new Date().getTime()
+    const name = displayName || email?.split('@')[0] || ''
+    const username = generateUsername(name, createdAt.toString())
+    await addUsername(uid, username)
 
-  const userProfileData = {
-    createdAt: Number(createdAt),
-    displayName,
-    photoUrl,
-    username,
-    totalWorkouts: 0,
-    totalExercises: 0,
+    const userProfileData = {
+      createdAt: Number(createdAt),
+      displayName,
+      photoUrl,
+      username,
+      totalWorkouts: 0,
+      totalExercises: 0,
+    }
+    const userProfileDocRef = doc(db, 'userProfileData', username)
+    await setDoc(userProfileDocRef, userProfileData)
   }
-  const userProfileDocRef = doc(db, 'userProfileData', username)
-  await setDoc(userProfileDocRef, userProfileData)
 }
 export const logout = async () => {
   await signOut(auth)
