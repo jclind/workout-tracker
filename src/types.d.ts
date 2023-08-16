@@ -45,6 +45,25 @@ export type UserProfileDataType = {
 
 export type ExerciseSelectType = { label: string; value: string }
 
+export type UserFriendsListType = {
+  [key: string]: {
+    dateFriendRequest: number
+    friendshipCreatedAt: number
+    status: FriendsStatusType
+  }
+}
+export type UserFriendsListArrType = {
+  username: string
+  dateFriendRequest: number
+  friendshipCreatedAt: number
+  status: FriendsStatusType
+}
+export type FriendsStatusType =
+  | 'friends'
+  | 'pending'
+  | 'requested'
+  | 'not_friends'
+
 export type TimePeriodType =
   | 'week'
   | 'month'
