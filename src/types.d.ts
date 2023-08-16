@@ -38,6 +38,8 @@ export type UserProfileDataType = {
   displayName: string
   photoUrl: string
   username: string
+  totalWorkouts: number
+  totalExercises: number
 }
 
 export type ExerciseSelectType = { label: string; value: string }

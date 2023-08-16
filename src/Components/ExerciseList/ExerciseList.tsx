@@ -15,6 +15,7 @@ import { WorkoutDataType } from '../../types'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import ViewAllExercisesModal from '../ViewAllExercisesModal/ViewAllExercisesModal'
 import { TailSpin } from 'react-loader-spinner'
+import { toast } from 'react-hot-toast'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -71,13 +72,17 @@ const ExerciseInputs = ({
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (exerciseStr) {
-        searchExercises(exerciseName.toLowerCase()).then(res => {
-          if (res) {
-            setSuggestedName(res.name)
-            const prevData = getDataFromExercise(res)
-            setPrevExerciseData(prevData)
-          }
-        })
+        searchExercises(exerciseName.toLowerCase())
+          .then(res => {
+            if (res) {
+              setSuggestedName(res.name)
+              const prevData = getDataFromExercise(res)
+              setPrevExerciseData(prevData)
+            }
+          })
+          .catch((error: any) => {
+            toast.error(error, { position: 'bottom-center' })
+          })
       }
     }, 300)
 
@@ -198,20 +203,28 @@ const ExerciseList = ({
     useState<React.RefObject<HTMLInputElement>>()
 
   const clearCurrWorkout = async () => {
-    await updateCurrentWorkout('', [generateNewExercise()])
+    await updateCurrentWorkout('', [generateNewExercise()]).catch(
+      (error: any) => {
+        toast.error(error, { position: 'bottom-center' })
+      }
+    )
     setWorkoutTitle('')
     setExercises([generateNewExercise()])
   }
 
   useEffect(() => {
     setLoading(true)
-    getCurrentWorkoutData().then(res => {
-      if (res) {
-        setExercises(res.exercises)
-        setWorkoutTitle(res.workoutTitle)
-      }
-      setLoading(false)
-    })
+    getCurrentWorkoutData()
+      .then(res => {
+        if (res) {
+          setExercises(res.exercises)
+          setWorkoutTitle(res.workoutTitle)
+        }
+        setLoading(false)
+      })
+      .catch((error: any) => {
+        toast.error(error, { position: 'bottom-center' })
+      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -222,7 +235,9 @@ const ExerciseList = ({
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (!loading && !addWorkoutLoading) {
-        updateCurrentWorkout(workoutTitle, exercises)
+        updateCurrentWorkout(workoutTitle, exercises).catch((error: any) => {
+          toast.error(error, { position: 'bottom-center' })
+        })
       }
     }, 1000)
 
@@ -263,7 +278,7 @@ const ExerciseList = ({
       })
       .catch((error: any) => {
         setAddWorkoutLoading(false)
-        throw new Error(error.message)
+        toast.error(error, { position: 'bottom-center' })
       })
   }
 

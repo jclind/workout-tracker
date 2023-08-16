@@ -1,11 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import './UserDetails.scss'
 import { AiOutlineUser } from 'react-icons/ai'
-import {
-  getNumberOfTotalExercises,
-  getNumberOfTotalWorkouts,
-} from '../../services/tracker'
-import { formatDateToMMMDDYYYY } from '../../util/dateUtil'
+
 import { UserProfileDataType } from '../../types'
 
 type UserDetailsProps = {
@@ -13,18 +9,14 @@ type UserDetailsProps = {
 }
 
 const UserDetails = ({ userData }: UserDetailsProps) => {
-  const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null)
-  const [totalExercises, setTotalExercises] = useState<number | null>(null)
-
-  const { displayName, createdAt, photoUrl, username } = userData
-  console.log(photoUrl)
-  const dateJoined = new Date(createdAt)
-
-  const handleRender = async () => {}
-
-  useEffect(() => {
-    handleRender()
-  }, [])
+  const {
+    displayName,
+    // createdAt,
+    photoUrl,
+    username,
+    totalWorkouts,
+    totalExercises,
+  } = userData
 
   return (
     <div className='user-details'>
@@ -43,11 +35,6 @@ const UserDetails = ({ userData }: UserDetailsProps) => {
       </div>
       <h3 className='display-name'>{displayName}</h3>
       <div className='username'>@{username}</div>
-      {/* {dateJoined && (
-        <div className='date-joined'>
-          Joined {formatDateToMMMDDYYYY(dateJoined)}
-        </div>
-      )} */}
       <div className='small-data'>
         <div className='item'>
           <div className='value'>{totalWorkouts}</div>

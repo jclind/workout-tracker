@@ -1,7 +1,6 @@
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, db } from './firestore'
 import {
-  addDoc,
   collection,
   deleteDoc,
   doc,

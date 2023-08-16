@@ -96,7 +96,6 @@ const ExerciseChart = ({
       },
     ],
   }
-  console.log(formattedData, yMin, yMax)
   return (
     <>
       <div className='chart-head'>

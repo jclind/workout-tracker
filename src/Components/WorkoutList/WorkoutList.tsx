@@ -199,10 +199,6 @@ const WorkoutList = ({
       })
   }
 
-  // useEffect(() => {
-  //   console.log(workoutList)
-  // }, [workoutList])
-
   if (workoutList.length <= 0 && !nameFilter) return null
 
   return (

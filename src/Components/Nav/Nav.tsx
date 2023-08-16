@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './Nav.scss'
 import { getUsername, logout } from '../../services/auth'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'react-hot-toast'
 import {
   AiOutlineHome,
   AiOutlineLineChart,
@@ -12,7 +13,17 @@ const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const currPage = location.pathname.split('/').pop()
-  const username = getUsername()
+  const [username, setUsername] = useState('')
+
+  useEffect(() => {
+    getUsername()
+      .then(res => {
+        setUsername(res || '')
+      })
+      .catch((error: any) => {
+        toast.error(error, { position: 'bottom-center' })
+      })
+  }, [])
 
   return (
     <nav>

@@ -26,8 +26,7 @@ import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
-import userProfileData from '../assets/save_file.json'
-import { addUsername, getUsername } from './auth'
+import { getUsername } from './auth'
 
 export const addWorkout = async (
   name: string,

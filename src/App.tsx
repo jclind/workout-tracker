@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
@@ -13,9 +13,6 @@ import Charts from './Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
 import Account from './Pages/Account/Account'
 import { PUMP_TRACK_LS_USERNAME } from './services/PUMP_TRACK_LS'
-// import { updateUsersData } from './services/tracker'
-// import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
-// import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
 Modal.setAppElement('#root')
 
@@ -36,16 +33,6 @@ function App() {
       }, 100)
     }
   }, [authLoading, loginLoading])
-
-  useEffect(() => {
-    if (user) {
-      // updateNumberOfDocuments()
-      // addUsersData()
-      // findUniqueWorkoutTitlesFromCollection()
-      // findUniqueExerciseTitlesFromCollection()
-      // console.log('HERE')
-    }
-  }, [user])
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
