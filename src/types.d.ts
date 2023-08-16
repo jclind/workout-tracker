@@ -40,6 +40,7 @@ export type UserProfileDataType = {
   username: string
   totalWorkouts: number
   totalExercises: number
+  lastActive?: number
 }
 
 export type ExerciseSelectType = { label: string; value: string }

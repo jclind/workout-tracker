@@ -27,13 +27,14 @@ export const signupWithGoogle = async () => {
     const username = generateUsername(name, createdAt.toString())
     await addUsername(uid, username)
 
-    const userProfileData = {
+    const userProfileData: UserProfileDataType = {
       createdAt: Number(createdAt),
-      displayName,
-      photoUrl,
+      displayName: displayName || '',
+      photoUrl: photoUrl || '',
       username,
       totalWorkouts: 0,
       totalExercises: 0,
+      lastActive: Number(createdAt),
     }
     const userProfileDocRef = doc(db, 'userProfileData', username)
     await setDoc(userProfileDocRef, userProfileData)
