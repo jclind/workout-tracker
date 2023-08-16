@@ -26,7 +26,7 @@ import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
-import { getUsername } from './auth'
+import { getUsername, updateUserActivity } from './auth'
 
 export const addWorkout = async (
   name: string,
@@ -83,6 +83,7 @@ export const addWorkout = async (
       await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
       await updateTotalWorkoutsAndExercises(1, parsedExercises.length)
+      await updateUserActivity()
 
       return workoutData
     } catch (error: any) {

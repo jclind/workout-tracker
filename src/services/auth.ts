@@ -8,6 +8,7 @@ import {
   getDocs,
   query,
   setDoc,
+  updateDoc,
   where,
 } from 'firebase/firestore'
 import { UserProfileDataType } from '../types'
@@ -108,4 +109,14 @@ export const getUIDFromUsername = async (username: string) => {
   const usernameRes = await getDoc(usernamesRef)
   if (!usernameRes.exists()) return null
   return usernameRes.data().uid ?? null
+}
+
+export const updateUserActivity = async () => {
+  const username = await getUsername()
+  if (username) {
+    const userProfileDocRef = doc(db, 'userProfileData', username)
+    await updateDoc(userProfileDocRef, {
+      lastActive: new Date().getTime(),
+    })
+  }
 }
