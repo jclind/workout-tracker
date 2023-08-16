@@ -7,6 +7,7 @@ import {
   getCountFromServer,
   getDoc,
   getDocs,
+  increment,
   limit,
   orderBy,
   query,
@@ -26,7 +27,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
 import userProfileData from '../assets/save_file.json'
-import { addUsername } from './auth'
+import { addUsername, getUsername } from './auth'
 
 export const addWorkout = async (
   name: string,
@@ -79,8 +80,10 @@ export const addWorkout = async (
           )
         }
       })
+
       await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
+      await updateTotalWorkoutsAndExercises(1, parsedExercises.length)
 
       return workoutData
     } catch (error: any) {
@@ -104,6 +107,9 @@ export const importWorkouts = async (
       const workoutTitles: string[] = []
       const exerciseTitles: string[] = []
 
+      let numWorkouts = 0
+      let numExercises = 0
+
       workouts.forEach(workout => {
         const workoutID = workout.id
         const workoutDate = workout.date
@@ -115,10 +121,13 @@ export const importWorkouts = async (
 
         promises.push(setDoc(workoutsRefDoc, workoutData))
 
+        numWorkouts++
+
         workout.exercises.forEach((exercise, idx) => {
           const { id, name } = exercise
           const exercisesRefDoc = doc(exercisesRef, id)
           if (name) {
+            numExercises++
             exerciseTitles.push(name)
             promises.push(
               setDoc(exercisesRefDoc, {
@@ -135,7 +144,32 @@ export const importWorkouts = async (
       await updateUniqueTitles('workoutTitles', workoutTitles)
       await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
+      await updateTotalWorkoutsAndExercises(numWorkouts, numExercises)
       return workouts
+    } catch (error: any) {
+      throw new Error(error.message)
+    }
+  }
+}
+export const deleteWorkout = async (workoutID: string) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
+      const exercisesRef = collection(userDataRef, 'exercises')
+
+      await deleteDoc(workoutDocRef)
+
+      const q = query(exercisesRef, where('workoutID', '==', workoutID))
+      const exercisesQuerySnapshot = await getDocs(q)
+      let numExercises = 0
+      exercisesQuerySnapshot.forEach(doc => {
+        numExercises--
+        deleteDoc(doc.ref)
+      })
+
+      await updateTotalWorkoutsAndExercises(-1, numExercises)
     } catch (error: any) {
       throw new Error(error.message)
     }
@@ -332,6 +366,19 @@ export const getNumberOfTotalExercises = async (): Promise<
     }
   }
 }
+export const updateTotalWorkoutsAndExercises = async (
+  numWorkouts: number,
+  numExercises: number
+) => {
+  const username = await getUsername()
+  if (username) {
+    const userProfileDataRef = doc(db, 'userProfileData', username)
+    await updateDoc(userProfileDataRef, {
+      totalWorkouts: increment(numWorkouts),
+      totalExercises: increment(numExercises),
+    })
+  }
+}
 
 export const updateExercise = async (
   exerciseID: string,
@@ -427,28 +474,6 @@ export const updateCurrentWorkout = async (
         { currentWorkout: currWorkoutData },
         { merge: true }
       )
-    } catch (error: any) {
-      throw new Error(error.message)
-    }
-  }
-}
-
-export const deleteWorkout = async (workoutID: string) => {
-  const uid = auth?.currentUser?.uid
-  if (uid) {
-    try {
-      const userDataRef = doc(db, 'usersData', uid)
-      const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
-      const exercisesRef = collection(userDataRef, 'exercises')
-
-      await deleteDoc(workoutDocRef)
-
-      const q = query(exercisesRef, where('workoutID', '==', workoutID))
-      const exercisesQuerySnapshot = await getDocs(q)
-
-      exercisesQuerySnapshot.forEach(doc => {
-        deleteDoc(doc.ref)
-      })
     } catch (error: any) {
       throw new Error(error.message)
     }
@@ -633,6 +658,40 @@ export const findUniqueExerciseTitlesFromCollection = async () => {
     await updateUniqueTitles('exerciseTitles', titles)
   }
 }
+
+// export const updateNumberOfDocuments = async () => {
+//   const userDataRef = collection(db, 'usersData')
+//   const userQ = query(userDataRef)
+//   const userQRes = await getDocs(userQ)
+//   const uidArr: string[] = []
+//   userQRes.forEach(doc => {
+//     uidArr.push(doc.id)
+//   })
+
+//   const addData = async (uid: string) => {
+//     const usernamesRef = collection(db, 'usernames')
+//     const q = query(usernamesRef, where('uid', '==', uid))
+//     const queryRes = await getDocs(q)
+//     let username: string = ''
+//     queryRes.forEach(doc => {
+//       username = doc.id
+//     })
+//     console.log(username)
+//     const userProfileDataRef = doc(db, 'userProfileData', username)
+//     const totalExercises = await getNumberOfTotalExercises(uid)
+//     const totalWorkouts = await getNumberOfTotalWorkouts(uid)
+//     await setDoc(
+//       userProfileDataRef,
+//       { totalExercises, totalWorkouts },
+//       { merge: true }
+//     )
+//   }
+//   uidArr.forEach(uid => {
+//     addData(uid)
+//   })
+
+//   // const exercisesRef = collection(userDataRef, 'exercises')
+// }
 
 // export const addUsersData = () => {
 //   const userProfileDataRef = collection(db, 'userProfileData')

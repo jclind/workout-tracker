@@ -1,19 +1,18 @@
 import React from 'react'
 import './Nav.scss'
-import { logout } from '../../services/auth'
+import { getUsername, logout } from '../../services/auth'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AiOutlineHome,
   AiOutlineLineChart,
   AiOutlineUser,
 } from 'react-icons/ai'
-import { useUsername } from '../../App'
 
 const Nav = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const currPage = location.pathname.split('/').pop()
-  const { username } = useUsername()
+  const username = getUsername()
 
   return (
     <nav>

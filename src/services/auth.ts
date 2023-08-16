@@ -12,10 +12,31 @@ import {
   where,
 } from 'firebase/firestore'
 import { UserProfileDataType } from '../types'
+import { PUMP_TRACK_LS_USERNAME } from './PUMP_TRACK_LS'
 
 export const signupWithGoogle = async () => {
   const provider = new GoogleAuthProvider()
-  await signInWithPopup(auth, provider)
+  const cred = await signInWithPopup(auth, provider)
+  const user = cred.user
+
+  const { displayName, email, photoURL: photoUrl, uid } = user
+  const createdAt = user.metadata.creationTime
+    ? new Date(user.metadata.creationTime).getTime()
+    : new Date().getTime()
+  const name = displayName || email?.split('@')[0] || ''
+  const username = generateUsername(name, createdAt.toString())
+  await addUsername(uid, username)
+
+  const userProfileData = {
+    createdAt: Number(createdAt),
+    displayName,
+    photoUrl,
+    username,
+    totalWorkouts: 0,
+    totalExercises: 0,
+  }
+  const userProfileDocRef = doc(db, 'userProfileData', username)
+  await setDoc(userProfileDocRef, userProfileData)
 }
 export const logout = async () => {
   await signOut(auth)
@@ -53,10 +74,19 @@ export const getUserData = async (
   if (!userDataRes.exists()) return null
   return userDataRes.data() as UserProfileDataType
 }
-
-export const getUsername = async () => {
+const generateUsername = (name: string, createdAt: string) => {
+  return name.trim().split(' ').join('').toLowerCase() + createdAt.slice(-7)
+}
+export const getUsername = async (): Promise<string | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
+    const localStorageData = localStorage.getItem(PUMP_TRACK_LS_USERNAME) || ''
+    const localStorageUsername = localStorageData
+      ? JSON.parse(localStorageData)[uid]
+      : null
+    if (localStorageUsername) {
+      return localStorageUsername
+    }
     const usernamesRef = collection(db, 'usernames')
     const q = query(usernamesRef, where('uid', '==', uid))
     const queryRes = await getDocs(q)
@@ -64,6 +94,16 @@ export const getUsername = async () => {
     queryRes.forEach(doc => {
       username = doc.id
     })
+    localStorage.setItem(
+      PUMP_TRACK_LS_USERNAME,
+      JSON.stringify({ uid: username })
+    )
     return username
   }
+}
+export const getUIDFromUsername = async (username: string) => {
+  const usernamesRef = doc(db, 'usernames', username)
+  const usernameRes = await getDoc(usernamesRef)
+  if (!usernameRes.exists()) return null
+  return usernameRes.data().uid ?? null
 }

@@ -16,22 +16,11 @@ const UserDetails = ({ userData }: UserDetailsProps) => {
   const [totalWorkouts, setTotalWorkouts] = useState<number | null>(null)
   const [totalExercises, setTotalExercises] = useState<number | null>(null)
 
-  const { displayName, createdAt, photoUrl } = userData
+  const { displayName, createdAt, photoUrl, username } = userData
   console.log(photoUrl)
   const dateJoined = new Date(createdAt)
 
-  const handleRender = async () => {
-    await getNumberOfTotalWorkouts().then(res => {
-      if (res) {
-        setTotalWorkouts(res)
-      }
-    })
-    await getNumberOfTotalExercises().then(res => {
-      if (res) {
-        setTotalExercises(res)
-      }
-    })
-  }
+  const handleRender = async () => {}
 
   useEffect(() => {
     handleRender()
@@ -53,11 +42,12 @@ const UserDetails = ({ userData }: UserDetailsProps) => {
         )}
       </div>
       <h3 className='display-name'>{displayName}</h3>
-      {dateJoined && (
+      <div className='username'>@{username}</div>
+      {/* {dateJoined && (
         <div className='date-joined'>
           Joined {formatDateToMMMDDYYYY(dateJoined)}
         </div>
-      )}
+      )} */}
       <div className='small-data'>
         <div className='item'>
           <div className='value'>{totalWorkouts}</div>

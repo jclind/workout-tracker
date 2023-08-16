@@ -12,22 +12,15 @@ import { Route, Routes } from 'react-router-dom'
 import Charts from './Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
 import Account from './Pages/Account/Account'
+import { PUMP_TRACK_LS_USERNAME } from './services/PUMP_TRACK_LS'
 // import { updateUsersData } from './services/tracker'
 // import { findUniqueExerciseTitlesFromCollection } from './services/tracker'
 // import { findUniqueWorkoutTitlesFromCollection } from './services/tracker'
 
 Modal.setAppElement('#root')
 
-const UsernameContext = createContext<{ username: string | null }>({
-  username: null,
-})
-export const useUsername = () => {
-  return useContext(UsernameContext)
-}
-
 function App() {
   const [user, setUser] = useState<User | null>(null)
-  const [username, setUsername] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
 
   const [loginLoading, setLoginLoading] = useState(false)
@@ -46,6 +39,7 @@ function App() {
 
   useEffect(() => {
     if (user) {
+      // updateNumberOfDocuments()
       // addUsersData()
       // findUniqueWorkoutTitlesFromCollection()
       // findUniqueExerciseTitlesFromCollection()
@@ -57,14 +51,11 @@ function App() {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
       if (userInstance) {
         getUsername().then(res => {
-          if (res) {
-            setUsername(res)
-          }
           setUser(userInstance)
         })
       } else {
         setUser(null)
-        setUsername(null)
+        localStorage.removeItem(PUMP_TRACK_LS_USERNAME)
       }
       setAuthLoading(false)
     })
@@ -86,62 +77,60 @@ function App() {
   }
 
   return (
-    <UsernameContext.Provider value={{ username }}>
-      <div className='App'>
-        <div
-          className={`loading-overlay ${
-            showLoadingOverlay ? 'visible' : 'hidden'
-          }`}
-        >
-          <div className='animation'>
-            <Lottie animationData={loadingAnimationData} />
-          </div>
+    <div className='App'>
+      <div
+        className={`loading-overlay ${
+          showLoadingOverlay ? 'visible' : 'hidden'
+        }`}
+      >
+        <div className='animation'>
+          <Lottie animationData={loadingAnimationData} />
         </div>
-        <Toaster />
-        {user ? (
-          <Routes>
-            <Route
-              path='/'
-              element={
-                <Layout>
-                  <Home
-                    user={user}
-                    setShowLoadingOverlay={setShowLoadingOverlay}
-                  />
-                </Layout>
-              }
-            />
-
-            <Route
-              path='/user/:username'
-              element={
-                <Layout>
-                  <Account />
-                </Layout>
-              }
-            />
-            <Route
-              path='/charts'
-              element={
-                <Layout>
-                  <Charts />
-                </Layout>
-              }
-            />
-          </Routes>
-        ) : (
-          <div className='login-container'>
-            <h1>Workout Tracker</h1>
-            <button
-              className='btn-no-styles google-signup-btn'
-              onClick={handleSignup}
-            >
-              <AiFillGoogleCircle className='icon' /> Sign In With Google
-            </button>
-          </div>
-        )}
       </div>
-    </UsernameContext.Provider>
+      <Toaster />
+      {user ? (
+        <Routes>
+          <Route
+            path='/'
+            element={
+              <Layout>
+                <Home
+                  user={user}
+                  setShowLoadingOverlay={setShowLoadingOverlay}
+                />
+              </Layout>
+            }
+          />
+
+          <Route
+            path='/user/:username'
+            element={
+              <Layout>
+                <Account />
+              </Layout>
+            }
+          />
+          <Route
+            path='/charts'
+            element={
+              <Layout>
+                <Charts />
+              </Layout>
+            }
+          />
+        </Routes>
+      ) : (
+        <div className='login-container'>
+          <h1>Workout Tracker</h1>
+          <button
+            className='btn-no-styles google-signup-btn'
+            onClick={handleSignup}
+          >
+            <AiFillGoogleCircle className='icon' /> Sign In With Google
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
