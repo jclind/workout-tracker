@@ -1,4 +1,44 @@
 @import '../../helpers.scss';
 
 .friends-container {
+  .friend-request {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: $secondary-background;
+    padding: 0.5rem;
+    border-radius: $border-radius;
+
+    .profile-picture-container {
+      height: 80px;
+      width: 80px;
+      margin-bottom: 0.5rem;
+      img {
+        object-fit: contain;
+        height: 100%;
+        width: 100%;
+        border-radius: 50%;
+      }
+    }
+    .display-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .username {
+      font-size: 0.8rem;
+      color: $tertiary-text;
+      font-weight: 600;
+    }
+    button.accept-request-btn {
+      background: $secondary;
+      width: 100%;
+      padding: 0.5rem 0;
+      color: $primary-background;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+  }
 }

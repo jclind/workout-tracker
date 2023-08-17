@@ -6,11 +6,7 @@ import { getUserData, getUsername } from '../../services/auth'
 import { FriendsStatusType, UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import FriendsList from '../../Components/FriendsList/FriendsList'
-import {
-  addFriend,
-  checkIfFriends,
-  getPendingFriendRequest,
-} from '../../services/friends'
+import { addFriend, checkIfFriends } from '../../services/friends'
 
 const Account = () => {
   const [userData, setUserData] = useState<UserProfileDataType | null>(null)
@@ -47,7 +43,7 @@ const Account = () => {
           setFriendshipStatus('not_friends')
         }
       })
-      getPendingFriendRequest()
+      // getPendingFriendRequests()
     }
   }, [currUserIsAuthor])
 

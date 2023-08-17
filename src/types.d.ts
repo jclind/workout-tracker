@@ -58,6 +58,9 @@ export type UserFriendsListArrType = {
   friendshipCreatedAt: number
   status: FriendsStatusType
 }
+export type CombinedFriendDataType = UserProfileDataType &
+  UserFriendsListArrType
+
 export type FriendsStatusType =
   | 'friends'
   | 'pending'

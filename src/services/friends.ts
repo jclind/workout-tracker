@@ -2,9 +2,11 @@ import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { getUsername } from './auth'
 import { auth, db } from './firestore'
 import {
+  CombinedFriendDataType,
   FriendsStatusType,
   UserFriendsListArrType,
   UserFriendsListType,
+  UserProfileDataType,
 } from '../types'
 
 export const getRecommendedFriendsList = () => {
@@ -55,9 +57,13 @@ export const addFriend = async (friendUsername: string) => {
   }
 }
 
-export const getPendingFriendRequests = async (options: {
-  returnUserData?: boolean
-}) => {
+export const getPendingFriendRequests = async <
+  B extends boolean | undefined
+>(options: {
+  returnUserData?: B
+}): Promise<
+  B extends true ? CombinedFriendDataType[] : UserFriendsListArrType[]
+> => {
   const currUsername = await getUsername()
   if (currUsername) {
     const userFriendsDocRef = doc(db, 'friends', currUsername)
@@ -73,20 +79,31 @@ export const getPendingFriendRequests = async (options: {
     const pendingRequests = userFriendsArr.filter(
       val => val.status === 'pending'
     )
-    if (options.returnUserData) {
-      // const promises: Promise<void>[] = []
-      const userProfileDataRef = collection(db, 'userProfileData')
-      const promises = pendingRequests.map(user => {
-        const username = user.username
-        const userProfileDataDocRef = doc(userProfileDataRef, username)
-        const userProfileDataSnapshot = await getDoc(userProfileDataDocRef)
-        const userProfileData = userProfileDataSnapshot.data()
-        return { ...user, userProfileData }
-      })
 
-      await Promise.all(promises)
+    if (options.returnUserData) {
+      const userProfileDataRef = collection(db, 'userProfileData')
+      const combinedUserData: CombinedFriendDataType[] = await Promise.all(
+        pendingRequests.map(
+          async (
+            user: UserFriendsListArrType
+          ): Promise<CombinedFriendDataType> => {
+            const username = user.username
+            const userProfileDataDocRef = doc(userProfileDataRef, username)
+            const userProfileDataSnapshot = await getDoc(userProfileDataDocRef)
+            const userProfileData =
+              userProfileDataSnapshot.data() as UserProfileDataType
+            const result = {
+              ...user,
+              ...userProfileData,
+            }
+            return result
+          }
+        )
+      )
+      return combinedUserData
+    } else {
+      return pendingRequests as any
     }
-    return pendingRequests
   }
-  return []
+  return [] as any
 }
