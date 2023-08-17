@@ -107,3 +107,26 @@ export const getPendingFriendRequests = async <
   }
   return [] as any
 }
+
+export const acceptFriendRequest = async (friendUsername: string) => {
+  const currUsername = await getUsername()
+  if (currUsername) {
+    const friendsDataDocRef = doc(db, 'friends', friendUsername)
+    const currUserDataDocRef = doc(db, 'friends', currUsername)
+
+    await setDoc(
+      friendsDataDocRef,
+      {
+        [currUsername]: 'friends' as FriendsStatusType,
+      },
+      { merge: true }
+    )
+    await setDoc(
+      currUserDataDocRef,
+      {
+        [friendUsername]: 'friends',
+      },
+      { merge: true }
+    )
+  }
+}
