@@ -26,7 +26,7 @@ import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
-import { getUsername, updateUserActivity } from './auth'
+import { updateUserActivity } from './auth'
 
 export const addWorkout = async (
   name: string,
@@ -370,9 +370,9 @@ export const updateTotalWorkoutsAndExercises = async (
   numWorkouts: number,
   numExercises: number
 ) => {
-  const username = await getUsername()
-  if (username) {
-    const userProfileDataRef = doc(db, 'userProfileData', username)
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userProfileDataRef = doc(db, 'userProfileData', uid)
     await updateDoc(userProfileDataRef, {
       totalWorkouts: increment(numWorkouts),
       totalExercises: increment(numExercises),

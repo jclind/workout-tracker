@@ -7,6 +7,7 @@ import { FriendsStatusType, UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import FriendsList from '../../Components/FriendsList/FriendsList'
 import { addFriend, checkIfFriends } from '../../services/friends'
+import FriendStatusButton from '../../Components/FriendStatusButton/FriendStatusButton'
 
 const Account = () => {
   const [userData, setUserData] = useState<UserProfileDataType | null>(null)
@@ -43,7 +44,6 @@ const Account = () => {
           setFriendshipStatus('not_friends')
         }
       })
-      // getPendingFriendRequests()
     }
   }, [currUserIsAuthor])
 
@@ -59,25 +59,12 @@ const Account = () => {
   return (
     <div className='account-page'>
       {userData && <UserDetails userData={userData} />}
-      {currUserIsAuthor === false && (
-        <>
-          {friendshipStatus === 'not_friends' ? (
-            <button
-              className='submit-btn add-friend-btn'
-              onClick={handleAddFriend}
-            >
-              Add Friend
-            </button>
-          ) : friendshipStatus === 'requested' ? (
-            <button className='submit-btn add-friend-btn'>
-              Accept Friend Request
-            </button>
-          ) : friendshipStatus === 'pending' ? (
-            <button className='submit-btn add-friend-btn pending'>
-              Pending
-            </button>
-          ) : null}
-        </>
+      {currUserIsAuthor === false && friendshipStatus && (
+        <FriendStatusButton
+          friendshipStatus={friendshipStatus}
+          setFriendshipStatus={setFriendshipStatus}
+          accountUsername={username}
+        />
       )}
 
       {currUserIsAuthor && <FriendsList />}

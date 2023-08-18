@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
-import {
-  acceptFriendRequest,
-  getPendingFriendRequests,
-} from '../../services/friends'
-import { CombinedFriendDataType, UserFriendsListArrType } from '../../types'
+import { acceptFriendRequest, getFriendRequests } from '../../services/friends'
+import { CombinedFriendDataType } from '../../types'
 import toast from 'react-hot-toast'
 
 type PendingFriendRequestProps = {
@@ -48,8 +45,9 @@ const FriendsList = () => {
     CombinedFriendDataType[]
   >([])
   useEffect(() => {
-    getPendingFriendRequests({ returnUserData: true }).then(res => {
+    getFriendRequests({ returnUserData: true }).then(res => {
       setPendingFriendRequests(res)
+      console.log(res)
     })
   }, [])
 

@@ -1,6 +1,7 @@
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'
 import { auth, db } from './firestore'
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -37,7 +38,7 @@ export const signupWithGoogle = async () => {
       totalExercises: 0,
       lastActive: Number(createdAt),
     }
-    const userProfileDocRef = doc(db, 'userProfileData', username)
+    const userProfileDocRef = doc(db, 'userProfileData', uid)
     await setDoc(userProfileDocRef, userProfileData)
   }
 }
@@ -72,7 +73,8 @@ export const updateUsername = async (uid: string, username: string) => {
 export const getUserData = async (
   username: string
 ): Promise<UserProfileDataType | null> => {
-  const userProfileDataRef = doc(db, 'userProfileData', username)
+  const uid = await getUIDFromUsername(username)
+  const userProfileDataRef = doc(db, 'userProfileData', uid)
   const userDataRes = await getDoc(userProfileDataRef)
   if (!userDataRes.exists()) return null
   return userDataRes.data() as UserProfileDataType
@@ -112,11 +114,34 @@ export const getUIDFromUsername = async (username: string) => {
 }
 
 export const updateUserActivity = async () => {
-  const username = await getUsername()
-  if (username) {
-    const userProfileDocRef = doc(db, 'userProfileData', username)
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userProfileDocRef = doc(db, 'userProfileData', uid)
     await updateDoc(userProfileDocRef, {
       lastActive: new Date().getTime(),
     })
   }
 }
+
+// export const changeUIDs = async () => {
+//   const uid = auth?.currentUser?.uid
+//   const currUsername = await getUsername()
+//   if (uid && currUsername) {
+//     const profilesRef = collection(db, 'userProfileData')
+//     const docsSnapshot = await getDocs(profilesRef)
+//     const dataArr: UserProfileDataType[] = []
+//     docsSnapshot.forEach(doc => {
+//       dataArr.push(doc.data() as UserProfileDataType)
+//       deleteDoc(doc.ref)
+//     })
+//     await Promise.all(
+//       dataArr.map(async user => {
+//         const username = user.username
+//         const uid = await getUIDFromUsername(username)
+
+//         const newDoc = doc(profilesRef, uid)
+//         await setDoc(newDoc, user)
+//       })
+//     )
+//   }
+// }

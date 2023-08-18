@@ -52,14 +52,27 @@ export type UserFriendsListType = {
     status: FriendsStatusType
   }
 }
-export type UserFriendsListArrType = {
-  username: string
-  dateFriendRequest: number
-  friendshipCreatedAt: number
-  status: FriendsStatusType
-}
+
 export type CombinedFriendDataType = UserProfileDataType &
   UserFriendsListArrType
+
+export type CombinedPendingFriendData = PendingFriendData & UserFriendsListType
+
+export type PendingFriendData = {
+  friendUID: string
+  pendingUsername: string
+  datePending: number
+}
+export type RequestedFriendData = {
+  friendUID: string
+  requestedUsername: string
+  dateRequested: number
+}
+export type FriendsData = {
+  friendUID: string
+  friendUsername: string
+  dateFriended: number
+}
 
 export type FriendsStatusType =
   | 'friends'
