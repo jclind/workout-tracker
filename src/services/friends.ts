@@ -118,8 +118,6 @@ export const acceptFriendRequest = async (friendUsername: string) => {
       const friendProfileRef = doc(db, 'userProfileData', friendUID)
       const friendPendingRef = doc(friendProfileRef, 'pending', uid)
       const friendPendingSnapshot = await getDoc(friendPendingRef)
-      console.log(currUserRequestedSnapshot.data())
-      console.log(friendPendingSnapshot.data())
       if (
         currUserRequestedSnapshot.exists() &&
         friendPendingSnapshot.exists()
@@ -132,7 +130,6 @@ export const acceptFriendRequest = async (friendUsername: string) => {
           dateFriended: date,
         }
         await setDoc(currUserFriendsRef, currUserFriendData)
-        console.log('3')
 
         const friendFriendsRef = doc(friendProfileRef, 'friends', uid)
         const friendFriendData: FriendsData = {
@@ -142,11 +139,8 @@ export const acceptFriendRequest = async (friendUsername: string) => {
         }
         await setDoc(friendFriendsRef, friendFriendData)
 
-        console.log('4')
         await deleteDoc(currUserRequestedRef)
-        console.log('5')
         await deleteDoc(friendPendingRef)
-        console.log('6')
       } else {
         throw new Error(
           'Friendship does not exist, please refresh and try again'

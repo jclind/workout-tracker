@@ -6,7 +6,7 @@ import { getUserData, getUsername } from '../../services/auth'
 import { FriendsStatusType, UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import FriendsList from '../../Components/FriendsList/FriendsList'
-import { addFriend, checkIfFriends } from '../../services/friends'
+import { checkIfFriends } from '../../services/friends'
 import FriendStatusButton from '../../Components/FriendStatusButton/FriendStatusButton'
 
 const Account = () => {
