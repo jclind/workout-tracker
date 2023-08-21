@@ -53,10 +53,8 @@ export type UserFriendsListType = {
   }
 }
 
-export type CombinedFriendDataType = UserProfileDataType &
-  UserFriendsListArrType
-
-export type CombinedPendingFriendData = PendingFriendData & UserFriendsListType
+export type CombinedRequestedFriendDataType = RequestedFriendData &
+  UserProfileDataType
 
 export type PendingFriendData = {
   friendUID: string

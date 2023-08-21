@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
 import { acceptFriendRequest, getFriendRequests } from '../../services/friends'
-import { CombinedFriendDataType } from '../../types'
+import { CombinedRequestedFriendDataType } from '../../types'
 import toast from 'react-hot-toast'
 
 type PendingFriendRequestProps = {
-  request: CombinedFriendDataType
+  request: CombinedRequestedFriendDataType
 }
 
 const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
@@ -42,20 +42,23 @@ const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
 
 const FriendsList = () => {
   const [pendingFriendRequests, setPendingFriendRequests] = useState<
-    CombinedFriendDataType[]
+    CombinedRequestedFriendDataType[]
   >([])
   useEffect(() => {
-    getFriendRequests({ returnUserData: true }).then(res => {
-      setPendingFriendRequests(res)
-      console.log(res)
-    })
+    getFriendRequests({ returnUserData: true })
+      .then(res => {
+        setPendingFriendRequests(res)
+      })
+      .catch((err: any) => {
+        toast.error(err, { position: 'bottom-center' })
+      })
   }, [])
 
   return (
     <div className='friends-container'>
       <div className='pending-friend-request-list'>
         {pendingFriendRequests.map(req => {
-          return <PendingFriendRequest request={req} />
+          return <PendingFriendRequest key={req.friendUID} request={req} />
         })}
       </div>
     </div>

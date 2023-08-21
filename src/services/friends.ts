@@ -8,18 +8,18 @@ import {
   orderBy,
   query,
   setDoc,
-  updateDoc,
 } from 'firebase/firestore'
 import { getUIDFromUsername, getUsername } from './auth'
 import { auth, db } from './firestore'
 import {
-  CombinedFriendDataType,
+  CombinedRequestedFriendDataType,
   FriendsData,
   FriendsStatusType,
   PendingFriendData,
   RequestedFriendData,
   UserProfileDataType,
 } from '../types'
+import { toast } from 'react-hot-toast'
 
 export const getRecommendedFriendsList = () => {
   const uid = auth?.currentUser?.uid
@@ -59,7 +59,9 @@ export const checkIfFriends = async (
 
       return 'not_friends'
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -69,25 +71,31 @@ export const addFriend = async (friendUsername: string) => {
   const currUsername = await getUsername()
   const friendUID = await getUIDFromUsername(friendUsername)
   if (uid && friendUID && currUsername) {
-    const date = new Date().getTime()
+    try {
+      const date = new Date().getTime()
 
-    const currUserProfileRef = doc(db, 'userProfileData', uid)
-    const currUserRequestedRef = doc(currUserProfileRef, 'pending', friendUID)
-    const pendingData: PendingFriendData = {
-      friendUID: friendUID,
-      pendingUsername: friendUsername,
-      datePending: date,
-    }
-    await setDoc(currUserRequestedRef, pendingData)
+      const currUserProfileRef = doc(db, 'userProfileData', uid)
+      const currUserRequestedRef = doc(currUserProfileRef, 'pending', friendUID)
+      const pendingData: PendingFriendData = {
+        friendUID: friendUID,
+        pendingUsername: friendUsername,
+        datePending: date,
+      }
+      await setDoc(currUserRequestedRef, pendingData)
 
-    const friendProfileRef = doc(db, 'userProfileData', friendUID)
-    const friendPendingRequestRef = doc(friendProfileRef, 'requested', uid)
-    const requestedData: RequestedFriendData = {
-      friendUID: uid,
-      requestedUsername: currUsername,
-      dateRequested: date,
+      const friendProfileRef = doc(db, 'userProfileData', friendUID)
+      const friendPendingRequestRef = doc(friendProfileRef, 'requested', uid)
+      const requestedData: RequestedFriendData = {
+        friendUID: uid,
+        requestedUsername: currUsername,
+        dateRequested: date,
+      }
+      await setDoc(friendPendingRequestRef, requestedData)
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
-    await setDoc(friendPendingRequestRef, requestedData)
   }
 }
 
@@ -95,20 +103,27 @@ export const acceptFriendRequest = async (friendUsername: string) => {
   const uid = auth?.currentUser?.uid
   const currUsername = await getUsername()
   const friendUID = await getUIDFromUsername(friendUsername)
+
   if (uid && friendUID && currUsername) {
     try {
       const currUserProfileRef = doc(db, 'userProfileData', uid)
-      const currUserPendingRef = doc(currUserProfileRef, 'pending', friendUID)
-      const currUserPendingSnapshot = await getDoc(currUserPendingRef)
+      const currUserRequestedRef = doc(
+        currUserProfileRef,
+        'requested',
+        friendUID
+      )
+      const currUserRequestedSnapshot = await getDoc(currUserRequestedRef)
 
       const friendProfileRef = doc(db, 'userProfileData', friendUID)
-      const friendRequestedRef = doc(friendProfileRef, 'requested', uid)
-      const friendRequestedSnapshot = await getDoc(friendRequestedRef)
-
+      const friendPendingRef = doc(friendProfileRef, 'pending', uid)
+      const friendPendingSnapshot = await getDoc(friendPendingRef)
+      console.log(currUserRequestedSnapshot.data())
+      console.log(friendPendingSnapshot.data())
       if (
-        currUserPendingSnapshot.exists() &&
-        friendRequestedSnapshot.exists()
+        currUserRequestedSnapshot.exists() &&
+        friendPendingSnapshot.exists()
       ) {
+        console.log('2')
         const date = new Date().getTime()
         const currUserFriendsRef = doc(currUserProfileRef, 'friends', friendUID)
         const currUserFriendData: FriendsData = {
@@ -117,6 +132,7 @@ export const acceptFriendRequest = async (friendUsername: string) => {
           dateFriended: date,
         }
         await setDoc(currUserFriendsRef, currUserFriendData)
+        console.log('3')
 
         const friendFriendsRef = doc(friendProfileRef, 'friends', uid)
         const friendFriendData: FriendsData = {
@@ -126,15 +142,20 @@ export const acceptFriendRequest = async (friendUsername: string) => {
         }
         await setDoc(friendFriendsRef, friendFriendData)
 
-        await deleteDoc(currUserPendingRef)
-        await deleteDoc(friendRequestedRef)
+        console.log('4')
+        await deleteDoc(currUserRequestedRef)
+        console.log('5')
+        await deleteDoc(friendPendingRef)
+        console.log('6')
       } else {
         throw new Error(
           'Friendship does not exist, please refresh and try again'
         )
       }
     } catch (error: any) {
-      throw new Error(error.message || error)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -144,47 +165,55 @@ export const getFriendRequests = async <
 >(options: {
   returnUserData?: B
 }): Promise<
-  B extends true ? CombinedFriendDataType[] : PendingFriendData[]
+  B extends true ? CombinedRequestedFriendDataType[] : RequestedFriendData[]
 > => {
   const uid = auth?.currentUser?.uid
-  console.log('here')
   if (uid) {
-    console.log('here 2')
-    const userProfileRef = doc(db, 'userProfileData', uid)
-    const userFriendRequestsRef = collection(userProfileRef, 'requested')
-    const q = query(
-      userFriendRequestsRef,
-      orderBy('dateRequested', 'desc'),
-      limit(20)
-    )
-    const querySnapshot = await getDocs(q)
-    const users: PendingFriendData[] = []
-    querySnapshot.forEach(doc => {
-      users.push(doc.data() as PendingFriendData)
-    })
-    console.log('here 4', users)
-
-    if (options.returnUserData) {
-      const userProfileDataRef = collection(db, 'userProfileData')
-      const combinedUserData: CombinedFriendDataType[] = await Promise.all(
-        users.map(
-          async (user: PendingFriendData): Promise<CombinedFriendDataType> => {
-            const username = user.pendingUsername
-            const userProfileDataDocRef = doc(userProfileDataRef, username)
-            const userProfileDataSnapshot = await getDoc(userProfileDataDocRef)
-            const userProfileData =
-              userProfileDataSnapshot.data() as UserProfileDataType
-            const result = {
-              ...user,
-              ...userProfileData,
-            }
-            return result
-          }
-        )
+    try {
+      const userProfileRef = doc(db, 'userProfileData', uid)
+      const userFriendRequestsRef = collection(userProfileRef, 'requested')
+      const q = query(
+        userFriendRequestsRef,
+        orderBy('dateRequested', 'desc'),
+        limit(20)
       )
-      return combinedUserData
-    } else {
-      return users
+      const querySnapshot = await getDocs(q)
+      const users: RequestedFriendData[] = []
+      querySnapshot.forEach(doc => {
+        users.push(doc.data() as RequestedFriendData)
+      })
+
+      if (options.returnUserData) {
+        const userProfileDataRef = collection(db, 'userProfileData')
+        const combinedUserData: CombinedRequestedFriendDataType[] =
+          await Promise.all(
+            users.map(
+              async (
+                user: RequestedFriendData
+              ): Promise<CombinedRequestedFriendDataType> => {
+                const friendUID = user.friendUID
+                const userProfileDataDocRef = doc(userProfileDataRef, friendUID)
+                const userProfileDataSnapshot = await getDoc(
+                  userProfileDataDocRef
+                )
+                const userProfileData =
+                  userProfileDataSnapshot.data() as UserProfileDataType
+                const result: CombinedRequestedFriendDataType = {
+                  ...user,
+                  ...userProfileData,
+                }
+                return result
+              }
+            )
+          )
+        return combinedUserData
+      } else {
+        return users as any
+      }
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
   return []
