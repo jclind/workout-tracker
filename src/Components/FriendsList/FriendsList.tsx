@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
-import { acceptFriendRequest, getFriendRequests } from '../../services/friends'
-import { CombinedRequestedFriendDataType } from '../../types'
+import {
+  acceptFriendRequest,
+  getFriendRequests,
+  getFriends,
+} from '../../services/friends'
+import {
+  CombinedFriendsDataType,
+  CombinedRequestedFriendDataType,
+} from '../../types'
 import toast from 'react-hot-toast'
 
 type PendingFriendRequestProps = {
@@ -44,6 +51,7 @@ const FriendsList = () => {
   const [pendingFriendRequests, setPendingFriendRequests] = useState<
     CombinedRequestedFriendDataType[]
   >([])
+  const [friendsList, setFriendsList] = useState<CombinedFriendsDataType[]>([])
   useEffect(() => {
     getFriendRequests({ returnUserData: true })
       .then(res => {
@@ -52,6 +60,12 @@ const FriendsList = () => {
       .catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
       })
+    getFriends({ returnUserData: true }).then(res => {
+      if (res) {
+        // !!! fix
+        setFriendsList([])
+      }
+    })
   }, [])
 
   return (
@@ -59,6 +73,20 @@ const FriendsList = () => {
       <div className='pending-friend-request-list'>
         {pendingFriendRequests.map(req => {
           return <PendingFriendRequest key={req.friendUID} request={req} />
+        })}
+      </div>
+      <div className='friends-list'>
+        {friendsList.map(friend => {
+          const { photoUrl, displayName, username } = friend
+          return (
+            <div className='friend-request'>
+              <div className='profile-picture-container'>
+                <img src={photoUrl} alt={displayName} />
+              </div>
+              <div className='display-name'>{displayName}</div>
+              <div className='username'>@{username}</div>
+            </div>
+          )
         })}
       </div>
     </div>

@@ -71,6 +71,7 @@ export type FriendsData = {
   friendUsername: string
   dateFriended: number
 }
+export type CombinedFriendsDataType = FriendsData & UserProfileDataType
 
 export type FriendsStatusType =
   | 'friends'

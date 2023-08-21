@@ -12,6 +12,7 @@ import {
 import { getUIDFromUsername, getUsername } from './auth'
 import { auth, db } from './firestore'
 import {
+  CombinedFriendsDataType,
   CombinedRequestedFriendDataType,
   FriendsData,
   FriendsStatusType,
@@ -123,7 +124,6 @@ export const acceptFriendRequest = async (friendUsername: string) => {
         currUserRequestedSnapshot.exists() &&
         friendPendingSnapshot.exists()
       ) {
-        console.log('2')
         const date = new Date().getTime()
         const currUserFriendsRef = doc(currUserProfileRef, 'friends', friendUID)
         const currUserFriendData: FriendsData = {
@@ -216,6 +216,60 @@ export const getFriendRequests = async <
       toast.error(message, { position: 'bottom-center' })
     }
   }
+  return []
+}
+
+export const getFriends = async <B extends boolean | undefined>(options: {
+  returnUserData?: B
+}): Promise<B extends true ? CombinedFriendsDataType[] : FriendsData[]> => {
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const userProfileRef = doc(db, 'userProfileData', uid)
+      const userFriendsRef = collection(userProfileRef, 'friends')
+      const q = query(
+        userFriendsRef,
+        orderBy('dateFriended', 'desc'),
+        limit(20)
+      )
+      const userFriendsSnapshot = await getDocs(q)
+
+      const friends: FriendsData[] = []
+      userFriendsSnapshot.forEach(doc => {
+        friends.push(doc.data() as FriendsData)
+      })
+
+      if (options.returnUserData) {
+        const userProfileDataRef = collection(db, 'userProfileData')
+        const combinedUserData: CombinedFriendsDataType[] = await Promise.all(
+          friends.map(
+            async (friend: FriendsData): Promise<CombinedFriendsDataType> => {
+              const friendUID = friend.friendUID
+              const userProfileDataDocRef = doc(userProfileDataRef, friendUID)
+              const userProfileDataSnapshot = await getDoc(
+                userProfileDataDocRef
+              )
+              const userProfileData =
+                userProfileDataSnapshot.data() as UserProfileDataType
+              const result: CombinedFriendsDataType = {
+                ...friend,
+                ...userProfileData,
+              }
+              return result
+            }
+          )
+        )
+        return combinedUserData
+      } else {
+        return friends as any
+      }
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(message)
+    toast.error(message, { position: 'bottom-center' })
+  }
+
   return []
 }
 
