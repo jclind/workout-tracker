@@ -1,8 +1,96 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
+import {
+  acceptFriendRequest,
+  getFriendRequests,
+  getFriends,
+} from '../../services/friends'
+import {
+  CombinedFriendsDataType,
+  CombinedRequestedFriendDataType,
+} from '../../types'
+import toast from 'react-hot-toast'
+
+type PendingFriendRequestProps = {
+  request: CombinedRequestedFriendDataType
+}
+
+const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
+  const [accepted, setAccepted] = useState(false)
+
+  const { displayName, photoUrl, username } = request
+
+  const handleAcceptRequest = () => {
+    setAccepted(true)
+    acceptFriendRequest(username).catch((err: any) => {
+      toast.error(err, { position: 'bottom-center' })
+      setAccepted(false)
+    })
+  }
+  return (
+    <div className='friend-request'>
+      <div className='profile-picture-container'>
+        <img src={photoUrl} alt={displayName} />
+      </div>
+      <div className='display-name'>{displayName}</div>
+      <div className='username'>@{username}</div>
+      <button
+        className={`accept-request-btn btn-no-styles ${
+          accepted ? 'accepted' : ''
+        }`}
+        disabled={accepted}
+        onClick={handleAcceptRequest}
+      >
+        {accepted ? 'Accepted' : 'Accept'}
+      </button>
+    </div>
+  )
+}
 
 const FriendsList = () => {
-  return <div className='friends-container'>FriendsList</div>
+  const [pendingFriendRequests, setPendingFriendRequests] = useState<
+    CombinedRequestedFriendDataType[]
+  >([])
+  const [friendsList, setFriendsList] = useState<CombinedFriendsDataType[]>([])
+  useEffect(() => {
+    getFriendRequests({ returnUserData: true })
+      .then(res => {
+        setPendingFriendRequests(res)
+      })
+      .catch((err: any) => {
+        toast.error(err, { position: 'bottom-center' })
+      })
+    getFriends({ returnUserData: true }).then(res => {
+      if (res) {
+        // !!! fix
+        setFriendsList([])
+      }
+    })
+  }, [])
+
+  return (
+    <div className='friends-container'>
+      <div className='pending-friend-request-list'>
+        {pendingFriendRequests.map(req => {
+          return <PendingFriendRequest key={req.friendUID} request={req} />
+        })}
+      </div>
+      <div className='friends-list'>
+        {friendsList.map(friend => {
+          const { photoUrl, displayName, username } = friend
+          return (
+            <div className='friend-request'>
+              <div className='profile-picture-container'>
+                <img src={photoUrl} alt={displayName} />
+              </div>
+              <div className='display-name'>{displayName}</div>
+              <div className='username'>@{username}</div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export default FriendsList

@@ -1,1 +1,15 @@
 @import '../../helpers.scss';
+
+.account-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2rem;
+  button.add-friend-btn.pending {
+    outline: 1px solid $border-color;
+    color: $border-color;
+    background: none;
+
+    // filter: brightness(50%);
+  }
+}

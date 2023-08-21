@@ -192,8 +192,8 @@ const WorkoutList = ({
         setMoreLoading(false)
       })
       .catch((error: any) => {
-        toast.error(error.message || error)
         console.log(error)
+        toast.error(error.message || error)
         setLoading(false)
         setMoreLoading(false)
       })

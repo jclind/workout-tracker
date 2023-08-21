@@ -81,6 +81,7 @@ const ExerciseInputs = ({
             }
           })
           .catch((error: any) => {
+            console.log(error)
             toast.error(error, { position: 'bottom-center' })
           })
       }
@@ -277,6 +278,7 @@ const ExerciseList = ({
         setWorkoutList(prev => [workoutData, ...prev])
       })
       .catch((error: any) => {
+        console.log(error)
         setAddWorkoutLoading(false)
         toast.error(error, { position: 'bottom-center' })
       })

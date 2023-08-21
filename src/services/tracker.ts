@@ -26,7 +26,8 @@ import { auth, db } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
-import { getUsername } from './auth'
+import { updateUserActivity } from './auth'
+import toast from 'react-hot-toast'
 
 export const addWorkout = async (
   name: string,
@@ -83,10 +84,13 @@ export const addWorkout = async (
       await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
       await updateTotalWorkoutsAndExercises(1, parsedExercises.length)
+      await updateUserActivity()
 
       return workoutData
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -146,7 +150,9 @@ export const importWorkouts = async (
       await updateTotalWorkoutsAndExercises(numWorkouts, numExercises)
       return workouts
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -170,7 +176,9 @@ export const deleteWorkout = async (workoutID: string) => {
 
       await updateTotalWorkoutsAndExercises(-1, numExercises)
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -180,25 +188,31 @@ export const searchExercises = async (
 ): Promise<ExerciseDataType | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
-    const userDataRef = doc(db, 'usersData', uid)
-    const exercisesRef = collection(userDataRef, 'exercises')
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
 
-    const q = query(
-      exercisesRef,
-      where('name', '>=', queryText),
-      where('name', '<=', queryText + '\uf8ff'),
-      orderBy('name'),
-      orderBy('workoutDate', 'desc'),
-      limit(1)
-    )
+      const q = query(
+        exercisesRef,
+        where('name', '>=', queryText),
+        where('name', '<=', queryText + '\uf8ff'),
+        orderBy('name'),
+        orderBy('workoutDate', 'desc'),
+        limit(1)
+      )
 
-    const dataArr: ExerciseDataType[] = []
-    const querySnapshot = await getDocs(q)
-    querySnapshot.forEach(doc => {
-      dataArr.push(doc.data() as ExerciseDataType)
-    })
+      const dataArr: ExerciseDataType[] = []
+      const querySnapshot = await getDocs(q)
+      querySnapshot.forEach(doc => {
+        dataArr.push(doc.data() as ExerciseDataType)
+      })
 
-    return dataArr[0]
+      return dataArr[0]
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
+    }
   }
 }
 
@@ -220,7 +234,9 @@ export const getUniqueTitles = async (
       })
       return sortedTitles
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -232,41 +248,47 @@ export const queryAllSingleExercise = async (
 ) => {
   const uid = auth?.currentUser?.uid
   if (uid) {
-    const userDataRef = doc(db, 'usersData', uid)
-    const exercisesRef = collection(userDataRef, 'exercises')
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
 
-    let q
-    if (lastDoc) {
-      q = query(
+      let q
+      if (lastDoc) {
+        q = query(
+          exercisesRef,
+          where('name', '==', exerciseName.toLowerCase()),
+          orderBy('workoutDate', 'desc'),
+          startAfter(lastDoc),
+          limit(resultsPerPage)
+        )
+      } else {
+        q = query(
+          exercisesRef,
+          where('name', '==', exerciseName.toLowerCase()),
+          orderBy('workoutDate', 'desc'),
+          limit(resultsPerPage)
+        )
+      }
+      const countQuery = query(
         exercisesRef,
-        where('name', '==', exerciseName.toLowerCase()),
-        orderBy('workoutDate', 'desc'),
-        startAfter(lastDoc),
-        limit(resultsPerPage)
+        where('name', '==', exerciseName.toLowerCase())
       )
-    } else {
-      q = query(
-        exercisesRef,
-        where('name', '==', exerciseName.toLowerCase()),
-        orderBy('workoutDate', 'desc'),
-        limit(resultsPerPage)
-      )
+      const totalResultsSnapshot = await getCountFromServer(countQuery)
+      const totalResults = totalResultsSnapshot.data().count
+
+      const results: ExercisesServerDataType[] = []
+      const querySnapshot = await getDocs(q)
+      const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
+      querySnapshot.forEach(doc => {
+        results.push(doc.data() as ExercisesServerDataType)
+      })
+
+      return { data: results, lastDoc: newLastDoc, totalResults }
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
-    const countQuery = query(
-      exercisesRef,
-      where('name', '==', exerciseName.toLowerCase())
-    )
-    const totalResultsSnapshot = await getCountFromServer(countQuery)
-    const totalResults = totalResultsSnapshot.data().count
-
-    const results: ExercisesServerDataType[] = []
-    const querySnapshot = await getDocs(q)
-    const newLastDoc = querySnapshot.docs[querySnapshot.docs.length - 1]
-    querySnapshot.forEach(doc => {
-      results.push(doc.data() as ExercisesServerDataType)
-    })
-
-    return { data: results, lastDoc: newLastDoc, totalResults }
   }
 }
 export const queryChartExerciseData = async (
@@ -275,24 +297,30 @@ export const queryChartExerciseData = async (
 ): Promise<{ data: ExercisesServerDataType[] } | undefined> => {
   const uid = auth?.currentUser?.uid
   if (uid) {
-    const userDataRef = doc(db, 'usersData', uid)
-    const exercisesRef = collection(userDataRef, 'exercises')
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
 
-    const q = query(
-      exercisesRef,
-      where('name', '==', exerciseName.toLowerCase()),
-      where('workoutDate', '>=', earliestDate),
-      orderBy('workoutDate', 'desc'),
-      limit(100)
-    )
+      const q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        where('workoutDate', '>=', earliestDate),
+        orderBy('workoutDate', 'desc'),
+        limit(100)
+      )
 
-    const results: ExercisesServerDataType[] = []
-    const querySnapshot = await getDocs(q)
-    querySnapshot.forEach(doc => {
-      results.push(doc.data() as ExercisesServerDataType)
-    })
+      const results: ExercisesServerDataType[] = []
+      const querySnapshot = await getDocs(q)
+      querySnapshot.forEach(doc => {
+        results.push(doc.data() as ExercisesServerDataType)
+      })
 
-    return { data: results }
+      return { data: results }
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
+    }
   }
 }
 
@@ -329,7 +357,9 @@ export const getWorkouts = async (
 
       return { data: workouts, lastDoc: newLastDoc, totalResults }
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -345,7 +375,9 @@ export const getNumberOfTotalWorkouts = async (): Promise<
       const totalResults = totalResultsSnapshot.data().count
       return totalResults
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -361,7 +393,9 @@ export const getNumberOfTotalExercises = async (): Promise<
       const totalResults = totalResultsSnapshot.data().count
       return totalResults
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -369,9 +403,9 @@ export const updateTotalWorkoutsAndExercises = async (
   numWorkouts: number,
   numExercises: number
 ) => {
-  const username = await getUsername()
-  if (username) {
-    const userProfileDataRef = doc(db, 'userProfileData', username)
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const userProfileDataRef = doc(db, 'userProfileData', uid)
     await updateDoc(userProfileDataRef, {
       totalWorkouts: increment(numWorkouts),
       totalExercises: increment(numExercises),
@@ -414,7 +448,9 @@ export const updateExercise = async (
         originalExerciseName
       )
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -437,7 +473,9 @@ export const updateWorkout = async (
         await updateUniqueTitles('workoutTitles', addedTitle, removedTitle)
       }
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -452,7 +490,9 @@ export const getCurrentWorkoutData = async () => {
       const data = result.data()?.currentWorkout as CurrentWorkoutType
       return data
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -474,7 +514,9 @@ export const updateCurrentWorkout = async (
         { merge: true }
       )
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }
@@ -482,25 +524,31 @@ export const updateCurrentWorkout = async (
 export const modifyData = async () => {
   const uid = auth?.currentUser?.uid
   if (uid) {
-    const userDataRef = doc(db, 'usersData', uid)
-    const workoutsRef = collection(userDataRef, 'workouts')
-    const exercisesRef = collection(userDataRef, 'exercises')
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const workoutsRef = collection(userDataRef, 'workouts')
+      const exercisesRef = collection(userDataRef, 'exercises')
 
-    const exercisesQ = query(exercisesRef)
+      const exercisesQ = query(exercisesRef)
 
-    const exercisesQuerySnapshot = await getDocs(exercisesQ)
+      const exercisesQuerySnapshot = await getDocs(exercisesQ)
 
-    exercisesQuerySnapshot.forEach(doc => {
-      // deleteDoc(doc.ref)
-    })
+      exercisesQuerySnapshot.forEach(doc => {
+        // deleteDoc(doc.ref)
+      })
 
-    const workoutsQ = query(workoutsRef)
+      const workoutsQ = query(workoutsRef)
 
-    const workoutsQuerySnapshot = await getDocs(workoutsQ)
+      const workoutsQuerySnapshot = await getDocs(workoutsQ)
 
-    workoutsQuerySnapshot.forEach(doc => {
-      // deleteDoc(doc.ref)
-    })
+      workoutsQuerySnapshot.forEach(doc => {
+        // deleteDoc(doc.ref)
+      })
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
+    }
   }
 }
 
@@ -548,7 +596,9 @@ export const updateUniqueTitles = async (
         [field]: filteredTitles,
       })
     } catch (error: any) {
-      throw new Error(error.message)
+      const message = error.message || error
+      console.log(message)
+      toast.error(message, { position: 'bottom-center' })
     }
   }
 }

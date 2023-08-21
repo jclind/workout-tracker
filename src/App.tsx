@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
-import { getUsername, signupWithGoogle } from './services/auth'
+import {
+  getUsername,
+  signupWithGoogle,
+  updateUserActivity,
+} from './services/auth'
 import { User } from 'firebase/auth'
 import toast, { Toaster } from 'react-hot-toast'
 import Lottie from 'lottie-react'
@@ -37,8 +41,9 @@ function App() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(userInstance => {
       if (userInstance) {
-        getUsername().then(res => {
+        getUsername().then(() => {
           setUser(userInstance)
+          updateUserActivity()
         })
       } else {
         setUser(null)
