@@ -2,12 +2,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
   getDocs,
   limit,
   orderBy,
   query,
   setDoc,
+  startAfter,
 } from 'firebase/firestore'
 import { getUIDFromUsername, getUsername } from './auth'
 import { auth, db } from './firestore'
@@ -29,11 +31,16 @@ export const getRecommendedFriendsList = () => {
 }
 
 export const checkIfFriends = async (
-  friendUsername: string
+  friendUsername: string | null = null,
+  friendUIDInput: string | null = null
 ): Promise<FriendsStatusType | undefined> => {
   const currUsername = await getUsername()
   const uid = auth?.currentUser?.uid
-  const friendUID = await getUIDFromUsername(friendUsername)
+  const friendUID = friendUIDInput
+    ? friendUIDInput
+    : friendUsername
+    ? await getUIDFromUsername(friendUsername)
+    : null
   if (uid && friendUID && currUsername) {
     try {
       const currUserProfileRef = doc(db, 'userProfileData', uid)
@@ -265,6 +272,77 @@ export const getFriends = async <B extends boolean | undefined>(options: {
   }
 
   return []
+}
+
+export const getNumberOfFriends = async (username: string | null = null) => {
+  try {
+    const uid = username
+      ? await getUIDFromUsername(username)
+      : auth?.currentUser?.uid
+    if (uid) {
+      const profileRef = doc(db, 'userProfileData', uid)
+      const friendsRef = collection(profileRef, 'friends')
+      const numberOfFriendsRes = await getCountFromServer(friendsRef)
+      const numberOfFriends = numberOfFriendsRes.data().count
+
+      return numberOfFriends
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(message)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
+
+export const getSuggestedFriends = async () => {
+  try {
+    const currUserUID = auth?.currentUser?.uid
+    if (currUserUID) {
+      const profilesCollection = collection(db, 'userProfileData')
+
+      const friendsList: UserProfileDataType[] = []
+
+      let lastDoc
+      while (friendsList.length < 6) {
+        // The current limit will be the number of friends that still need to be added to friendsList
+        const currLimit = 6 - friendsList.length
+        let friendsQ = query(
+          profilesCollection,
+          orderBy('lastActive', 'desc'),
+          limit(currLimit)
+        )
+        if (lastDoc) {
+          friendsQ = query(friendsQ, startAfter(lastDoc))
+        }
+        const querySnapshot = await getDocs(friendsQ)
+        if (querySnapshot.empty) break
+        for (const userDoc of querySnapshot.docs) {
+          const userUID = userDoc.id
+          console.log(userUID, userDoc.data())
+
+          if (userUID === currUserUID) continue
+
+          const isFriend = await checkIfFriends(null, userUID)
+
+          if (!isFriend) {
+            const userData = userDoc.data() as UserProfileDataType
+            friendsList.push(userData)
+          }
+        }
+
+        // If the number of documents received is less than the number queried / there is no more data left
+        const docsLength = querySnapshot.docs.length
+        if (docsLength < currLimit) break
+
+        lastDoc = querySnapshot.docs[docsLength]
+      }
+      return friendsList
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(message)
+    toast.error(message, { position: 'bottom-center' })
+  }
 }
 
 // export const getPendingFriendRequests = async <

@@ -6,17 +6,43 @@
   justify-content: center;
   align-items: center;
   .profile-image-container {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    align-items: center;
+    background: $secondary-text;
+    border-radius: 50%;
     height: 100px;
     width: 100px;
-    border-radius: 50%;
-    overflow: hidden;
     margin-bottom: 1rem;
+    padding: 0.15rem;
     .profile-image {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      border-radius: 50%;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+    .qr-code-link {
+      position: absolute;
+      bottom: 0rem;
+      right: 0rem;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100%;
-      width: 100%;
+      background: $primary;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      .icon {
+        height: 25px;
+        width: 25px;
+        color: $primary-background;
+      }
     }
   }
   .username {

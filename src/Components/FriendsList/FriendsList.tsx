@@ -4,6 +4,7 @@ import {
   acceptFriendRequest,
   getFriendRequests,
   getFriends,
+  getSuggestedFriends,
 } from '../../services/friends'
 import {
   CombinedFriendsDataType,
@@ -65,6 +66,9 @@ const FriendsList = () => {
         // !!! fix
         setFriendsList([])
       }
+    })
+    getSuggestedFriends().then(res => {
+      console.log(res)
     })
   }, [])
 
