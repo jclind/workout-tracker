@@ -11,12 +11,13 @@
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    background: $secondary-text;
     border-radius: 50%;
     height: 100px;
     width: 100px;
     margin-bottom: 1rem;
     padding: 0.15rem;
+    // box-sizing: border-box;
+
     .profile-image {
       display: flex;
       flex-shrink: 0;
@@ -29,8 +30,8 @@
     }
     .qr-code-link {
       position: absolute;
-      bottom: 0rem;
-      right: 0rem;
+      bottom: 0;
+      right: 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -45,12 +46,16 @@
       }
     }
   }
+  .display-name {
+    height: 22px;
+  }
   .username {
     font-size: 0.8rem;
     font-weight: 700;
     color: $tertiary-text;
     margin-bottom: 1.5rem;
     margin-top: 0.25rem;
+    height: 15px;
   }
   .date-joined {
     font-size: 0.8rem;

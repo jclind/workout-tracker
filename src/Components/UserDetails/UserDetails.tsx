@@ -1,43 +1,40 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import './UserDetails.scss'
 import { AiOutlineQrcode, AiOutlineUser } from 'react-icons/ai'
 
 import { UserProfileDataType } from '../../types'
-import { getNumberOfFriends } from '../../services/friends'
 import FriendQRModal from '../FriendQRModal/FriendQRModal'
+import styles from '../../_exports.scss'
+import Skeleton from '@mui/material/Skeleton'
 
 type UserDetailsProps = {
-  userData: UserProfileDataType
+  userData: UserProfileDataType | null
+  numFriends: number | null
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-const UserDetails = ({ userData }: UserDetailsProps) => {
-  const [numFriends, setNumFriends] = useState<number | null>(null)
+const UserDetails = ({ userData, numFriends, loading }: UserDetailsProps) => {
   const [isFriendQRModalOpen, setIsFriendQRModalOpen] = useState(false)
-  const {
-    displayName,
-    // createdAt,
-    photoUrl,
-    username,
-    totalWorkouts,
-    totalExercises,
-  } = userData
-
-  useEffect(() => {
-    getNumberOfFriends(username).then(res => {
-      setNumFriends(res || 0)
-    })
-  }, [])
 
   return (
     <div className='user-details'>
       <button
         className='btn-no-styles profile-image-container'
         onClick={() => setIsFriendQRModalOpen(true)}
+        disabled={loading}
       >
-        {photoUrl ? (
+        {!userData || loading ? (
+          <Skeleton
+            sx={{ bgcolor: styles.tertiaryBackground, flexShrink: 0 }}
+            variant='circular'
+            width={100}
+            height={100}
+          />
+        ) : userData.photoUrl ? (
           <img
-            src={photoUrl}
-            alt={displayName || 'profile'}
+            src={userData.photoUrl}
+            alt={userData.displayName || 'profile'}
             className='profile-image'
           />
         ) : (
@@ -45,32 +42,97 @@ const UserDetails = ({ userData }: UserDetailsProps) => {
             <AiOutlineUser className='icon' />
           </div>
         )}
-        <div className='qr-code-link'>
-          <AiOutlineQrcode className='icon' />
-        </div>
+        {!userData || loading ? (
+          <Skeleton
+            sx={{
+              bgcolor: styles.tertiaryText,
+              flexShrink: 0,
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+            }}
+            variant='circular'
+            width={40}
+            height={40}
+          />
+        ) : (
+          <div className='qr-code-link'>
+            <AiOutlineQrcode className='icon' />
+          </div>
+        )}
       </button>
-      <h3 className='display-name'>{displayName}</h3>
-      <div className='username'>@{username}</div>
+      <h3 className='display-name'>
+        {!userData || loading ? (
+          <Skeleton
+            sx={{
+              bgcolor: styles.tertiaryBackground,
+            }}
+            variant='rounded'
+            width={120}
+            height={18}
+          />
+        ) : (
+          userData.displayName
+        )}
+      </h3>
+      <div className='username'>
+        {!userData || loading ? (
+          <Skeleton
+            sx={{
+              bgcolor: styles.tertiaryBackground,
+            }}
+            variant='rounded'
+            width={140}
+            height={15}
+          />
+        ) : (
+          `@${userData.username}`
+        )}
+      </div>
       <div className='small-data'>
         <div className='item'>
-          <div className='value'>{numFriends}</div>
+          <div className='value'>
+            {!userData || loading ? (
+              <Skeleton
+                sx={{
+                  bgcolor: styles.tertiaryBackground,
+                }}
+                variant='rounded'
+                width={20}
+                height={22}
+              />
+            ) : (
+              numFriends
+            )}
+          </div>
           <div className='label'>Friends</div>
         </div>
         <div className='item'>
-          <div className='value'>{totalWorkouts}</div>
+          <div className='value'>
+            {!userData || loading ? (
+              <Skeleton
+                sx={{
+                  bgcolor: styles.tertiaryBackground,
+                }}
+                variant='rounded'
+                width={20}
+                height={22}
+              />
+            ) : (
+              userData.totalWorkouts
+            )}
+          </div>
           <div className='label'>Workouts</div>
         </div>
-        {/* <div className='item'>
-          <div className='value'>{totalExercises}</div>
-          <div className='label'>Exercises</div>
-        </div> */}
       </div>
-      <FriendQRModal
-        isOpen={isFriendQRModalOpen}
-        setIsOpen={setIsFriendQRModalOpen}
-        name={displayName}
-        username={username}
-      />
+      {userData && !loading ? (
+        <FriendQRModal
+          isOpen={isFriendQRModalOpen}
+          setIsOpen={setIsFriendQRModalOpen}
+          name={userData.displayName}
+          username={userData.username}
+        />
+      ) : null}
     </div>
   )
 }

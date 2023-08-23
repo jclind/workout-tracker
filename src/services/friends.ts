@@ -68,7 +68,7 @@ export const checkIfFriends = async (
       return 'not_friends'
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -101,7 +101,7 @@ export const addFriend = async (friendUsername: string) => {
       await setDoc(friendPendingRequestRef, requestedData)
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -155,7 +155,7 @@ export const acceptFriendRequest = async (friendUsername: string) => {
       }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -213,7 +213,7 @@ export const getFriendRequests = async <
       }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -267,7 +267,7 @@ export const getFriends = async <B extends boolean | undefined>(options: {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 
@@ -289,7 +289,7 @@ export const getNumberOfFriends = async (username: string | null = null) => {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -318,13 +318,11 @@ export const getSuggestedFriends = async () => {
         if (querySnapshot.empty) break
         for (const userDoc of querySnapshot.docs) {
           const userUID = userDoc.id
-          console.log(userUID, userDoc.data())
 
           if (userUID === currUserUID) continue
 
           const isFriend = await checkIfFriends(null, userUID)
-
-          if (!isFriend) {
+          if (isFriend === 'not_friends') {
             const userData = userDoc.data() as UserProfileDataType
             friendsList.push(userData)
           }
@@ -340,7 +338,7 @@ export const getSuggestedFriends = async () => {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }

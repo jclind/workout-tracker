@@ -89,7 +89,7 @@ export const addWorkout = async (
       return workoutData
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -151,7 +151,7 @@ export const importWorkouts = async (
       return workouts
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -177,7 +177,7 @@ export const deleteWorkout = async (workoutID: string) => {
       await updateTotalWorkoutsAndExercises(-1, numExercises)
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -210,7 +210,7 @@ export const searchExercises = async (
       return dataArr[0]
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -235,7 +235,7 @@ export const getUniqueTitles = async (
       return sortedTitles
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -286,7 +286,7 @@ export const queryAllSingleExercise = async (
       return { data: results, lastDoc: newLastDoc, totalResults }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -318,7 +318,7 @@ export const queryChartExerciseData = async (
       return { data: results }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -358,9 +358,20 @@ export const getWorkouts = async (
       return { data: workouts, lastDoc: newLastDoc, totalResults }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
+  }
+}
+export const getMostRecentWorkout = async () => {
+  try {
+    const workoutRes = await getWorkouts(1, null, null)
+    const workoutData = workoutRes?.data[0] || null
+    return workoutData
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
   }
 }
 export const getNumberOfTotalWorkouts = async (): Promise<
@@ -376,7 +387,7 @@ export const getNumberOfTotalWorkouts = async (): Promise<
       return totalResults
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -394,7 +405,7 @@ export const getNumberOfTotalExercises = async (): Promise<
       return totalResults
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -449,7 +460,7 @@ export const updateExercise = async (
       )
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -474,7 +485,7 @@ export const updateWorkout = async (
       }
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -491,7 +502,7 @@ export const getCurrentWorkoutData = async () => {
       return data
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -515,7 +526,7 @@ export const updateCurrentWorkout = async (
       )
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -546,7 +557,7 @@ export const modifyData = async () => {
       })
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
@@ -597,7 +608,7 @@ export const updateUniqueTitles = async (
       })
     } catch (error: any) {
       const message = error.message || error
-      console.log(message)
+      console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
   }
