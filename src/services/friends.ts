@@ -160,6 +160,26 @@ export const acceptFriendRequest = async (friendUsername: string) => {
     }
   }
 }
+export const removePendingRequest = async (friendUsername: string) => {
+  try {
+    const uid = auth?.currentUser?.uid
+    const currUsername = await getUsername()
+    const friendUID = await getUIDFromUsername(friendUsername)
+    if (uid && friendUID && currUsername) {
+      const currUserProfileRef = doc(db, 'userProfileData', uid)
+      const currUserPendingRef = doc(currUserProfileRef, 'pending', friendUID)
+      await deleteDoc(currUserPendingRef)
+
+      const friendProfileRef = doc(db, 'userProfileData', friendUID)
+      const friendRequestedRef = doc(friendProfileRef, 'requested', uid)
+      await deleteDoc(friendRequestedRef)
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
 
 export const getFriendRequests = async <
   B extends boolean | undefined

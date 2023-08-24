@@ -6,6 +6,11 @@
   justify-content: center;
   gap: 2rem;
   width: 100%;
+  button.add-friend-btn {
+    width: fit-content;
+    text-transform: capitalize;
+    margin: 0 auto;
+  }
   button.add-friend-btn.pending {
     outline: 1px solid $border-color;
     color: $border-color;
