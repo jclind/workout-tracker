@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
 import {
   acceptFriendRequest,
+  addFriend,
   getFriendRequests,
   getFriends,
   getSuggestedFriends,
@@ -14,7 +15,7 @@ import {
 import toast from 'react-hot-toast'
 import Skeleton from '@mui/material/Skeleton'
 import styles from '../../_exports.scss'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 type PendingFriendRequestProps = {
   request: CombinedRequestedFriendDataType
@@ -66,10 +67,10 @@ const SuggestedFriend = ({
   const handleRequestFriend = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
-    e.stopPropagation()
+    e.preventDefault()
     if (username) {
       setRequested(true)
-      acceptFriendRequest(username).catch((err: any) => {
+      addFriend(username).catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
         setRequested(false)
       })

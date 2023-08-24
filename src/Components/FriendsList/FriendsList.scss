@@ -98,6 +98,12 @@
           background: $secondary;
           padding: 0.25rem;
         }
+        .request-btn.requested {
+          outline: 1px solid $border-color;
+          color: $tertiary-background;
+          font-weight: 600;
+          background: none;
+        }
       }
       h5 {
         padding: 1rem 0;

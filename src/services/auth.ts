@@ -44,7 +44,7 @@ export const signupWithGoogle = async () => {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -53,7 +53,7 @@ export const logout = async () => {
     await signOut(auth)
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -66,7 +66,7 @@ export const addUsername = async (uid: string, username: string) => {
     await setDoc(usernameDocRef, { uid })
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -80,7 +80,7 @@ export const checkUsernameExists = async (username: string) => {
     return false
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -95,7 +95,7 @@ export const updateUsername = async (uid: string, username: string) => {
     await setDoc(doc(usernameCollectionRef, username), { uid })
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -111,7 +111,7 @@ export const getUserData = async (
     return userDataRes.data() as UserProfileDataType
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
     return null
   }
@@ -146,7 +146,7 @@ export const getUsername = async (): Promise<string | undefined> => {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -158,7 +158,7 @@ export const getUIDFromUsername = async (username: string) => {
     return usernameRes.data().uid ?? null
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
@@ -174,7 +174,7 @@ export const updateUserActivity = async () => {
     }
   } catch (error: any) {
     const message = error.message || error
-    console.log(message)
+    console.log(error)
     toast.error(message, { position: 'bottom-center' })
   }
 }
