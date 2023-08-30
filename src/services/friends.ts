@@ -18,6 +18,7 @@ import {
   CombinedRequestedFriendDataType,
   FriendsData,
   FriendsStatusType,
+  PendingFriendData,
   RequestedFriendData,
   UserProfileDataType,
 } from '../types'
@@ -77,26 +78,26 @@ export const checkIfFriends = async (
 export const addFriend = async (friendUsername: string) => {
   const uid = auth?.currentUser?.uid
   const currUsername = await getUsername()
-  const friendUID = await getUIDFromUsername(friendUsername)
+  const friendUID: string = await getUIDFromUsername(friendUsername)
   if (uid && friendUID && currUsername) {
     try {
-      // const date = new Date().getTime()
-      // const currUserProfileRef = doc(db, 'userProfileData', uid)
-      // const currUserRequestedRef = doc(currUserProfileRef, 'pending', friendUID)
-      // const pendingData: PendingFriendData = {
-      //   friendUID: friendUID,
-      //   pendingUsername: friendUsername,
-      //   datePending: date,
-      // }
-      // await setDoc(currUserRequestedRef, pendingData)
-      // const friendProfileRef = doc(db, 'userProfileData', friendUID)
-      // const friendPendingRequestRef = doc(friendProfileRef, 'requested', uid)
-      // const requestedData: RequestedFriendData = {
-      //   friendUID: uid,
-      //   requestedUsername: currUsername,
-      //   dateRequested: date,
-      // }
-      // await setDoc(friendPendingRequestRef, requestedData)
+      const date = new Date().getTime()
+      const currUserProfileRef = doc(db, 'userProfileData', uid)
+      const currUserRequestedRef = doc(currUserProfileRef, 'pending', friendUID)
+      const pendingData: PendingFriendData = {
+        friendUID: friendUID,
+        pendingUsername: friendUsername,
+        datePending: date,
+      }
+      await setDoc(currUserRequestedRef, pendingData)
+      const friendProfileRef = doc(db, 'userProfileData', friendUID)
+      const friendPendingRequestRef = doc(friendProfileRef, 'requested', uid)
+      const requestedData: RequestedFriendData = {
+        friendUID: uid,
+        requestedUsername: currUsername,
+        dateRequested: date,
+      }
+      await setDoc(friendPendingRequestRef, requestedData)
       const sendFriendMail = httpsCallable(firebaseFunctions, 'sendFriendMail')
       sendFriendMail({ currUID: uid, friendUID, currUsername })
     } catch (error: any) {
