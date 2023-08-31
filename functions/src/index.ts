@@ -33,6 +33,8 @@ export type CombinedRequestedFriendDataType = RequestedFriendData &
 admin.initializeApp()
 const firestore = admin.firestore()
 
+// Friend cloud functions
+
 export const sendFriendRequestEmail = functions.https.onCall(
   async (data, context) => {
     // try {
@@ -127,7 +129,6 @@ You are receiving this email because you have a registered account on PumpTrack.
     // }
   }
 )
-
 export const sendFriendAcceptedEmail = functions.https.onCall(
   async (data, context) => {
     if (!context.auth) {
@@ -215,7 +216,6 @@ export const sendFriendAcceptedEmail = functions.https.onCall(
     })
   }
 )
-
 export const getNumberOfFriends = functions.https.onCall(
   async (data, context) => {
     if (!context.auth) {
@@ -242,7 +242,6 @@ export const getNumberOfFriends = functions.https.onCall(
     // return { numFriends }
   }
 )
-
 const checkIfDocExistsInUserCollection = async (
   collection: FriendsStatusType,
   currUID: string,
@@ -259,7 +258,6 @@ const checkIfDocExistsInUserCollection = async (
 
   return false
 }
-
 export const checkIfFriends = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
@@ -280,7 +278,6 @@ export const checkIfFriends = functions.https.onCall(async (data, context) => {
     data.friendUID
   )
 })
-
 export const getFriendshipStatusFunc = async (
   currUID: string,
   friendUID: string
@@ -308,7 +305,6 @@ export const getFriendshipStatusFunc = async (
 
   return 'not_friends'
 }
-
 export const getFriendshipStatus = functions.https.onCall(
   async (data, context): Promise<FriendsStatusType | undefined> => {
     if (!context.auth) {
@@ -329,7 +325,6 @@ export const getFriendshipStatus = functions.https.onCall(
     return await getFriendshipStatusFunc(currUID, friendUID)
   }
 )
-
 export const addFriend = functions.https.onCall(async (data, context) => {
   if (!context.auth) {
     throw new functions.https.HttpsError(
@@ -407,7 +402,6 @@ export const addFriend = functions.https.onCall(async (data, context) => {
     .doc(`userProfileData/${friendUID}/requested/${currUID}`)
     .set({ ...requestedData })
 })
-
 export const acceptFriendRequest = functions.https.onCall(
   async (data, context) => {
     if (!context.auth) {
@@ -475,7 +469,6 @@ export const acceptFriendRequest = functions.https.onCall(
     return 'test'
   }
 )
-
 export const getPendingFriendRequests = functions.https.onCall(
   async (data, context) => {
     if (!data.uid) {
@@ -517,7 +510,6 @@ export const getPendingFriendRequests = functions.https.onCall(
     return pendingRequestsData
   }
 )
-
 export const getSuggestedFriends = functions.https.onCall(
   async (data, context) => {
     const uid = data.uid
@@ -581,7 +573,6 @@ export const getSuggestedFriends = functions.https.onCall(
     return friendsList
   }
 )
-
 export const removePendingRequest = functions.https.onCall(
   async (data, context) => {
     const currUID = data.currUID
@@ -609,3 +600,18 @@ export const removePendingRequest = functions.https.onCall(
       })
   }
 )
+
+// User cloud functions
+export const updateActivity = functions.https.onCall((data, context) => {
+  const uid = data.uid
+  if (!context.auth || context.auth.uid !== uid) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'only authenticated users can request'
+    )
+  }
+
+  firestore.doc(`userProfileData/${uid}`).update({
+    lastActive: new Date().getTime(),
+  })
+})

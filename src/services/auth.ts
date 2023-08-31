@@ -1,5 +1,5 @@
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth'
-import { auth, db } from './firestore'
+import { auth, db, firebaseFunctions } from './firestore'
 import {
   collection,
   deleteDoc,
@@ -14,6 +14,7 @@ import {
 import { UserProfileDataType } from '../types'
 import { PUMP_TRACK_LS_USERNAME } from './PUMP_TRACK_LS'
 import toast from 'react-hot-toast'
+import { httpsCallable } from 'firebase/functions'
 
 export const signupWithGoogle = async () => {
   try {
@@ -167,10 +168,8 @@ export const updateUserActivity = async () => {
   try {
     const uid = auth?.currentUser?.uid
     if (uid) {
-      const userProfileDocRef = doc(db, 'userProfileData', uid)
-      await updateDoc(userProfileDocRef, {
-        lastActive: new Date().getTime(),
-      })
+      const updateActivity = httpsCallable(firebaseFunctions, 'updateActivity')
+      updateActivity({ uid })
     }
   } catch (error: any) {
     const message = error.message || error

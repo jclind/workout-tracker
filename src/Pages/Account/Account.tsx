@@ -6,11 +6,7 @@ import { getUserData, getUsername } from '../../services/auth'
 import { FriendsStatusType, UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import FriendsList from '../../Components/FriendsList/FriendsList'
-import {
-  checkIfFriends,
-  getFriendshipStatus,
-  getNumberOfFriends,
-} from '../../services/friends'
+import { getFriendshipStatus, getNumberOfFriends } from '../../services/friends'
 import FriendStatusButton from '../../Components/FriendStatusButton/FriendStatusButton'
 import LastWorkout from '../../Components/LastWorkout/LastWorkout'
 
