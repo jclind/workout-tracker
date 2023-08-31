@@ -1,6 +1,11 @@
 @import '../../helpers.scss';
 
 .friends-container {
+  .pending-friend-request-list {
+    width: 100%;
+    padding-left: 1rem;
+    margin-bottom: 2rem;
+  }
   .friend-request,
   .suggested-friend {
     display: flex;

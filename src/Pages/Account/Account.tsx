@@ -6,7 +6,11 @@ import { getUserData, getUsername } from '../../services/auth'
 import { FriendsStatusType, UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import FriendsList from '../../Components/FriendsList/FriendsList'
-import { checkIfFriends, getNumberOfFriends } from '../../services/friends'
+import {
+  checkIfFriends,
+  getFriendshipStatus,
+  getNumberOfFriends,
+} from '../../services/friends'
 import FriendStatusButton from '../../Components/FriendStatusButton/FriendStatusButton'
 import LastWorkout from '../../Components/LastWorkout/LastWorkout'
 
@@ -32,7 +36,9 @@ const Account = () => {
       .catch((error: any) => {
         toast.error(error, { position: 'bottom-center' })
       })
-    const p2 = getNumberOfFriends(username).then(res => setNumFriends(res || 0))
+    const p2 = getNumberOfFriends(username).then(res => {
+      setNumFriends(res || 0)
+    })
     const p3 = checkCurrUserIsAuthor(username)
     await Promise.all([p1, p2, p3])
   }
@@ -46,7 +52,7 @@ const Account = () => {
 
   useEffect(() => {
     if (currUserIsAuthor === false && username) {
-      checkIfFriends(username).then(res => {
+      getFriendshipStatus(username).then(res => {
         if (res) {
           setFriendshipStatus(res)
         } else {

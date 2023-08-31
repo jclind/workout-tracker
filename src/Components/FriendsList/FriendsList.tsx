@@ -3,8 +3,8 @@ import './FriendsList.scss'
 import {
   acceptFriendRequest,
   addFriend,
-  getFriendRequests,
   getFriends,
+  getPendingFriendRequests,
   getSuggestedFriends,
 } from '../../services/friends'
 import {
@@ -136,19 +136,24 @@ const FriendsList = () => {
   const [isSuggestedData, setIsSuggestedData] = useState(true)
 
   useEffect(() => {
-    getFriendRequests({ returnUserData: true })
+    getPendingFriendRequests()
       .then(res => {
-        setPendingFriendRequests(res)
+        console.log(res)
+        if (res) {
+          setPendingFriendRequests(res)
+        } else {
+          setPendingFriendRequests([])
+        }
       })
       .catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
       })
-    getFriends({ returnUserData: true }).then(res => {
-      if (res) {
-        // !!! fix
-        setFriendsList([])
-      }
-    })
+    // getFriends({ returnUserData: true }).then(res => {
+    //   if (res) {
+    //     // !!! fix
+    //     setFriendsList([])
+    //   }
+    // })
     setSuggestedLoading(true)
     getSuggestedFriends()
       .then(res => {
@@ -166,11 +171,12 @@ const FriendsList = () => {
 
   return (
     <div className='friends-container'>
-      <div className='pending-friend-request-list'>
+      {/* <div className='pending-friend-request-list'>
+        <div className='account-header'>Friend Requests</div>
         {pendingFriendRequests.map(req => {
           return <PendingFriendRequest key={req.friendUID} request={req} />
         })}
-      </div>
+      </div> */}
       <div className='friends-list'>
         {friendsList.map(friend => {
           const { photoUrl, displayName, username } = friend
