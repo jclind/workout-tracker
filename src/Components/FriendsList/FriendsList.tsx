@@ -6,6 +6,7 @@ import {
   getFriends,
   getPendingFriendRequests,
   getSuggestedFriends,
+  removePendingRequest,
 } from '../../services/friends'
 import {
   CombinedFriendsDataType,
@@ -69,11 +70,19 @@ const SuggestedFriend = ({
   ) => {
     e.preventDefault()
     if (username) {
-      setRequested(true)
-      addFriend(username).catch((err: any) => {
-        toast.error(err, { position: 'bottom-center' })
+      if (!requested) {
+        setRequested(true)
+        addFriend(username).catch((err: any) => {
+          toast.error(err, { position: 'bottom-center' })
+          setRequested(false)
+        })
+      } else {
         setRequested(false)
-      })
+        removePendingRequest(username).catch((err: any) => {
+          toast.error(err, { position: 'bottom-center' })
+          setRequested(true)
+        })
+      }
     }
   }
 
@@ -114,7 +123,7 @@ const SuggestedFriend = ({
           className={`request-btn btn-no-styles ${
             requested ? 'requested' : ''
           }`}
-          disabled={requested || loading}
+          disabled={loading}
           onClick={handleRequestFriend}
         >
           {requested ? 'Requested' : 'Add'}

@@ -116,18 +116,17 @@ export const addFriend = async (friendUsername: string) => {
       // }
       // await setDoc(friendPendingRequestRef, requestedData)
       const cloudAddFriend = httpsCallable(firebaseFunctions, 'addFriend')
-      cloudAddFriend({
+      await cloudAddFriend({
         currUID: uid,
         friendUID,
         currUsername,
         friendUsername,
-      }).then(() => {
-        const sendFriendMail = httpsCallable(
-          firebaseFunctions,
-          'sendFriendRequestEmail'
-        )
-        sendFriendMail({ currUID: uid, friendUID, currUsername })
       })
+      const sendFriendMail = httpsCallable(
+        firebaseFunctions,
+        'sendFriendRequestEmail'
+      )
+      sendFriendMail({ currUID: uid, friendUID, currUsername })
     } catch (error: any) {
       const message = error.message || error
       console.log(error)
@@ -212,16 +211,13 @@ export const acceptFriendRequest = async (friendUsername: string) => {
 export const removePendingRequest = async (friendUsername: string) => {
   try {
     const uid = auth?.currentUser?.uid
-    const currUsername = await getUsername()
     const friendUID = await getUIDFromUsername(friendUsername)
-    if (uid && friendUID && currUsername) {
-      const currUserProfileRef = doc(db, 'userProfileData', uid)
-      const currUserPendingRef = doc(currUserProfileRef, 'pending', friendUID)
-      await deleteDoc(currUserPendingRef)
-
-      const friendProfileRef = doc(db, 'userProfileData', friendUID)
-      const friendRequestedRef = doc(friendProfileRef, 'requested', uid)
-      await deleteDoc(friendRequestedRef)
+    if (uid && friendUID) {
+      const cloudRemovePendingRequest = httpsCallable(
+        firebaseFunctions,
+        'removePendingRequest'
+      )
+      await cloudRemovePendingRequest({ currUID: uid, friendUID })
     }
   } catch (error: any) {
     const message = error.message || error
@@ -381,43 +377,6 @@ export const getSuggestedFriends = async () => {
       const suggestedFriendsData =
         suggestedFriendsRes.data as UserProfileDataType[]
       return suggestedFriendsData
-      //   const profilesCollection = collection(db, 'userProfileData')
-
-      //   const friendsList: UserProfileDataType[] = []
-
-      //   let lastDoc
-      //   while (friendsList.length < 6) {
-      //     // The current limit will be the number of friends that still need to be added to friendsList
-      //     const currLimit = 6 - friendsList.length
-      //     let friendsQ = query(
-      //       profilesCollection,
-      //       orderBy('lastActive', 'desc'),
-      //       limit(currLimit)
-      //     )
-      //     if (lastDoc) {
-      //       friendsQ = query(friendsQ, startAfter(lastDoc))
-      //     }
-      //     const querySnapshot = await getDocs(friendsQ)
-      //     if (querySnapshot.empty) break
-      //     for (const userDoc of querySnapshot.docs) {
-      //       const userUID = userDoc.id
-
-      //       if (userUID === currUserUID) continue
-
-      //       const isFriend = await checkIfFriends(null, userUID)
-      //       if (isFriend === 'not_friends') {
-      //         const userData = userDoc.data() as UserProfileDataType
-      //         friendsList.push(userData)
-      //       }
-      //     }
-
-      //     // If the number of documents received is less than the number queried / there is no more data left
-      //     const docsLength = querySnapshot.docs.length
-      //     if (docsLength < currLimit) break
-
-      //     lastDoc = querySnapshot.docs[docsLength]
-      //   }
-      //   return friendsList
     }
   } catch (error: any) {
     const message = error.message || error
@@ -429,19 +388,25 @@ export const getSuggestedFriends = async () => {
 export const getPendingFriendRequests = async (): Promise<
   CombinedRequestedFriendDataType[] | undefined
 > => {
-  const uid = auth?.currentUser?.uid
-  if (uid) {
-    const getPendingRequests = httpsCallable(
-      firebaseFunctions,
-      'getPendingFriendRequests'
-    )
-    const pendingRequestsRes = await getPendingRequests({ uid })
-    const pendingRequestsData =
-      pendingRequestsRes.data as CombinedRequestedFriendDataType[]
-    if (pendingRequestsData) {
-      return pendingRequestsData
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const getPendingRequests = httpsCallable(
+        firebaseFunctions,
+        'getPendingFriendRequests'
+      )
+      const pendingRequestsRes = await getPendingRequests({ uid })
+      const pendingRequestsData =
+        pendingRequestsRes.data as CombinedRequestedFriendDataType[]
+      if (pendingRequestsData) {
+        return pendingRequestsData
+      }
+      return undefined
     }
-    return undefined
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
   }
 }
 

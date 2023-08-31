@@ -370,7 +370,7 @@ export const addFriend = functions.https.onCall(async (data, context) => {
   if (isPending) {
     throw new functions.https.HttpsError(
       'failed-precondition',
-      'friendship already pending'
+      'friendship already pending, please refresh'
     )
   }
 
@@ -382,7 +382,7 @@ export const addFriend = functions.https.onCall(async (data, context) => {
   if (isRequested) {
     throw new functions.https.HttpsError(
       'failed-precondition',
-      'friendship already requested'
+      'friendship already requested, please refresh'
     )
   }
 
@@ -579,5 +579,33 @@ export const getSuggestedFriends = functions.https.onCall(
     }
 
     return friendsList
+  }
+)
+
+export const removePendingRequest = functions.https.onCall(
+  async (data, context) => {
+    const currUID = data.currUID
+    const friendUID = data.friendUID
+    console.log(currUID, friendUID, data)
+    if (!currUID || !friendUID) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'currUID and friendUID must be passed through data object'
+      )
+    }
+    if (!context.auth || context.auth.uid !== currUID) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'only authenticated users can request'
+      )
+    }
+
+    firestore.doc(`userProfileData/${currUID}/pending/${friendUID}`).delete()
+    firestore
+      .doc(`userProfileData/${friendUID}/requested/${currUID}`)
+      .delete()
+      .then(() => {
+        return 'test'
+      })
   }
 )
