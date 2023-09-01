@@ -48,6 +48,7 @@ const Account = () => {
 
   useEffect(() => {
     if (currUserIsAuthor === false && username) {
+      console.log('here', username)
       getFriendshipStatus(username).then(res => {
         if (res) {
           setFriendshipStatus(res)

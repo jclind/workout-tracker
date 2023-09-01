@@ -25,12 +25,6 @@ import {
 import { toast } from 'react-hot-toast'
 import { httpsCallable } from 'firebase/functions'
 
-export const getRecommendedFriendsList = () => {
-  const uid = auth?.currentUser?.uid
-  if (uid) {
-  }
-}
-
 export const getFriendshipStatus = async (friendUID: string | null = null) => {
   const currUID = auth?.currentUser?.uid
 
@@ -47,50 +41,6 @@ export const getFriendshipStatus = async (friendUID: string | null = null) => {
     return undefined
   }
 }
-
-// export const checkIfFriends = async (
-//   friendUsername: string | null = null,
-//   friendUIDInput: string | null = null
-// ): Promise<FriendsStatusType | undefined> => {
-//   const currUsername = await getUsername()
-//   const uid = auth?.currentUser?.uid
-//   const friendUID = friendUIDInput
-//     ? friendUIDInput
-//     : friendUsername
-//     ? await getUIDFromUsername(friendUsername)
-//     : null
-//   if (uid && friendUID && currUsername) {
-//     try {
-//       const currUserProfileRef = doc(db, 'userProfileData', uid)
-//       const currUserFriendsRef = doc(currUserProfileRef, 'friends', friendUID)
-//       const currUserFriendsSnapshot = await getDoc(currUserFriendsRef)
-//       if (currUserFriendsSnapshot.exists()) {
-//         return 'friends'
-//       }
-//       const currUserPendingRef = doc(currUserProfileRef, 'pending', friendUID)
-//       const currUserPendingSnapshot = await getDoc(currUserPendingRef)
-//       if (currUserPendingSnapshot.exists()) {
-//         return 'pending'
-//       }
-
-//       const currUserRequestedRef = doc(
-//         currUserProfileRef,
-//         'requested',
-//         friendUID
-//       )
-//       const currUserRequestedSnapshot = await getDoc(currUserRequestedRef)
-//       if (currUserRequestedSnapshot.exists()) {
-//         return 'requested'
-//       }
-
-//       return 'not_friends'
-//     } catch (error: any) {
-//       const message = error.message || error
-//       console.log(error)
-//       toast.error(message, { position: 'bottom-center' })
-//     }
-//   }
-// }
 
 export const addFriend = async (friendUsername: string) => {
   const uid = auth?.currentUser?.uid

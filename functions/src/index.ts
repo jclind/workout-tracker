@@ -281,32 +281,27 @@ export const checkIfFriends = functions.https.onCall(async (data, context) => {
 export const getFriendshipStatusFunc = async (
   currUID: string,
   friendUID: string
-) => {
-  const isFriends = await checkIfDocExistsInUserCollection(
-    'friends',
-    currUID,
-    friendUID
-  )
-  if (isFriends) return 'friends'
+): Promise<FriendsStatusType> => {
+  let status: FriendsStatusType
 
-  const isPending = await checkIfDocExistsInUserCollection(
-    'pending',
-    currUID,
-    friendUID
-  )
-  if (isPending) return 'pending'
+  if (await checkIfDocExistsInUserCollection('friends', currUID, friendUID)) {
+    status = 'friends'
+  } else if (
+    await checkIfDocExistsInUserCollection('pending', currUID, friendUID)
+  ) {
+    status = 'pending'
+  } else if (
+    await checkIfDocExistsInUserCollection('requested', currUID, friendUID)
+  ) {
+    status = 'requested'
+  } else {
+    status = 'not_friends'
+  }
 
-  const isRequested = await checkIfDocExistsInUserCollection(
-    'requested',
-    currUID,
-    friendUID
-  )
-  if (isRequested) return 'requested'
-
-  return 'not_friends'
+  return status
 }
 export const getFriendshipStatus = functions.https.onCall(
-  async (data, context): Promise<FriendsStatusType | undefined> => {
+  async (data, context) => {
     if (!context.auth) {
       throw new functions.https.HttpsError(
         'unauthenticated',
@@ -322,7 +317,23 @@ export const getFriendshipStatus = functions.https.onCall(
       )
     }
 
-    return await getFriendshipStatusFunc(currUID, friendUID)
+    let status: FriendsStatusType
+
+    if (await checkIfDocExistsInUserCollection('friends', currUID, friendUID)) {
+      status = 'friends'
+    } else if (
+      await checkIfDocExistsInUserCollection('pending', currUID, friendUID)
+    ) {
+      status = 'pending'
+    } else if (
+      await checkIfDocExistsInUserCollection('requested', currUID, friendUID)
+    ) {
+      status = 'requested'
+    } else {
+      status = 'not_friends'
+    }
+
+    return status
   }
 )
 export const addFriend = functions.https.onCall(async (data, context) => {
