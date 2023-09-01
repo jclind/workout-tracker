@@ -625,3 +625,24 @@ export const updateActivity = functions.https.onCall((data, context) => {
     lastActive: new Date().getTime(),
   })
 })
+
+// Workout cloud functions
+export const updateTotalWorkoutsAndExercises = functions.https.onCall(
+  (data, context) => {
+    const uid = data.uid
+    if (!context.auth || context.auth.uid !== uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'only authenticated users can request'
+      )
+    }
+
+    const numWorkouts: number = Number(data.numWorkouts) || 0
+    const numExercises: number = Number(data.numExercises) || 0
+
+    firestore.doc(`userProfileData/${uid}`).update({
+      totalWorkouts: admin.firestore.FieldValue.increment(numWorkouts),
+      totalExercises: admin.firestore.FieldValue.increment(numExercises),
+    })
+  }
+)

@@ -7,7 +7,6 @@ import {
   getCountFromServer,
   getDoc,
   getDocs,
-  increment,
   limit,
   orderBy,
   query,
@@ -22,12 +21,13 @@ import {
   ExercisesServerDataType,
   WorkoutDataType,
 } from '../types'
-import { auth, db } from './firestore'
+import { auth, db, firebaseFunctions } from './firestore'
 import { v4 as uuidv4 } from 'uuid'
 import { parseExercise } from '../util/parseExercise'
 import { getTitleAndDate } from '../util/getTitleAndDate'
 import { updateUserActivity } from './auth'
 import toast from 'react-hot-toast'
+import { httpsCallable } from 'firebase/functions'
 
 export const addWorkout = async (
   name: string,
@@ -414,13 +414,19 @@ export const updateTotalWorkoutsAndExercises = async (
   numWorkouts: number,
   numExercises: number
 ) => {
-  const uid = auth?.currentUser?.uid
-  if (uid) {
-    const userProfileDataRef = doc(db, 'userProfileData', uid)
-    await updateDoc(userProfileDataRef, {
-      totalWorkouts: increment(numWorkouts),
-      totalExercises: increment(numExercises),
-    })
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const cloudUpdateTotalWorkoutsAndExercises = httpsCallable(
+        firebaseFunctions,
+        'updateTotalWorkoutsAndExercises'
+      )
+      cloudUpdateTotalWorkoutsAndExercises({ uid, numWorkouts, numExercises })
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
   }
 }
 
