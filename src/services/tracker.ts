@@ -619,53 +619,6 @@ export const updateUniqueTitles = async (
     }
   }
 }
-// export const updateUniqueExerciseTitles = async (
-//   addedExercises: ExerciseDataType | ExerciseDataType[] | null,
-//   removedExercises: ExerciseDataType | ExerciseDataType[] | null = null
-// ) => {
-//   const uid = auth?.currentUser?.uid
-//   if (uid) {
-//     try {
-//       const userDataRef = doc(db, 'usersData', uid)
-//       const userDataDoc = await getDoc(userDataRef)
-//       const exerciseTitles = userDataDoc.data()?.exerciseTitles || {}
-
-//       if (addedExercises) {
-//         if (Array.isArray(addedExercises)) {
-//           addedExercises.forEach(exercise => {
-//             const title = exercise.name
-//             exerciseTitles[title] = ++exerciseTitles[title] || 1
-//           })
-//         } else {
-//           const title = addedExercises.name
-//           exerciseTitles[title] = ++exerciseTitles[title] || 1
-//         }
-//       }
-//       if (removedExercises) {
-//         if (Array.isArray(removedExercises)) {
-//           removedExercises.forEach(exercise => {
-//             const title = exercise.name
-//             exerciseTitles[title] = ++exerciseTitles[title] || 1
-//           })
-//         } else {
-//           const title = removedExercises.name
-//           exerciseTitles[title] = ++exerciseTitles[title] || 1
-//         }
-//       }
-//       const filteredTitles: { [key: string]: number } = {}
-//       for (const [key, value] of Object.entries(exerciseTitles)) {
-//         if (typeof value === 'number' && value > 0) {
-//           filteredTitles[key] = value
-//         }
-//       }
-//       await updateDoc(userDataRef, {
-//         exerciseTitles: filteredTitles,
-//       })
-//     } catch (error: any) {
-//       throw new Error(error.message)
-//     }
-//   }
-// }
 
 export const findUniqueWorkoutTitlesFromCollection = async () => {
   const uid = auth?.currentUser?.uid
@@ -680,13 +633,6 @@ export const findUniqueWorkoutTitlesFromCollection = async () => {
       const workoutData = doc.data() as WorkoutDataType
       let workoutTitle = workoutData.name.toLowerCase().trim()
       workoutTitles[workoutTitle] = ++workoutTitles[workoutTitle] || 1
-      // workoutTitle = workoutTitle.replace('day', '').toLowerCase()
-      // if (workoutTitle === 'leg') workoutTitle = 'legs'
-
-      // console.log(workoutData.name, workoutTitle)
-      // updateDoc(doc.ref, {
-      //   name: workoutTitle,
-      // })
     })
 
     updateDoc(userDataRef, {
