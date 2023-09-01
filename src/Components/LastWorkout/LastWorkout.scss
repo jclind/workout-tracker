@@ -1,0 +1,50 @@
+@import '../../helpers.scss';
+
+.last-workout-container {
+  width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
+  .last-workout {
+    background: $secondary-background;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+    box-sizing: border-box;
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding-bottom: 1.5rem;
+      .title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        text-transform: capitalize;
+        height: 22px;
+      }
+      .date {
+        height: 18px;
+        font-size: 1rem;
+        font-weight: 600;
+        color: $tertiary-text;
+      }
+    }
+    .exercises {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      text-transform: capitalize;
+      color: $secondary-text;
+      .exercise {
+        font-size: 0.9rem;
+        height: 18px;
+        .exercise-name {
+          font-weight: 800;
+          color: $primary;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+@import '../../helpers.scss';
+
+.friend-qr-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 2rem 0;
+  .user-data {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    .name {
+      font-size: 1.1rem;
+      color: $primary;
+      font-weight: 500;
+    }
+    .username {
+      font-size: 0.8rem;
+      color: $secondary-text;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+  .qr-code-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 80%;
+    height: fit-content;
+    padding: 2rem;
+    box-sizing: border-box;
+    background: $secondary-background;
+    // box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px,
+    //   rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px,
+    //   rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    box-shadow: $box-shadow;
+    border-radius: $border-radius;
+    .qr {
+      // max-width: 140px;
+      width: 70%;
+      height: fit-content;
+    }
+    .text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: $secondary;
+    }
+  }
+}

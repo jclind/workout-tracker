@@ -1,7 +1,11 @@
 import React from 'react'
 import './FriendStatusButton.scss'
 import { FriendsStatusType } from '../../types'
-import { acceptFriendRequest, addFriend } from '../../services/friends'
+import {
+  acceptFriendRequest,
+  addFriend,
+  removePendingRequest,
+} from '../../services/friends'
 import toast from 'react-hot-toast'
 
 const getBtnText = (friendshipStatus: FriendsStatusType): string => {
@@ -31,6 +35,11 @@ const FriendStatusButton = ({
         setFriendshipStatus('not_friends')
       })
     } else if (friendshipStatus === 'pending') {
+      setFriendshipStatus('not_friends')
+      removePendingRequest(accountUsername).catch((err: any) => {
+        toast.error(err, { position: 'bottom-center' })
+        setFriendshipStatus('pending')
+      })
     } else if (friendshipStatus === 'requested') {
       setFriendshipStatus('friends')
       acceptFriendRequest(accountUsername).catch((err: any) => {
@@ -41,7 +50,10 @@ const FriendStatusButton = ({
   }
 
   return (
-    <button className={`submit-btn ${friendshipStatus}`} onClick={handleClick}>
+    <button
+      className={`add-friend-btn submit-btn ${friendshipStatus}`}
+      onClick={handleClick}
+    >
       {getBtnText(friendshipStatus)}
     </button>
   )
