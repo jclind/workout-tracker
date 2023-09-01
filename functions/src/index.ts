@@ -588,7 +588,6 @@ export const removePendingRequest = functions.https.onCall(
   async (data, context) => {
     const currUID = data.currUID
     const friendUID = data.friendUID
-    console.log(currUID, friendUID, data)
     if (!currUID || !friendUID) {
       throw new functions.https.HttpsError(
         'invalid-argument',

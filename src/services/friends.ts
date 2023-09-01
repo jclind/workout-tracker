@@ -1,15 +1,11 @@
 import {
   collection,
-  deleteDoc,
   doc,
-  getCountFromServer,
   getDoc,
   getDocs,
   limit,
   orderBy,
   query,
-  setDoc,
-  startAfter,
 } from 'firebase/firestore'
 import { getUIDFromUsername, getUsername } from './auth'
 import { auth, db, firebaseFunctions } from './firestore'
@@ -17,9 +13,6 @@ import {
   CombinedFriendsDataType,
   CombinedRequestedFriendDataType,
   FriendsData,
-  FriendsStatusType,
-  PendingFriendData,
-  RequestedFriendData,
   UserProfileDataType,
 } from '../types'
 import { toast } from 'react-hot-toast'

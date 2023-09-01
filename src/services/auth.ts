@@ -8,7 +8,6 @@ import {
   getDocs,
   query,
   setDoc,
-  updateDoc,
   where,
 } from 'firebase/firestore'
 import { UserProfileDataType } from '../types'

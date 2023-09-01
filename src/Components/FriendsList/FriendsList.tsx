@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
 import {
-  acceptFriendRequest,
   addFriend,
-  getFriends,
   getPendingFriendRequests,
   getSuggestedFriends,
   removePendingRequest,
 } from '../../services/friends'
 import {
-  CombinedFriendsDataType,
   CombinedRequestedFriendDataType,
   UserProfileDataType,
 } from '../../types'
@@ -18,41 +15,41 @@ import Skeleton from '@mui/material/Skeleton'
 import styles from '../../_exports.scss'
 import { Link } from 'react-router-dom'
 
-type PendingFriendRequestProps = {
-  request: CombinedRequestedFriendDataType
-}
+// type PendingFriendRequestProps = {
+//   request: CombinedRequestedFriendDataType
+// }
 
-const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
-  const [accepted, setAccepted] = useState(false)
+// const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
+//   const [accepted, setAccepted] = useState(false)
 
-  const { displayName, photoUrl, username } = request
+//   const { displayName, photoUrl, username } = request
 
-  const handleAcceptRequest = () => {
-    setAccepted(true)
-    acceptFriendRequest(username).catch((err: any) => {
-      toast.error(err, { position: 'bottom-center' })
-      setAccepted(false)
-    })
-  }
-  return (
-    <div className='friend-request'>
-      <div className='profile-picture-container'>
-        <img src={photoUrl} alt={displayName} />
-      </div>
-      <div className='display-name'>{displayName}</div>
-      <div className='username'>@{username}</div>
-      <button
-        className={`accept-request-btn btn-no-styles ${
-          accepted ? 'accepted' : ''
-        }`}
-        disabled={accepted}
-        onClick={handleAcceptRequest}
-      >
-        {accepted ? 'Accepted' : 'Accept'}
-      </button>
-    </div>
-  )
-}
+//   const handleAcceptRequest = () => {
+//     setAccepted(true)
+//     acceptFriendRequest(username).catch((err: any) => {
+//       toast.error(err, { position: 'bottom-center' })
+//       setAccepted(false)
+//     })
+//   }
+//   return (
+//     <div className='friend-request'>
+//       <div className='profile-picture-container'>
+//         <img src={photoUrl} alt={displayName} />
+//       </div>
+//       <div className='display-name'>{displayName}</div>
+//       <div className='username'>@{username}</div>
+//       <button
+//         className={`accept-request-btn btn-no-styles ${
+//           accepted ? 'accepted' : ''
+//         }`}
+//         disabled={accepted}
+//         onClick={handleAcceptRequest}
+//       >
+//         {accepted ? 'Accepted' : 'Accept'}
+//       </button>
+//     </div>
+//   )
+// }
 type SuggestedFriendProps = {
   friendData?: UserProfileDataType | null
   loading?: boolean
@@ -137,7 +134,6 @@ const FriendsList = () => {
   const [pendingFriendRequests, setPendingFriendRequests] = useState<
     CombinedRequestedFriendDataType[]
   >([])
-  const [friendsList, setFriendsList] = useState<CombinedFriendsDataType[]>([])
   const [suggestedFriendList, setSuggestedFriendList] = useState<
     UserProfileDataType[]
   >([])
@@ -147,9 +143,9 @@ const FriendsList = () => {
   useEffect(() => {
     getPendingFriendRequests()
       .then(res => {
-        console.log(res)
         if (res) {
           setPendingFriendRequests(res)
+          console.log(pendingFriendRequests)
         } else {
           setPendingFriendRequests([])
         }
@@ -176,6 +172,7 @@ const FriendsList = () => {
       .catch(err => {
         setSuggestedLoading(false)
       })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -186,7 +183,7 @@ const FriendsList = () => {
           return <PendingFriendRequest key={req.friendUID} request={req} />
         })}
       </div> */}
-      <div className='friends-list'>
+      {/* <div className='friends-list'>
         {friendsList.map(friend => {
           const { photoUrl, displayName, username } = friend
           return (
@@ -199,7 +196,7 @@ const FriendsList = () => {
             </div>
           )
         })}
-      </div>
+      </div> */}
       <div className='suggested-friends-container'>
         <div className='account-header'>Suggested Friends</div>
         <div className='suggested-friends-list'>
