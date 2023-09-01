@@ -52,8 +52,8 @@ const FriendQRModal = ({
             value={url}
             fgColor={styles.secondaryBackground}
             className='qr'
-            level='H'
-            bgColor={styles.secondary}
+            level='L'
+            bgColor={styles.primary}
           />
           <div className='text'>Pump track</div>
         </div>
