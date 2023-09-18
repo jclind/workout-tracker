@@ -75,6 +75,7 @@ const Account = () => {
         loading={userDetailsLoading}
         setLoading={setUserDetailsLoading}
         numFriends={numFriends}
+        currUserIsAuthor={currUserIsAuthor}
       />
       {currUserIsAuthor && <LastWorkout />}
       {currUserIsAuthor === false && friendshipStatus && (

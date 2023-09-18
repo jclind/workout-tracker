@@ -6,16 +6,25 @@ import { UserProfileDataType } from '../../types'
 import FriendQRModal from '../FriendQRModal/FriendQRModal'
 import styles from '../../_exports.scss'
 import Skeleton from '@mui/material/Skeleton'
+import { useNavigate } from 'react-router-dom'
 
 type UserDetailsProps = {
   userData: UserProfileDataType | null
   numFriends: number | null
   loading: boolean
   setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  currUserIsAuthor: boolean | null
 }
 
-const UserDetails = ({ userData, numFriends, loading }: UserDetailsProps) => {
+const UserDetails = ({
+  userData,
+  numFriends,
+  loading,
+  currUserIsAuthor,
+}: UserDetailsProps) => {
   const [isFriendQRModalOpen, setIsFriendQRModalOpen] = useState(false)
+
+  const navigate = useNavigate()
 
   return (
     <div className='user-details'>
@@ -90,7 +99,11 @@ const UserDetails = ({ userData, numFriends, loading }: UserDetailsProps) => {
         )}
       </div>
       <div className='small-data'>
-        <div className='item'>
+        <button
+          className='item btn-no-styles'
+          disabled={!currUserIsAuthor || loading}
+          onClick={() => navigate(`friends`)}
+        >
           <div className='value'>
             {!userData || loading ? (
               <Skeleton
@@ -106,7 +119,7 @@ const UserDetails = ({ userData, numFriends, loading }: UserDetailsProps) => {
             )}
           </div>
           <div className='label'>Friends</div>
-        </div>
+        </button>
         <div className='item'>
           <div className='value'>
             {!userData || loading ? (

@@ -413,6 +413,45 @@ export const addFriend = functions.https.onCall(async (data, context) => {
     .doc(`userProfileData/${friendUID}/requested/${currUID}`)
     .set({ ...requestedData })
 })
+export const removeFriend = functions.https.onCall(async (data, context) => {
+  const currUID = data.currUID
+  const friendUID = data.friendUID
+
+  if (!context.auth || context.auth.uid !== currUID) {
+    throw new functions.https.HttpsError(
+      'unauthenticated',
+      'only authenticated users can request'
+    )
+  }
+
+  if (!friendUID || !currUID) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'friendUID and currUID must be provided'
+    )
+  }
+
+  await firestore
+    .doc(`userProfileData/${currUID}/friends/${friendUID}`)
+    .delete()
+  const currUserDocRef = firestore.doc(`userProfileData/${currUID}`)
+  currUserDocRef.set(
+    {
+      numFriends: admin.firestore.FieldValue.increment(-1),
+    },
+    { merge: true }
+  )
+  await firestore
+    .doc(`userProfileData/${friendUID}/friends/${currUID}`)
+    .delete()
+  const friendDocRef = firestore.doc(`userProfileData/${friendUID}`)
+  friendDocRef.set(
+    {
+      numFriends: admin.firestore.FieldValue.increment(-1),
+    },
+    { merge: true }
+  )
+})
 export const acceptFriendRequest = functions.https.onCall(
   async (data, context) => {
     if (!context.auth) {
@@ -425,11 +464,12 @@ export const acceptFriendRequest = functions.https.onCall(
     const currUID = data.currUID
     const friendUID = data.friendUID
     const friendUsername = data.friendUsername
+    const currUsername = data.currUsername
 
-    if (!friendUID || !friendUsername || !currUID) {
+    if (!friendUID || !friendUsername || !currUID || !currUsername) {
       throw new functions.https.HttpsError(
         'invalid-argument',
-        'friendUID, friendUsername and currUID must all be provided'
+        'friendUID, friendUsername, currUID and currUsername must all be provided'
       )
     }
 
@@ -456,31 +496,49 @@ export const acceptFriendRequest = functions.https.onCall(
       )
     }
 
-    const date = new Date().getTime()
+    const dateFriended = new Date().getTime()
 
-    const currUserFriendData: FriendsData = {
+    const incomingFriendData: FriendsData = {
       friendUID: data.friendUID,
       friendUsername: data.friendUsername,
-      dateFriended: date,
+      dateFriended,
+    }
+    const outgoingFriendData: FriendsData = {
+      friendUID: currUID,
+      friendUsername: currUsername,
+      dateFriended,
     }
 
+    // update current user
     await firestore
       .doc(`userProfileData/${currUID}/friends/${friendUID}`)
-      .set({ ...currUserFriendData })
-
+      .set({ ...incomingFriendData })
     const currUserDocRef = firestore.doc(`userProfileData/${currUID}`)
-
-    await currUserDocRef.set(
+    currUserDocRef.set(
       {
         numFriends: admin.firestore.FieldValue.increment(1),
       },
       { merge: true }
     )
+    firestore.doc(`userProfileData/${currUID}/requested/${friendUID}`).delete()
+
+    // update friend
+    await firestore
+      .doc(`userProfileData/${friendUID}/friends/${currUID}`)
+      .set({ ...outgoingFriendData })
+    const friendDocRef = firestore.doc(`userProfileData/${friendUID}`)
+    friendDocRef.set(
+      {
+        numFriends: admin.firestore.FieldValue.increment(1),
+      },
+      { merge: true }
+    )
+    firestore.doc(`userProfileData/${friendUID}/pending/${currUID}`).delete()
 
     return 'test'
   }
 )
-export const getPendingFriendRequests = functions.https.onCall(
+export const getIncomingFriendRequests = functions.https.onCall(
   async (data, context) => {
     if (!data.uid) {
       throw new functions.https.HttpsError(

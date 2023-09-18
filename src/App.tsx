@@ -17,6 +17,10 @@ import Charts from './Pages/Charts/Charts'
 import Layout from './Components/Layout/Layout'
 import Account from './Pages/Account/Account'
 import { PUMP_TRACK_LS_USERNAME } from './services/PUMP_TRACK_LS'
+import Friends from './Pages/Friends/Friends'
+import FriendsList from './Components/FriendsPage/FriendsList/FriendsList'
+import IncomingRequests from './Components/FriendsPage/IncomingRequests/IncomingRequests'
+import OutgoingRequests from './Components/FriendsPage/OutgoingRequests/OutgoingRequests'
 
 Modal.setAppElement('#root')
 
@@ -102,6 +106,17 @@ function App() {
               </Layout>
             }
           />
+          <Route
+            path='user/:username/friends'
+            element={
+              <Layout>
+                <Friends />
+              </Layout>
+            }
+          >
+            <Route path='requested' element={<IncomingRequests />} />
+            <Route path='pending' element={<OutgoingRequests />} />
+          </Route>
           <Route
             path='/charts'
             element={

@@ -1,0 +1,112 @@
+@import '../../../helpers.scss';
+
+.user-card {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  width: 90%;
+  background: $secondary-background;
+  padding: 0 0.5rem;
+  margin: 0 auto;
+  border-radius: $border-radius;
+  gap: 0.75rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  text-decoration: none;
+  color: $primary;
+  height: 66px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease-in-out 2s, opacity 0.3s ease-in-out 2s,
+    height 0.3s ease-in-out 2.4s, margin 0.3s ease-in-out 2.4s;
+  .profile-picture-container {
+    flex-shrink: 0;
+    height: 50px;
+    width: 50px;
+    img {
+      height: 100%;
+      width: 100%;
+      border-radius: 50%;
+    }
+  }
+  .user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-weight: 600;
+
+    .name {
+    }
+    .username {
+      color: $secondary-text;
+      font-size: 0.8rem;
+    }
+  }
+}
+.pending-actions,
+.friends-actions {
+  display: flex;
+  gap: 0.5rem;
+  button {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    font-weight: 600;
+    height: 26px;
+  }
+}
+.removed {
+  opacity: 0;
+  transform: translateX(-100%);
+  height: 0;
+  margin-bottom: 0;
+}
+.pending-actions {
+  .friend-added-successfully {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    color: $success-green;
+    padding: 0.5rem;
+  }
+  button.deny-btn {
+    background: $tertiary-background;
+    color: $secondary-text;
+    width: 55px;
+  }
+  button.accept-btn {
+    background: $secondary;
+    color: $primary;
+    width: 70px;
+  }
+}
+.friends-actions {
+  .friend-removed-text {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
+    color: $error-red;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+
+  button.remove-friend-btn,
+  button.cancel-remove-friend-btn {
+    color: $secondary-text;
+    background: $tertiary-background;
+  }
+
+  button.confirm-remove-friend-btn {
+    color: $secondary-text;
+    background: $error-red;
+    width: 75px;
+  }
+}
+.disabled-link {
+  pointer-events: none;
+}
