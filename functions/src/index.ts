@@ -1,23 +1,18 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 
+export const INCOMING_FRIEND_REQUESTS = 'incomingFriendRequests'
+export const OUTGOING_FRIEND_REQUESTS = 'outgoingFriendRequests'
+export const FRIENDS = 'friends'
+
+type FriendsStatusType = 'friends' | 'incoming' | 'outgoing' | 'not_friends'
+
 type FriendsData = {
   friendUID: string
   friendUsername: string
-  dateFriended: number
+  date: number
 }
-type FriendsStatusType = 'friends' | 'pending' | 'requested' | 'not_friends'
 
-type PendingFriendData = {
-  friendUID: string
-  pendingUsername: string
-  datePending: number
-}
-type RequestedFriendData = {
-  friendUID: string
-  requestedUsername: string
-  dateRequested: number
-}
 export type UserProfileDataType = {
   createdAt: number
   displayName: string
@@ -27,8 +22,8 @@ export type UserProfileDataType = {
   totalExercises: number
   lastActive?: number
 }
-export type CombinedRequestedFriendDataType = RequestedFriendData &
-  UserProfileDataType
+
+export type CombinedFriendsData = FriendsData & UserProfileDataType
 
 admin.initializeApp()
 const firestore = admin.firestore()
@@ -235,11 +230,6 @@ export const getNumberOfFriends = functions.https.onCall(
       })
 
     return numFriends
-
-    // const numFriends = await firestore
-    //   .collection(`userProfileData/${data.uid}/friends`).
-
-    // return { numFriends }
   }
 )
 const checkIfDocExistsInUserCollection = async (
@@ -287,13 +277,13 @@ export const getFriendshipStatusFunc = async (
   if (await checkIfDocExistsInUserCollection('friends', currUID, friendUID)) {
     status = 'friends'
   } else if (
-    await checkIfDocExistsInUserCollection('pending', currUID, friendUID)
+    await checkIfDocExistsInUserCollection('outgoing', currUID, friendUID)
   ) {
-    status = 'pending'
+    status = 'outgoing'
   } else if (
-    await checkIfDocExistsInUserCollection('requested', currUID, friendUID)
+    await checkIfDocExistsInUserCollection('incoming', currUID, friendUID)
   ) {
-    status = 'requested'
+    status = 'incoming'
   } else {
     status = 'not_friends'
   }
@@ -322,13 +312,13 @@ export const getFriendshipStatus = functions.https.onCall(
     if (await checkIfDocExistsInUserCollection('friends', currUID, friendUID)) {
       status = 'friends'
     } else if (
-      await checkIfDocExistsInUserCollection('pending', currUID, friendUID)
+      await checkIfDocExistsInUserCollection('outgoing', currUID, friendUID)
     ) {
-      status = 'pending'
+      status = 'outgoing'
     } else if (
-      await checkIfDocExistsInUserCollection('requested', currUID, friendUID)
+      await checkIfDocExistsInUserCollection('incoming', currUID, friendUID)
     ) {
-      status = 'requested'
+      status = 'incoming'
     } else {
       status = 'not_friends'
     }
@@ -368,24 +358,24 @@ export const addFriend = functions.https.onCall(async (data, context) => {
     )
   }
 
-  const isPending = await checkIfDocExistsInUserCollection(
-    'pending',
+  const isOutgoing = await checkIfDocExistsInUserCollection(
+    'outgoing',
     currUID,
     friendUID
   )
-  if (isPending) {
+  if (isOutgoing) {
     throw new functions.https.HttpsError(
       'failed-precondition',
       'friendship already pending, please refresh'
     )
   }
 
-  const isRequested = await checkIfDocExistsInUserCollection(
-    'requested',
+  const isIncoming = await checkIfDocExistsInUserCollection(
+    'incoming',
     currUID,
     friendUID
   )
-  if (isRequested) {
+  if (isIncoming) {
     throw new functions.https.HttpsError(
       'failed-precondition',
       'friendship already requested, please refresh'
@@ -394,24 +384,24 @@ export const addFriend = functions.https.onCall(async (data, context) => {
 
   const date = new Date().getTime()
 
-  const pendingData: PendingFriendData = {
-    datePending: date,
+  const friendsData: FriendsData = {
     friendUID,
-    pendingUsername: friendUsername,
+    friendUsername: friendUsername,
+    date: date,
   }
 
-  const requestedData: RequestedFriendData = {
-    dateRequested: date,
+  const currUsersData: FriendsData = {
     friendUID: currUID,
-    requestedUsername: currUsername,
+    friendUsername: currUsername,
+    date: date,
   }
 
   await firestore
-    .doc(`userProfileData/${currUID}/pending/${friendUID}`)
-    .set({ ...pendingData })
+    .doc(`userProfileData/${currUID}/${OUTGOING_FRIEND_REQUESTS}/${friendUID}`)
+    .set({ ...friendsData })
   await firestore
-    .doc(`userProfileData/${friendUID}/requested/${currUID}`)
-    .set({ ...requestedData })
+    .doc(`userProfileData/${friendUID}/${INCOMING_FRIEND_REQUESTS}/${currUID}`)
+    .set({ ...currUsersData })
 })
 export const removeFriend = functions.https.onCall(async (data, context) => {
   const currUID = data.currUID
@@ -432,7 +422,7 @@ export const removeFriend = functions.https.onCall(async (data, context) => {
   }
 
   await firestore
-    .doc(`userProfileData/${currUID}/friends/${friendUID}`)
+    .doc(`userProfileData/${currUID}/${FRIENDS}/${friendUID}`)
     .delete()
   const currUserDocRef = firestore.doc(`userProfileData/${currUID}`)
   currUserDocRef.set(
@@ -442,7 +432,7 @@ export const removeFriend = functions.https.onCall(async (data, context) => {
     { merge: true }
   )
   await firestore
-    .doc(`userProfileData/${friendUID}/friends/${currUID}`)
+    .doc(`userProfileData/${friendUID}/${FRIENDS}/${currUID}`)
     .delete()
   const friendDocRef = firestore.doc(`userProfileData/${friendUID}`)
   friendDocRef.set(
@@ -484,34 +474,34 @@ export const acceptFriendRequest = functions.https.onCall(
         'users are already friends'
       )
     }
-    const isRequested = await checkIfDocExistsInUserCollection(
-      'requested',
+    const isIncoming = await checkIfDocExistsInUserCollection(
+      'incoming',
       currUID,
       friendUID
     )
-    if (!isRequested) {
+    if (!isIncoming) {
       throw new functions.https.HttpsError(
         'failed-precondition',
         'must have requested friend in order to accept'
       )
     }
 
-    const dateFriended = new Date().getTime()
+    const date = new Date().getTime()
 
     const incomingFriendData: FriendsData = {
       friendUID: data.friendUID,
       friendUsername: data.friendUsername,
-      dateFriended,
+      date,
     }
     const outgoingFriendData: FriendsData = {
       friendUID: currUID,
       friendUsername: currUsername,
-      dateFriended,
+      date,
     }
 
     // update current user
     await firestore
-      .doc(`userProfileData/${currUID}/friends/${friendUID}`)
+      .doc(`userProfileData/${currUID}/${FRIENDS}/${friendUID}`)
       .set({ ...incomingFriendData })
     const currUserDocRef = firestore.doc(`userProfileData/${currUID}`)
     currUserDocRef.set(
@@ -520,11 +510,15 @@ export const acceptFriendRequest = functions.https.onCall(
       },
       { merge: true }
     )
-    firestore.doc(`userProfileData/${currUID}/requested/${friendUID}`).delete()
+    firestore
+      .doc(
+        `userProfileData/${currUID}/${INCOMING_FRIEND_REQUESTS}/${friendUID}`
+      )
+      .delete()
 
     // update friend
     await firestore
-      .doc(`userProfileData/${friendUID}/friends/${currUID}`)
+      .doc(`userProfileData/${friendUID}/${FRIENDS}/${currUID}`)
       .set({ ...outgoingFriendData })
     const friendDocRef = firestore.doc(`userProfileData/${friendUID}`)
     friendDocRef.set(
@@ -533,7 +527,11 @@ export const acceptFriendRequest = functions.https.onCall(
       },
       { merge: true }
     )
-    firestore.doc(`userProfileData/${friendUID}/pending/${currUID}`).delete()
+    firestore
+      .doc(
+        `userProfileData/${friendUID}/${OUTGOING_FRIEND_REQUESTS}/${currUID}`
+      )
+      .delete()
 
     return 'test'
   }
@@ -553,30 +551,71 @@ export const getIncomingFriendRequests = functions.https.onCall(
       )
     }
 
-    const limit = data.limit || 4
+    const limit = data.limit || 20
 
-    const pendingRequestsQuery = firestore
-      .collection(`userProfileData/${data.uid}/requested`)
-      .orderBy('dateRequested')
+    const incomingRequestsQuery = firestore
+      .collection(`userProfileData/${data.uid}/${INCOMING_FRIEND_REQUESTS}`)
+      .orderBy('date')
       .limit(limit)
-    const pendingRequestsSnapshot = await pendingRequestsQuery.get()
+    const incomingRequestsSnapshot = await incomingRequestsQuery.get()
 
-    const pendingRequestsData: CombinedRequestedFriendDataType[] = []
-    for (const doc of pendingRequestsSnapshot.docs) {
-      const requestData = doc.data() as RequestedFriendData
+    const incomingRequestsData: CombinedFriendsData[] = []
+    for (const doc of incomingRequestsSnapshot.docs) {
+      const requestData = doc.data() as FriendsData
       const requestUID = requestData.friendUID
 
       const userDoc = await firestore.doc(`userProfileData/${requestUID}`).get()
       const userData = userDoc.data() as UserProfileDataType
 
-      const combined: CombinedRequestedFriendDataType = {
+      const combined: CombinedFriendsData = {
         ...requestData,
         ...userData,
       }
-      pendingRequestsData.push(combined)
+      incomingRequestsData.push(combined)
     }
 
-    return pendingRequestsData
+    return incomingRequestsData
+  }
+)
+export const getOutgoingFriendRequests = functions.https.onCall(
+  async (data, context) => {
+    if (!data.uid) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'uid must be passed through data object'
+      )
+    }
+    if (!context.auth || context.auth.uid !== data.uid) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'only authenticated users can request'
+      )
+    }
+
+    const limit = data.limit || 10
+
+    const outgoingRequestsQuery = firestore
+      .collection(`userProfileData/${data.uid}/${OUTGOING_FRIEND_REQUESTS}`)
+      .orderBy('date')
+      .limit(limit)
+    const outgoingRequestsSnapshot = await outgoingRequestsQuery.get()
+
+    const outgoingRequestsData: CombinedFriendsData[] = []
+    for (const doc of outgoingRequestsSnapshot.docs) {
+      const requestData = doc.data() as FriendsData
+      const requestUID = requestData.friendUID
+
+      const userDoc = await firestore.doc(`userProfileData/${requestUID}`).get()
+      const userData = userDoc.data() as UserProfileDataType
+
+      const combined: CombinedFriendsData = {
+        ...requestData,
+        ...userData,
+      }
+      outgoingRequestsData.push(combined)
+    }
+
+    return outgoingRequestsData
   }
 )
 export const getSuggestedFriends = functions.https.onCall(
@@ -642,7 +681,7 @@ export const getSuggestedFriends = functions.https.onCall(
     return friendsList
   }
 )
-export const removePendingRequest = functions.https.onCall(
+export const removeIncomingRequest = functions.https.onCall(
   async (data, context) => {
     const currUID = data.currUID
     const friendUID = data.friendUID
@@ -659,9 +698,47 @@ export const removePendingRequest = functions.https.onCall(
       )
     }
 
-    firestore.doc(`userProfileData/${currUID}/pending/${friendUID}`).delete()
     firestore
-      .doc(`userProfileData/${friendUID}/requested/${currUID}`)
+      .doc(
+        `userProfileData/${currUID}/${INCOMING_FRIEND_REQUESTS}/${friendUID}`
+      )
+      .delete()
+    firestore
+      .doc(
+        `userProfileData/${friendUID}/${OUTGOING_FRIEND_REQUESTS}/${currUID}`
+      )
+      .delete()
+      .then(() => {
+        return 'test'
+      })
+  }
+)
+export const removeOutgoingRequest = functions.https.onCall(
+  async (data, context) => {
+    const currUID = data.currUID
+    const friendUID = data.friendUID
+    if (!currUID || !friendUID) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'currUID and friendUID must be passed through data object'
+      )
+    }
+    if (!context.auth || context.auth.uid !== currUID) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'only authenticated users can request'
+      )
+    }
+
+    firestore
+      .doc(
+        `userProfileData/${currUID}/${OUTGOING_FRIEND_REQUESTS}/${friendUID}`
+      )
+      .delete()
+    firestore
+      .doc(
+        `userProfileData/${friendUID}/${INCOMING_FRIEND_REQUESTS}/${currUID}`
+      )
       .delete()
       .then(() => {
         return 'test'

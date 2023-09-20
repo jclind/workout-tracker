@@ -1,35 +1,46 @@
 import React, { useEffect, useState } from 'react'
 import './OutgoingRequests.scss'
-import { CombinedRequestedFriendDataType } from '../../../types'
-import { getPendingFriendRequests } from '../../../services/friends'
+import { CombinedFriendsData } from '../../../types'
 import UserCard from '../UserCard/UserCard'
+import { getOutgoingFriendRequests } from '../../../services/friends'
 
-const RequestedFriends = () => {
-  const [pendingList, setPendingList] = useState<
-    CombinedRequestedFriendDataType[] | null
+const OutgoingRequests = () => {
+  const [outgoingList, setOutgoingList] = useState<
+    CombinedFriendsData[] | null
   >(null)
+  const [loading, setLoading] = useState(true)
 
-  const handleGetPending = async () => {
-    const res = await getPendingFriendRequests()
-    console.log(res)
+  const handleGetOutgoingFriendRequests = async () => {
+    setLoading(true)
+    const res = await getOutgoingFriendRequests()
     if (res) {
-      setPendingList(res)
+      setOutgoingList(res)
     }
+    setLoading(false)
   }
+
   useEffect(() => {
-    console.log('test')
-    handleGetPending()
+    handleGetOutgoingFriendRequests()
   }, [])
   return (
-    <div>
-      {pendingList &&
-        pendingList.map(user => {
-          return (
-            <UserCard key={user.friendUID} user={user} type={'requested'} />
-          )
-        })}
+    <div className='outgoing-requests-page'>
+      <div className='list'>
+        {!loading && outgoingList ? (
+          outgoingList.map(user => {
+            return (
+              <UserCard key={user.friendUID} user={user} type={'outgoing'} />
+            )
+          })
+        ) : (
+          <>
+            <UserCard user={null} type='outgoing' loading={true} />
+            <UserCard user={null} type='outgoing' loading={true} />
+            <UserCard user={null} type='outgoing' loading={true} />
+          </>
+        )}
+      </div>
     </div>
   )
 }
 
-export default RequestedFriends
+export default OutgoingRequests

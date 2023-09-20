@@ -43,8 +43,9 @@
     }
   }
 }
-.pending-actions,
-.friends-actions {
+.incoming-actions,
+.friends-actions,
+.outgoing-actions {
   display: flex;
   gap: 0.5rem;
   button {
@@ -63,7 +64,7 @@
   height: 0;
   margin-bottom: 0;
 }
-.pending-actions {
+.incoming-actions {
   .friend-added-successfully {
     display: flex;
     justify-content: center;
@@ -105,6 +106,13 @@
     color: $secondary-text;
     background: $error-red;
     width: 75px;
+  }
+}
+.outgoing-actions {
+  .remove-btn {
+    background: $tertiary-background;
+    color: $secondary-text;
+    width: 80px;
   }
 }
 .disabled-link {

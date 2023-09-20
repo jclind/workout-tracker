@@ -59,13 +59,6 @@ const Account = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUserIsAuthor])
 
-  // const handleAddFriend = () => {
-  //   if (username) {
-  //     addFriend(username)
-  //     setFriendshipStatus('pending')
-  //   }
-  // }
-
   if (!username) return null
 
   return (

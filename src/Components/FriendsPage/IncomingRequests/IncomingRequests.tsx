@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import './IncomingRequests.scss'
-import { CombinedRequestedFriendDataType } from '../../../types'
 import { getIncomingFriendRequests } from '../../../services/friends'
 import UserCard from '../UserCard/UserCard'
-import { AiOutlineMail } from 'react-icons/ai'
 import NoDataAnimation from '../../NoDataAnimation/NoDataAnimation'
+import { CombinedFriendsData } from '../../../types'
 
-const PendingFriendRequests = () => {
+const IncomingFriendRequests = () => {
   const [incomingList, setIncomingList] = useState<
-    CombinedRequestedFriendDataType[] | null
+    CombinedFriendsData[] | null
   >(null)
   const [loading, setLoading] = useState(true)
 
   const [isData, setIsData] = useState(true)
 
-  const handleGetPending = async () => {
+  const handleGetIncomingFriendRequests = async () => {
     setLoading(true)
     const res = await getIncomingFriendRequests()
-    console.log(res)
     if (res && res.length > 0) {
       setIncomingList(res)
     } else {
@@ -26,7 +24,7 @@ const PendingFriendRequests = () => {
     setLoading(false)
   }
   useEffect(() => {
-    handleGetPending()
+    handleGetIncomingFriendRequests()
   }, [])
   return (
     <div className='incoming-requests-page'>
@@ -44,15 +42,15 @@ const PendingFriendRequests = () => {
         <div className='list'>
           {loading && (
             <>
-              <UserCard user={null} type='requested' loading={true} />
-              <UserCard user={null} type='requested' loading={true} />
-              <UserCard user={null} type='requested' loading={true} />
+              <UserCard user={null} type='incoming' loading={true} />
+              <UserCard user={null} type='incoming' loading={true} />
+              <UserCard user={null} type='incoming' loading={true} />
             </>
           )}
           {incomingList &&
             incomingList.map(user => {
               return (
-                <UserCard key={user.friendUID} user={user} type='requested' />
+                <UserCard key={user.friendUID} user={user} type='incoming' />
               )
             })}
         </div>
@@ -61,4 +59,4 @@ const PendingFriendRequests = () => {
   )
 }
 
-export default PendingFriendRequests
+export default IncomingFriendRequests

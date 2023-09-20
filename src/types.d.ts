@@ -53,30 +53,17 @@ export type UserFriendsListType = {
   }
 }
 
-export type CombinedRequestedFriendDataType = RequestedFriendData &
-  UserProfileDataType
-
-export type PendingFriendData = {
-  friendUID: string
-  pendingUsername: string
-  datePending: number
-}
-export type RequestedFriendData = {
-  friendUID: string
-  requestedUsername: string
-  dateRequested: number
-}
 export type FriendsData = {
   friendUID: string
   friendUsername: string
-  dateFriended: number
+  date: number
 }
-export type CombinedFriendsDataType = FriendsData & UserProfileDataType
+export type CombinedFriendsData = FriendsData & UserProfileDataType
 
 export type FriendsStatusType =
   | 'friends'
-  | 'pending'
-  | 'requested'
+  | 'incoming'
+  | 'outgoing'
   | 'not_friends'
 
 export type TimePeriodType =

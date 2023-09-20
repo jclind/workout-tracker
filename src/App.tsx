@@ -114,8 +114,8 @@ function App() {
               </Layout>
             }
           >
-            <Route path='requested' element={<IncomingRequests />} />
-            <Route path='pending' element={<OutgoingRequests />} />
+            <Route path='incoming' element={<IncomingRequests />} />
+            <Route path='outgoing' element={<OutgoingRequests />} />
           </Route>
           <Route
             path='/charts'

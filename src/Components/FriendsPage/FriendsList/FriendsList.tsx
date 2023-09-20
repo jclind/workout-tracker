@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react'
 import './FriendsList.scss'
 import { getFriends } from '../../../services/friends'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
-import { CombinedFriendsDataType } from '../../../types'
 import UserCard from '../UserCard/UserCard'
+import { CombinedFriendsData } from '../../../types'
 
 const FriendsList = () => {
-  const [friends, setFriends] = useState<CombinedFriendsDataType[] | null>(null)
+  const [friends, setFriends] = useState<CombinedFriendsData[] | null>(null)
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
     DocumentData

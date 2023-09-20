@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import './Friends.scss'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import FriendsList from '../../Components/FriendsPage/FriendsList/FriendsList'
-import { getNumRequested, getNumberOfFriends } from '../../services/friends'
+import { getNumIncoming, getNumberOfFriends } from '../../services/friends'
 import { getUsername } from '../../services/auth'
 
 const Friends = () => {
@@ -11,7 +11,7 @@ const Friends = () => {
   const pathParts = location.pathname.split('/')
   const endPath = pathParts[pathParts.length - 1]
 
-  const [numRequested, setNumRequested] = useState<number | null>(null)
+  const [numIncoming, setNumIncoming] = useState<number | null>(null)
   const [numFriends, setNumFriends] = useState<number | null>(null)
 
   const [currUsername, setCurrUsername] = useState<string | null>(null)
@@ -24,8 +24,8 @@ const Friends = () => {
       if (!location.pathname.includes(`/user/${currUsername}/friends`)) {
         navigate('/')
       } else {
-        getNumRequested().then(res => {
-          setNumRequested(res ?? null)
+        getNumIncoming().then(res => {
+          setNumIncoming(res ?? null)
         })
         getNumberOfFriends().then(res => {
           setNumFriends(res ?? null)
@@ -41,17 +41,17 @@ const Friends = () => {
       <div className='title'>Friends page</div>
       <div className='page-options'>
         <Link
-          to='requested'
-          className={`link ${endPath === 'requested' ? 'active' : ''}`}
+          to='incoming'
+          className={`link ${endPath === 'incoming' ? 'active' : ''}`}
         >
-          Requests {numRequested ? `(${numRequested})` : ''}
+          Requests {numIncoming ? `(${numIncoming})` : ''}
         </Link>
         <Link to='' className={`link ${endPath === 'friends' ? 'active' : ''}`}>
           Friends {numFriends ? `(${numFriends})` : ''}
         </Link>
         <Link
-          to='pending'
-          className={`link ${endPath === 'pending' ? 'active' : ''}`}
+          to='outgoing'
+          className={`link ${endPath === 'outgoing' ? 'active' : ''}`}
         >
           Pending
         </Link>

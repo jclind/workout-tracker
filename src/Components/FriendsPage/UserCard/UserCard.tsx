@@ -1,13 +1,10 @@
 import React, { useState } from 'react'
 import './UserCard.scss'
+import { CombinedFriendsData } from '../../../types'
 import {
-  CombinedFriendsDataType,
-  CombinedRequestedFriendDataType,
-} from '../../../types'
-import {
-  acceptFriendRequest,
   removeFriend,
-  removePendingRequest,
+  removeIncomingRequest,
+  removeOutgoingRequest,
 } from '../../../services/friends'
 import { TailSpin } from 'react-loader-spinner'
 import Skeleton from '@mui/material/Skeleton'
@@ -15,17 +12,14 @@ import styles from '../../../_exports.scss'
 import { Link } from 'react-router-dom'
 import { AiOutlineCheck } from 'react-icons/ai'
 
-type UserDataType =
-  | CombinedRequestedFriendDataType
-  | CombinedFriendsDataType
-  | null
+type UserDataType = CombinedFriendsData | null
 
 type CardTypeProps = {
   user: UserDataType
   loading: boolean
   removeFromList: (uid: string) => void
 }
-const PendingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
+const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   const [isFriends, setIsFriends] = useState(false)
   const [denyRequestLoading, setDenyRequestLoading] = useState(false)
   const [acceptRequestLoading, setAcceptRequestLoading] = useState(false)
@@ -37,7 +31,7 @@ const PendingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
     e.preventDefault()
     if (user) {
       setDenyRequestLoading(true)
-      removePendingRequest(user.username).then(() => {
+      removeIncomingRequest(user.username).then(() => {
         setDenyRequestLoading(false)
       })
     }
@@ -63,7 +57,7 @@ const PendingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
     loading || denyRequestLoading || acceptRequestLoading || !user
 
   return (
-    <div className={`pending-actions`}>
+    <div className={`incoming-actions`}>
       <>
         {isFriends ? (
           <div className='friend-added-successfully'>
@@ -215,9 +209,59 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   )
 }
 
+const OutgoingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
+  const [removeRequestLoading, setRemoveRequestLoading] = useState(false)
+
+  const isBtnDisabled = loading || !user || removeRequestLoading
+
+  const handleRemoveRequest = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.stopPropagation()
+    e.preventDefault()
+    if (user) {
+      setRemoveRequestLoading(true)
+
+      removeOutgoingRequest(user.friendUID).then(() => {
+        removeFromList(user.friendUID)
+      })
+    }
+  }
+
+  return (
+    <div className='outgoing-actions'>
+      {loading ? (
+        <Skeleton
+          sx={{ bgcolor: styles.tertiaryBackground }}
+          variant='rounded'
+          width={80}
+          height={26}
+        />
+      ) : (
+        <button
+          className='no-styles-btn remove-btn'
+          disabled={isBtnDisabled}
+          onClick={handleRemoveRequest}
+        >
+          {removeRequestLoading ? (
+            <TailSpin
+              height='25'
+              width='25'
+              color={styles.secondary}
+              ariaLabel='loading'
+            />
+          ) : (
+            'Remove'
+          )}
+        </button>
+      )}
+    </div>
+  )
+}
+
 type UserCardProps = {
   user: UserDataType
-  type: 'requested' | 'friend' | 'pending'
+  type: 'incoming' | 'friend' | 'outgoing'
   removeFromList?: (uid: string) => void
   loading?: boolean
 }
@@ -281,14 +325,20 @@ const UserCard = ({ user, type, loading, removeFromList }: UserCardProps) => {
         </div>
       </div>
       <div className='actions'>
-        {type === 'requested' ? (
-          <PendingActions
+        {type === 'incoming' ? (
+          <IncomingActions
             loading={!!loading}
             user={user}
             removeFromList={handleRemoveFromList}
           />
         ) : type === 'friend' ? (
           <FriendActions
+            loading={!!loading}
+            user={user}
+            removeFromList={handleRemoveFromList}
+          />
+        ) : type === 'outgoing' ? (
+          <OutgoingActions
             loading={!!loading}
             user={user}
             removeFromList={handleRemoveFromList}
