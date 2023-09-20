@@ -55,7 +55,9 @@ const Friends = () => {
         >
           Pending
         </Link>
-        <div className={`selected-indicator ${endPath}`}></div>
+        <div className={`selected-indicator ${endPath}`}>
+          <div className='inner'></div>
+        </div>
       </div>
       {location.pathname === `/user/${currUsername}/friends` ? (
         <FriendsList />

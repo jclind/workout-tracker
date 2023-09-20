@@ -144,7 +144,7 @@ export const getFriends = async <B extends boolean | undefined>(
       const userProfileRef = doc(db, 'userProfileData', uid)
       const userFriendsRef = collection(userProfileRef, `${FRIENDS}`)
 
-      let q = query(userFriendsRef, orderBy('dateFriended', 'desc'), limit(20))
+      let q = query(userFriendsRef, orderBy('date', 'desc'), limit(20))
       if (lastDoc) {
         q = query(q, startAfter(lastDoc))
       }

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import './UserCard.scss'
 import { CombinedFriendsData } from '../../../types'
 import {
+  acceptFriendRequest,
   removeFriend,
   removeIncomingRequest,
   removeOutgoingRequest,
@@ -43,13 +44,10 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
     e.preventDefault()
     if (user) {
       setAcceptRequestLoading(true)
-      setTimeout(() => {
+      acceptFriendRequest(user.username).then(() => {
         setAcceptRequestLoading(false)
         removeFromList(user.friendUID)
-      }, 3000)
-      // acceptFriendRequest(user.username).then(() => {
-
-      // })
+      })
     }
   }
 
@@ -162,10 +160,19 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   }
 
   const isBtnDisabled = loading || removeFriendLoading || !user
-
+  console.log(loading)
   return (
     <div className={`friends-actions`}>
-      {friendRemoved ? (
+      {loading ? (
+        <>
+          <Skeleton
+            sx={{ bgcolor: styles.tertiaryBackground }}
+            variant='rounded'
+            width={75}
+            height={26}
+          />
+        </>
+      ) : friendRemoved ? (
         <div className='friend-removed-text'>
           <AiOutlineCheck />
           Removed

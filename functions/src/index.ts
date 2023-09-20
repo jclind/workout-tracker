@@ -237,8 +237,18 @@ const checkIfDocExistsInUserCollection = async (
   currUID: string,
   friendUID: string
 ) => {
+  let collectionName: string
+  switch (collection) {
+    case 'incoming':
+    case 'outgoing':
+      collectionName = collection + 'FriendRequests'
+      break
+    default:
+      collectionName = collection
+  }
+
   const docRef = firestore.doc(
-    `userProfileData/${currUID}/${collection}/${friendUID}`
+    `userProfileData/${currUID}/${collectionName}/${friendUID}`
   )
   const docSnapshot = await docRef.get()
 

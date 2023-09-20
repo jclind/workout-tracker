@@ -11,13 +11,17 @@ const FriendsList = () => {
     DocumentData,
     DocumentData
   > | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const handleGetFriends = async (
     currLastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
   ) => {
+    setLoading(true)
     const res = await getFriends(currLastDoc, { returnUserData: true })
     setLastDoc(res.lastDoc)
     setFriends(res.friendsData)
+    console.log(res)
+    setLoading(false)
   }
   useEffect(() => {
     handleGetFriends(lastDoc)
@@ -33,19 +37,24 @@ const FriendsList = () => {
   return (
     <div className='friends-list-page'>
       <div className='list'>
-        <>
-          {friends &&
-            friends.map(user => {
-              return (
-                <UserCard
-                  key={user.friendUID}
-                  user={user}
-                  type='friend'
-                  removeFromList={removeFriendFromList}
-                />
-              )
-            })}
-        </>
+        {friends && !loading ? (
+          friends.map(user => {
+            return (
+              <UserCard
+                key={user.friendUID}
+                user={user}
+                type='friend'
+                removeFromList={removeFriendFromList}
+              />
+            )
+          })
+        ) : (
+          <>
+            <UserCard user={null} type='friend' loading={true} />
+            <UserCard user={null} type='friend' loading={true} />
+            <UserCard user={null} type='friend' loading={true} />
+          </>
+        )}
       </div>
     </div>
   )
