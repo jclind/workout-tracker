@@ -29,7 +29,7 @@ const IncomingFriendRequests = () => {
   return (
     <div className='incoming-requests-page'>
       {!isData ? (
-        <div className='no-data'>
+        <div className='friends-no-data'>
           <NoDataAnimation />
 
           <div className='no-data-title'>No Friend Requests</div>

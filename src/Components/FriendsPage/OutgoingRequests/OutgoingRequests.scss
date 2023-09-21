@@ -2,6 +2,9 @@
 
 .outgoing-requests-page {
   width: 100%;
+  .no-data {
+    margin: 0 auto;
+  }
   .list {
     display: flex;
     flex-direction: column;

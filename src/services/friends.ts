@@ -131,10 +131,12 @@ export const getFriends = async <B extends boolean | undefined>(
   B extends true
     ? {
         friendsData: CombinedFriendsData[]
+        numFriends: number
         lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
       }
     : {
         friendsData: FriendsData[]
+        numFriends: number
         lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
       }
 > => {
@@ -144,12 +146,13 @@ export const getFriends = async <B extends boolean | undefined>(
       const userProfileRef = doc(db, 'userProfileData', uid)
       const userFriendsRef = collection(userProfileRef, `${FRIENDS}`)
 
-      let q = query(userFriendsRef, orderBy('date', 'desc'), limit(20))
+      let q = query(userFriendsRef, orderBy('date', 'desc'), limit(1))
       if (lastDoc) {
         q = query(q, startAfter(lastDoc))
       }
       const userFriendsSnapshot = await getDocs(q)
-
+      const username = await getUsername()
+      const numFriends = (await getNumberOfFriends(username)) || 0
       const friends: FriendsData[] = []
       const newLastDoc =
         userFriendsSnapshot.docs[userFriendsSnapshot.docs.length - 1]
@@ -180,10 +183,15 @@ export const getFriends = async <B extends boolean | undefined>(
         const returnData = {
           friendsData: combinedUserData,
           lastDoc: newLastDoc,
+          numFriends,
         }
         return returnData
       } else {
-        const returnData = { friendsData: friends as any, lastDoc: newLastDoc }
+        const returnData = {
+          friendsData: friends as any,
+          lastDoc: newLastDoc,
+          numFriends,
+        }
         return returnData
       }
     }
@@ -193,7 +201,7 @@ export const getFriends = async <B extends boolean | undefined>(
     toast.error(message, { position: 'bottom-center' })
   }
 
-  return { friendsData: [], lastDoc: null }
+  return { friendsData: [], lastDoc: null, numFriends: 0 }
 }
 export const getNumberOfFriends = async (username: string | null = null) => {
   try {
