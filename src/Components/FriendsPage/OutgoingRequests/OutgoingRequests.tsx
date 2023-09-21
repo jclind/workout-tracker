@@ -28,7 +28,7 @@ const OutgoingRequests = () => {
   }, [])
   return (
     <div className='outgoing-requests-page'>
-      <div className='list'>
+      <div className='friends-list'>
         {!isData ? (
           <div className='friends-no-data'>
             <NoDataAnimation />

@@ -22,15 +22,21 @@ import {
   OUTGOING_FRIEND_REQUESTS,
 } from '../assets/globalVars/userProfileCollections'
 
-export const getFriendshipStatus = async (friendUID: string | null = null) => {
+export const getFriendshipStatus = async (friendUsername: string) => {
   const currUID = auth?.currentUser?.uid
+  const friendUID = await getUIDFromUsername(friendUsername)
 
   if (currUID && friendUID) {
     const cloudGetFriendshipStatus = httpsCallable(
       firebaseFunctions,
       'getFriendshipStatus'
     )
-    const status: any = await cloudGetFriendshipStatus({ currUID, friendUID })
+    const statusRes: any = await cloudGetFriendshipStatus({
+      currUID,
+      friendUID,
+    })
+
+    const status = statusRes.data
 
     if (['friends', 'incoming', 'outgoing', 'not_friends'].includes(status)) {
       return status

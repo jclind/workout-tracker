@@ -98,7 +98,7 @@
     padding: 0.5rem;
   }
 
-  button.remove-friend-btn,
+  button.remove-btn,
   button.cancel-remove-friend-btn {
     color: $secondary-text;
     background: $tertiary-background;
@@ -107,7 +107,7 @@
   button.confirm-remove-friend-btn {
     color: $secondary-text;
     background: $error-red;
-    width: 75px;
+    width: 80px;
   }
 }
 .outgoing-actions {

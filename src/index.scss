@@ -167,6 +167,13 @@ label.fade {
   }
 }
 
+.friends-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: height 0.3s ease-in-out;
+}
+
 .friends-no-data {
   display: flex;
   flex-direction: column;

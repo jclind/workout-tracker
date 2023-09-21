@@ -2,12 +2,7 @@
 
 .friends-list-page {
   width: 100%;
-  .list {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    transition: height 0.3s ease-in-out;
-  }
+
   .load-more-btn-container {
     margin: 0 auto;
     width: 90%;

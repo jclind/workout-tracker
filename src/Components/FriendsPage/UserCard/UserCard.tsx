@@ -46,6 +46,7 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
       setAcceptRequestLoading(true)
       acceptFriendRequest(user.username).then(() => {
         setAcceptRequestLoading(false)
+        setIsFriends(true)
         removeFromList(user.friendUID)
       })
     }
@@ -167,7 +168,7 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
           <Skeleton
             sx={{ bgcolor: styles.tertiaryBackground }}
             variant='rounded'
-            width={75}
+            width={80}
             height={26}
           />
         </>
@@ -204,7 +205,7 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
         </>
       ) : (
         <button
-          className='btn-no-styles remove-friend-btn'
+          className='btn-no-styles remove-btn'
           onClick={handleRemoveFriendClick}
           disabled={isBtnDisabled}
         >

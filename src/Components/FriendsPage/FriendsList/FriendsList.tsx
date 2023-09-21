@@ -21,7 +21,6 @@ const FriendsList = () => {
     currLastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
   ) => {
     const res = await getFriends(currLastDoc, { returnUserData: true })
-    console.log(res)
     const updatedFriends = [...friends, ...res.friendsData]
     setLastDoc(res.lastDoc)
     setFriends(updatedFriends)
@@ -49,7 +48,7 @@ const FriendsList = () => {
 
   return (
     <div className='friends-list-page'>
-      <div className='list'>
+      <div className='friends-list'>
         {!isMoreData && friends.length <= 0 ? (
           <div className='friends-no-data'>
             <NoDataAnimation />

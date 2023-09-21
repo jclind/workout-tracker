@@ -49,6 +49,7 @@ const Account = () => {
   useEffect(() => {
     if (currUserIsAuthor === false && username) {
       getFriendshipStatus(username).then(res => {
+        console.log(res)
         if (res) {
           setFriendshipStatus(res)
         } else {
@@ -58,6 +59,10 @@ const Account = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUserIsAuthor])
+
+  useEffect(() => {
+    console.log(friendshipStatus)
+  }, [friendshipStatus])
 
   if (!username) return null
 
@@ -71,13 +76,15 @@ const Account = () => {
         currUserIsAuthor={currUserIsAuthor}
       />
       {currUserIsAuthor && <LastWorkout />}
-      {currUserIsAuthor === false && friendshipStatus && (
-        <FriendStatusButton
-          friendshipStatus={friendshipStatus}
-          setFriendshipStatus={setFriendshipStatus}
-          accountUsername={username}
-        />
-      )}
+      {currUserIsAuthor === false &&
+        friendshipStatus &&
+        friendshipStatus !== 'friends' && (
+          <FriendStatusButton
+            friendshipStatus={friendshipStatus}
+            setFriendshipStatus={setFriendshipStatus}
+            accountUsername={username}
+          />
+        )}
 
       {currUserIsAuthor && <FriendsList />}
     </div>

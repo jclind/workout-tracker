@@ -39,7 +39,7 @@ const IncomingFriendRequests = () => {
           </p>
         </div>
       ) : (
-        <div className='list'>
+        <div className='friends-list'>
           {loading && (
             <>
               <UserCard user={null} type='incoming' loading={true} />
