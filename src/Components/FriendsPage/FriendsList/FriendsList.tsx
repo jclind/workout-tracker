@@ -21,6 +21,7 @@ const FriendsList = () => {
     currLastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
   ) => {
     const res = await getFriends(currLastDoc, { returnUserData: true })
+    console.log(res)
     const updatedFriends = [...friends, ...res.friendsData]
     setLastDoc(res.lastDoc)
     setFriends(updatedFriends)

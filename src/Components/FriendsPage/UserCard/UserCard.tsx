@@ -160,7 +160,6 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   }
 
   const isBtnDisabled = loading || removeFriendLoading || !user
-  console.log(loading)
   return (
     <div className={`friends-actions`}>
       {loading ? (

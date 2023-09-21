@@ -546,88 +546,6 @@ export const acceptFriendRequest = functions.https.onCall(
     return 'test'
   }
 )
-export const getIncomingFriendRequests = functions.https.onCall(
-  async (data, context) => {
-    if (!data.uid) {
-      throw new functions.https.HttpsError(
-        'invalid-argument',
-        'uid must be passed through data object'
-      )
-    }
-    if (!context.auth || context.auth.uid !== data.uid) {
-      throw new functions.https.HttpsError(
-        'unauthenticated',
-        'only authenticated users can request'
-      )
-    }
-
-    const limit = data.limit || 20
-
-    const incomingRequestsQuery = firestore
-      .collection(`userProfileData/${data.uid}/${INCOMING_FRIEND_REQUESTS}`)
-      .orderBy('date')
-      .limit(limit)
-    const incomingRequestsSnapshot = await incomingRequestsQuery.get()
-
-    const incomingRequestsData: CombinedFriendsData[] = []
-    for (const doc of incomingRequestsSnapshot.docs) {
-      const requestData = doc.data() as FriendsData
-      const requestUID = requestData.friendUID
-
-      const userDoc = await firestore.doc(`userProfileData/${requestUID}`).get()
-      const userData = userDoc.data() as UserProfileDataType
-
-      const combined: CombinedFriendsData = {
-        ...requestData,
-        ...userData,
-      }
-      incomingRequestsData.push(combined)
-    }
-
-    return incomingRequestsData
-  }
-)
-export const getOutgoingFriendRequests = functions.https.onCall(
-  async (data, context) => {
-    if (!data.uid) {
-      throw new functions.https.HttpsError(
-        'invalid-argument',
-        'uid must be passed through data object'
-      )
-    }
-    if (!context.auth || context.auth.uid !== data.uid) {
-      throw new functions.https.HttpsError(
-        'unauthenticated',
-        'only authenticated users can request'
-      )
-    }
-
-    const limit = data.limit || 10
-
-    const outgoingRequestsQuery = firestore
-      .collection(`userProfileData/${data.uid}/${OUTGOING_FRIEND_REQUESTS}`)
-      .orderBy('date')
-      .limit(limit)
-    const outgoingRequestsSnapshot = await outgoingRequestsQuery.get()
-
-    const outgoingRequestsData: CombinedFriendsData[] = []
-    for (const doc of outgoingRequestsSnapshot.docs) {
-      const requestData = doc.data() as FriendsData
-      const requestUID = requestData.friendUID
-
-      const userDoc = await firestore.doc(`userProfileData/${requestUID}`).get()
-      const userData = userDoc.data() as UserProfileDataType
-
-      const combined: CombinedFriendsData = {
-        ...requestData,
-        ...userData,
-      }
-      outgoingRequestsData.push(combined)
-    }
-
-    return outgoingRequestsData
-  }
-)
 export const getSuggestedFriends = functions.https.onCall(
   async (data, context) => {
     const uid = data.uid
@@ -753,6 +671,37 @@ export const removeOutgoingRequest = functions.https.onCall(
       .then(() => {
         return 'test'
       })
+  }
+)
+
+export const getUsersFriendData = functions.https.onCall(
+  async (data: { usersFriendList: FriendsData[] }, context) => {
+    const usersFriendList: FriendsData[] = data.usersFriendList
+    if (!usersFriendList) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'usersFriendList must be passed through data object'
+      )
+    }
+
+    const combinedUserData: CombinedFriendsData[] = await Promise.all(
+      usersFriendList.map(
+        async (friend: FriendsData): Promise<CombinedFriendsData> => {
+          const friendUID = friend.friendUID
+          const userDoc = await firestore
+            .doc(`userProfileData/${friendUID}`)
+            .get()
+          const userProfileData = userDoc.data() as UserProfileDataType
+          const result: CombinedFriendsData = {
+            ...friend,
+            ...userProfileData,
+          }
+          return result
+        }
+      )
+    )
+
+    return combinedUserData
   }
 )
 
