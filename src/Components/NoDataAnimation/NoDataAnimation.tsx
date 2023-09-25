@@ -1,6 +1,5 @@
 import React from 'react'
 import Lottie from 'lottie-react'
-import noDataAnimationJSON from '../../assets/animations/no-data-animation.json'
 import noDataAnimationJSON2 from '../../assets/animations/no-data-animation-2.json'
 import './NoDataAnimation.scss'
 

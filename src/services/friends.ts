@@ -4,7 +4,6 @@ import {
   collection,
   doc,
   getCountFromServer,
-  getDoc,
   getDocs,
   limit,
   orderBy,

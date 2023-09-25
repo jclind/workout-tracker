@@ -18,7 +18,6 @@ import Layout from './Components/Layout/Layout'
 import Account from './Pages/Account/Account'
 import { PUMP_TRACK_LS_USERNAME } from './services/PUMP_TRACK_LS'
 import Friends from './Pages/Friends/Friends'
-import FriendsList from './Components/FriendsPage/FriendsList/FriendsList'
 import IncomingRequests from './Components/FriendsPage/IncomingRequests/IncomingRequests'
 import OutgoingRequests from './Components/FriendsPage/OutgoingRequests/OutgoingRequests'
 

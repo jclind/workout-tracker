@@ -31,7 +31,6 @@ const FriendsList = ({ setNumFriends }: FriendsListProps) => {
     if (res.numFriends <= updatedFriends.length) {
       setIsMoreData(false)
     }
-    console.log(res)
     setLoading(false)
   }
 
@@ -41,6 +40,7 @@ const FriendsList = ({ setNumFriends }: FriendsListProps) => {
   }
   useEffect(() => {
     handleGetFriends(lastDoc)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const removeFriendFromList = (uid: string) => {

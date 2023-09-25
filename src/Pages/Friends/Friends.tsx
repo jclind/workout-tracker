@@ -47,9 +47,8 @@ const Friends = () => {
         })
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUsername])
-
-  // if (currUsername && location.pathname.includes(`/users/${currUsername}`))
 
   return (
     <div className='friends-page'>
