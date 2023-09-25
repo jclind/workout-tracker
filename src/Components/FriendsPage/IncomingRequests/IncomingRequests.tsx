@@ -4,6 +4,7 @@ import { getIncomingFriendRequests } from '../../../services/friends'
 import UserCard from '../UserCard/UserCard'
 import NoDataAnimation from '../../NoDataAnimation/NoDataAnimation'
 import { CombinedFriendsData } from '../../../types'
+import { useFriendsContext } from '../../../Pages/Friends/Friends'
 
 const IncomingFriendRequests = () => {
   const [incomingList, setIncomingList] = useState<
@@ -12,6 +13,8 @@ const IncomingFriendRequests = () => {
   const [loading, setLoading] = useState(true)
 
   const [isData, setIsData] = useState(true)
+
+  const { setNumIncoming, setNumFriends } = useFriendsContext()
 
   const handleGetIncomingFriendRequests = async () => {
     setLoading(true)
@@ -26,6 +29,16 @@ const IncomingFriendRequests = () => {
   useEffect(() => {
     handleGetIncomingFriendRequests()
   }, [])
+
+  const removeFromList = async (uid: string) => {
+    setIncomingList(prev => {
+      if (prev) {
+        return prev.filter(val => val.friendUID !== uid)
+      }
+      return []
+    })
+  }
+
   return (
     <div className='incoming-requests-page'>
       {!isData ? (
@@ -50,7 +63,14 @@ const IncomingFriendRequests = () => {
           {incomingList &&
             incomingList.map(user => {
               return (
-                <UserCard key={user.friendUID} user={user} type='incoming' />
+                <UserCard
+                  key={user.friendUID}
+                  user={user}
+                  type='incoming'
+                  removeFromList={removeFromList}
+                  setNumIncoming={setNumIncoming}
+                  setNumFriends={setNumFriends}
+                />
               )
             })}
         </div>

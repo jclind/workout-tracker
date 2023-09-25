@@ -1,9 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import './Friends.scss'
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+} from 'react-router-dom'
 import FriendsList from '../../Components/FriendsPage/FriendsList/FriendsList'
 import { getNumIncoming, getNumberOfFriends } from '../../services/friends'
 import { getUsername } from '../../services/auth'
+
+type ContextType = {
+  setNumIncoming: React.Dispatch<React.SetStateAction<number | null>>
+  setNumFriends: React.Dispatch<React.SetStateAction<number | null>>
+}
+
+export function useFriendsContext() {
+  return useOutletContext<ContextType>()
+}
 
 const Friends = () => {
   const location = useLocation()
@@ -60,9 +75,11 @@ const Friends = () => {
         </div>
       </div>
       {location.pathname === `/user/${currUsername}/friends` ? (
-        <FriendsList />
+        <FriendsList setNumFriends={setNumFriends} />
       ) : (
-        <Outlet />
+        <Outlet
+          context={{ setNumIncoming, setNumFriends } satisfies ContextType}
+        />
       )}
     </div>
   )

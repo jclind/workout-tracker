@@ -7,7 +7,11 @@ import { CombinedFriendsData } from '../../../types'
 import NoDataAnimation from '../../NoDataAnimation/NoDataAnimation'
 import { TailSpin } from 'react-loader-spinner'
 
-const FriendsList = () => {
+type FriendsListProps = {
+  setNumFriends: React.Dispatch<React.SetStateAction<number | null>>
+}
+
+const FriendsList = ({ setNumFriends }: FriendsListProps) => {
   const [friends, setFriends] = useState<CombinedFriendsData[]>([])
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
@@ -43,6 +47,7 @@ const FriendsList = () => {
     if (friends) {
       const newFriends = friends?.filter(friend => friend.friendUID !== uid)
       setFriends(newFriends)
+      setNumFriends(prev => (prev ? prev - 1 : 0))
     }
   }
 
@@ -67,6 +72,7 @@ const FriendsList = () => {
                 user={user}
                 type='friend'
                 removeFromList={removeFriendFromList}
+                setNumFriends={setNumFriends}
               />
             )
           })

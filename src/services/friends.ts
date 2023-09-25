@@ -74,7 +74,8 @@ export const removeFriend = async (friendUID: string) => {
     const uid = auth?.currentUser?.uid
     if (uid) {
       const cloudRemoveFriend = httpsCallable(firebaseFunctions, 'removeFriend')
-      await cloudRemoveFriend({ currUID: uid, friendUID })
+      cloudRemoveFriend({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
   } catch (error: any) {
     const message = error.message || error
@@ -121,7 +122,8 @@ export const removeIncomingRequest = async (friendUsername: string) => {
         firebaseFunctions,
         'removeIncomingRequest'
       )
-      await cloudRemoveIncomingRequest({ currUID: uid, friendUID })
+      cloudRemoveIncomingRequest({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
   } catch (error: any) {
     const message = error.message || error
@@ -339,7 +341,8 @@ export const removeOutgoingRequest = async (friendUID: string) => {
         firebaseFunctions,
         'removeOutgoingRequest'
       )
-      await cloudRemoveOutgoingRequest({ currUID: uid, friendUID })
+      cloudRemoveOutgoingRequest({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
   } catch (error: any) {
     const message = error.message || error

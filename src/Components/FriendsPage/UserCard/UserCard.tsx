@@ -12,6 +12,7 @@ import Skeleton from '@mui/material/Skeleton'
 import styles from '../../../_exports.scss'
 import { Link } from 'react-router-dom'
 import { AiOutlineCheck } from 'react-icons/ai'
+import { useFriendsContext } from '../../../Pages/Friends/Friends'
 
 type UserDataType = CombinedFriendsData | null
 
@@ -19,9 +20,18 @@ type CardTypeProps = {
   user: UserDataType
   loading: boolean
   removeFromList: (uid: string) => void
+  setNumIncoming?: React.Dispatch<React.SetStateAction<number | null>>
+  setNumFriends?: React.Dispatch<React.SetStateAction<number | null>>
 }
-const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
+const IncomingActions = ({
+  user,
+  loading,
+  removeFromList,
+  setNumIncoming,
+  setNumFriends,
+}: CardTypeProps) => {
   const [isFriends, setIsFriends] = useState(false)
+  const [isDenied, setIsDenied] = useState(false)
   const [denyRequestLoading, setDenyRequestLoading] = useState(false)
   const [acceptRequestLoading, setAcceptRequestLoading] = useState(false)
 
@@ -30,10 +40,13 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   ) => {
     e.stopPropagation()
     e.preventDefault()
-    if (user) {
+    if (user && setNumIncoming) {
       setDenyRequestLoading(true)
       removeIncomingRequest(user.username).then(() => {
+        setIsDenied(true)
         setDenyRequestLoading(false)
+        removeFromList(user.friendUID)
+        setNumIncoming(prev => (prev ? prev - 1 : 0))
       })
     }
   }
@@ -42,12 +55,14 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   ) => {
     e.stopPropagation()
     e.preventDefault()
-    if (user) {
+    if (user && setNumIncoming && setNumFriends) {
       setAcceptRequestLoading(true)
       acceptFriendRequest(user.username).then(() => {
         setAcceptRequestLoading(false)
         setIsFriends(true)
         removeFromList(user.friendUID)
+        setNumIncoming(prev => (prev ? prev - 1 : 0))
+        setNumFriends(prev => (prev ? prev + 1 : 1))
       })
     }
   }
@@ -61,6 +76,10 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
         {isFriends ? (
           <div className='friend-added-successfully'>
             <AiOutlineCheck /> Friend Added
+          </div>
+        ) : isDenied ? (
+          <div className='friend-denied'>
+            <AiOutlineCheck /> Friend Denied
           </div>
         ) : (
           <>
@@ -79,8 +98,8 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
               >
                 {denyRequestLoading ? (
                   <TailSpin
-                    height='25'
-                    width='25'
+                    height='22'
+                    width='22'
                     color={styles.secondary}
                     ariaLabel='loading'
                   />
@@ -104,8 +123,8 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
               >
                 {acceptRequestLoading ? (
                   <TailSpin
-                    height='25'
-                    width='25'
+                    height='22'
+                    width='22'
                     color={styles.secondary}
                     ariaLabel='loading'
                   />
@@ -121,7 +140,12 @@ const IncomingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   )
 }
 
-const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
+const FriendActions = ({
+  user,
+  loading,
+  removeFromList,
+  setNumFriends,
+}: CardTypeProps) => {
   const [removeFriendLoading, setRemoveFriendLoading] = useState(false)
   const [isConfirmRemoveOpen, setIsConfirmRemoveOpen] = useState(false)
 
@@ -150,12 +174,13 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   ) => {
     e.stopPropagation()
     e.preventDefault()
-    if (user && removeFromList) {
+    if (user && removeFromList && setNumFriends) {
       setRemoveFriendLoading(true)
       removeFriend(user.friendUID).then(() => {
         setRemoveFriendLoading(false)
         setFriendRemoved(true)
         removeFromList(user.friendUID)
+        setNumFriends(prev => (prev ? prev - 1 : 0))
       })
     }
   }
@@ -193,8 +218,8 @@ const FriendActions = ({ user, loading, removeFromList }: CardTypeProps) => {
           >
             {removeFriendLoading ? (
               <TailSpin
-                height='25'
-                width='25'
+                height='22'
+                width='22'
                 color={styles.secondary}
                 ariaLabel='loading'
               />
@@ -252,8 +277,8 @@ const OutgoingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
         >
           {removeRequestLoading ? (
             <TailSpin
-              height='25'
-              width='25'
+              height='22'
+              width='22'
               color={styles.secondary}
               ariaLabel='loading'
             />
@@ -271,8 +296,17 @@ type UserCardProps = {
   type: 'incoming' | 'friend' | 'outgoing'
   removeFromList?: (uid: string) => void
   loading?: boolean
+  setNumIncoming?: React.Dispatch<React.SetStateAction<number | null>>
+  setNumFriends?: React.Dispatch<React.SetStateAction<number | null>>
 }
-const UserCard = ({ user, type, loading, removeFromList }: UserCardProps) => {
+const UserCard = ({
+  user,
+  type,
+  loading,
+  removeFromList,
+  setNumIncoming,
+  setNumFriends,
+}: UserCardProps) => {
   const userLink = user ? `/user/${user.username}` : ''
 
   const [itemRemoved, setItemRemoved] = useState(false)
@@ -337,12 +371,15 @@ const UserCard = ({ user, type, loading, removeFromList }: UserCardProps) => {
             loading={!!loading}
             user={user}
             removeFromList={handleRemoveFromList}
+            setNumIncoming={setNumIncoming}
+            setNumFriends={setNumFriends}
           />
         ) : type === 'friend' ? (
           <FriendActions
             loading={!!loading}
             user={user}
             removeFromList={handleRemoveFromList}
+            setNumFriends={setNumFriends}
           />
         ) : type === 'outgoing' ? (
           <OutgoingActions

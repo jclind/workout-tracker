@@ -32,30 +32,34 @@ const firestore = admin.firestore()
 
 export const sendFriendRequestEmail = functions.https.onCall(
   async (data, context) => {
-    // try {
-    if (!context.auth) {
-      throw new functions.https.HttpsError(
-        'unauthenticated',
-        'only authenticated users can request'
-      )
-    }
-    if (!data.currUID || !data.friendUID || context.auth.uid !== data.currUID) {
-      throw new functions.https.HttpsError(
-        'permission-denied',
-        'uid data not provided / invalid'
-      )
-    }
+    try {
+      if (!context.auth) {
+        throw new functions.https.HttpsError(
+          'unauthenticated',
+          'Only authenticated users can request'
+        )
+      }
+      if (
+        !data.currUID ||
+        !data.friendUID ||
+        context.auth.uid !== data.currUID
+      ) {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'UID data not provided or invalid'
+        )
+      }
 
-    const friendData = await admin.auth().getUser(data.friendUID)
-    const currUserData = await admin.auth().getUser(data.currUID)
-    const currName = currUserData.displayName
-    const currProfilePicture = currUserData.photoURL
-    const friendEmail = friendData.email
-    const friendName = friendData.displayName
+      const friendData = await admin.auth().getUser(data.friendUID)
+      const currUserData = await admin.auth().getUser(data.currUID)
+      const currName = currUserData.displayName
+      const currProfilePicture = currUserData.photoURL
+      const friendEmail = friendData.email
+      const friendName = friendData.displayName
 
-    const to = [friendEmail]
-    const message = {
-      html: `<body style="background-color: #09090b; margin: 0; padding: 0; font-family: Arial, sans-serif; color: #ffffff;">
+      const to = [friendEmail]
+      const message = {
+        html: `<body style="background-color: #09090b; margin: 0; padding: 0; font-family: Arial, sans-serif; color: #ffffff;">
 
     <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
         <tr>
@@ -88,8 +92,8 @@ export const sendFriendRequestEmail = functions.https.onCall(
     </table>
 
 </body>`,
-      subject: 'New Friend Request',
-      text: `Friend Request
+        subject: 'New Friend Request',
+        text: `Friend Request
 
 Hello ${friendName},
 
@@ -110,18 +114,18 @@ The PumpTrack Team
 This email was sent from an automated system. Please do not reply to this email.
 
 You are receiving this email because you have a registered account on PumpTrack. If you believe you received this email in error, please disregard it.`,
+      }
+      const mailCollection = admin.firestore().collection('mail')
+      return mailCollection.add({ to, message }).then(res => {
+        return 'test'
+      })
+    } catch (error) {
+      console.error('Error sending friend request email:', error)
+      throw new functions.https.HttpsError(
+        'internal',
+        'Error sending friend request email'
+      )
     }
-    const mailCollection = admin.firestore().collection('mail')
-    return mailCollection.add({ to, message }).then(res => {
-      return 'test'
-    })
-
-    // } catch (error) {
-    //   throw new functions.https.HttpsError(
-    //     'cancelled',
-    //     'something went wrong in the try block'
-    //   )
-    // }
   }
 )
 export const sendFriendAcceptedEmail = functions.https.onCall(
@@ -431,6 +435,18 @@ export const removeFriend = functions.https.onCall(async (data, context) => {
     )
   }
 
+  const isFriends = await checkIfDocExistsInUserCollection(
+    'friends',
+    currUID,
+    friendUID
+  )
+  if (!isFriends) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'users are not friends'
+    )
+  }
+
   await firestore
     .doc(`userProfileData/${currUID}/${FRIENDS}/${friendUID}`)
     .delete()
@@ -636,9 +652,7 @@ export const removeIncomingRequest = functions.https.onCall(
         `userProfileData/${friendUID}/${OUTGOING_FRIEND_REQUESTS}/${currUID}`
       )
       .delete()
-      .then(() => {
-        return 'test'
-      })
+    return 'test'
   }
 )
 export const removeOutgoingRequest = functions.https.onCall(
@@ -668,9 +682,8 @@ export const removeOutgoingRequest = functions.https.onCall(
         `userProfileData/${friendUID}/${INCOMING_FRIEND_REQUESTS}/${currUID}`
       )
       .delete()
-      .then(() => {
-        return 'test'
-      })
+
+    return 'test'
   }
 )
 

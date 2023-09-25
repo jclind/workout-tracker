@@ -25,6 +25,12 @@ const Nav = () => {
       })
   }, [])
 
+  const handleLogout = () => {
+    logout().then(() => {
+      navigate('/')
+    })
+  }
+
   return (
     <nav>
       <div className='links'>
@@ -53,7 +59,7 @@ const Nav = () => {
           <AiOutlineLineChart className='icon' />
         </button>
       </div>
-      <button className='btn-no-styles logout-btn' onClick={logout}>
+      <button className='btn-no-styles logout-btn' onClick={handleLogout}>
         Logout
       </button>
     </nav>
