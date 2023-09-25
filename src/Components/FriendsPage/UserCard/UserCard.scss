@@ -67,17 +67,6 @@
   margin-bottom: 0;
 }
 .incoming-actions {
-  .friend-added-successfully,
-  .friend-denied {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-  }
-  .friend-added-successfully {
-    color: $success-green;
-  }
   .friend-denied {
     color: $error-red;
   }
@@ -91,6 +80,19 @@
     color: $primary;
     width: 70px;
   }
+}
+.friend-added-successfully,
+.friend-denied,
+.pending-removed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+.friend-added-successfully,
+.pending-removed {
+  color: $success-green;
 }
 .friends-actions {
   .friend-removed-text {

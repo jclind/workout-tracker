@@ -12,7 +12,6 @@ import Skeleton from '@mui/material/Skeleton'
 import styles from '../../../_exports.scss'
 import { Link } from 'react-router-dom'
 import { AiOutlineCheck } from 'react-icons/ai'
-import { useFriendsContext } from '../../../Pages/Friends/Friends'
 
 type UserDataType = CombinedFriendsData | null
 
@@ -244,6 +243,8 @@ const FriendActions = ({
 const OutgoingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
   const [removeRequestLoading, setRemoveRequestLoading] = useState(false)
 
+  const [isRemoved, setIsRemoved] = useState(false)
+
   const isBtnDisabled = loading || !user || removeRequestLoading
 
   const handleRemoveRequest = (
@@ -255,6 +256,7 @@ const OutgoingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
       setRemoveRequestLoading(true)
 
       removeOutgoingRequest(user.friendUID).then(() => {
+        setIsRemoved(true)
         removeFromList(user.friendUID)
       })
     }
@@ -262,7 +264,11 @@ const OutgoingActions = ({ user, loading, removeFromList }: CardTypeProps) => {
 
   return (
     <div className='outgoing-actions'>
-      {loading ? (
+      {isRemoved ? (
+        <div className='pending-removed'>
+          <AiOutlineCheck /> Removed
+        </div>
+      ) : loading ? (
         <Skeleton
           sx={{ bgcolor: styles.tertiaryBackground }}
           variant='rounded'
