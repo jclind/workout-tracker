@@ -8,6 +8,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { importWorkouts } from '../../services/tracker'
 import { TailSpin } from 'react-loader-spinner'
 import { toast } from 'react-hot-toast'
+import packageJSON from '../../../package.json'
+
+const version = packageJSON.version
 
 const customStyles = {
   content: {
@@ -93,12 +96,26 @@ const Footer = ({ setWorkoutList }: FooterProps) => {
 
   return (
     <footer className='footer'>
-      <button
-        className='btn-no-styles import-btn'
-        onClick={() => setIsModalOpen(true)}
-      >
-        import
-      </button>
+      <div className='actions'>
+        <button
+          className='btn-no-styles import-btn'
+          onClick={() => setIsModalOpen(true)}
+        >
+          import workouts
+        </button>
+        <a
+          href='https://www.buymeacoffee.com/jesseclind'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='btn-no-styles donate-btn'
+        >
+          donate
+        </a>
+      </div>
+      <div className='copyright'>
+        © {new Date().getFullYear()} || Made with React.js
+      </div>
+      <div className='version'>version {version}</div>
       <Modal
         isOpen={isModalOpen}
         // onAfterOpen={afterOpenModal}
