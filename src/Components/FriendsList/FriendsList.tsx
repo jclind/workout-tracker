@@ -2,54 +2,15 @@ import React, { useState, useEffect } from 'react'
 import './FriendsList.scss'
 import {
   addFriend,
-  getPendingFriendRequests,
   getSuggestedFriends,
-  removePendingRequest,
+  removeOutgoingRequest,
 } from '../../services/friends'
-import {
-  CombinedRequestedFriendDataType,
-  UserProfileDataType,
-} from '../../types'
+import { UserProfileDataType } from '../../types'
 import toast from 'react-hot-toast'
 import Skeleton from '@mui/material/Skeleton'
 import styles from '../../_exports.scss'
 import { Link } from 'react-router-dom'
 
-// type PendingFriendRequestProps = {
-//   request: CombinedRequestedFriendDataType
-// }
-
-// const PendingFriendRequest = ({ request }: PendingFriendRequestProps) => {
-//   const [accepted, setAccepted] = useState(false)
-
-//   const { displayName, photoUrl, username } = request
-
-//   const handleAcceptRequest = () => {
-//     setAccepted(true)
-//     acceptFriendRequest(username).catch((err: any) => {
-//       toast.error(err, { position: 'bottom-center' })
-//       setAccepted(false)
-//     })
-//   }
-//   return (
-//     <div className='friend-request'>
-//       <div className='profile-picture-container'>
-//         <img src={photoUrl} alt={displayName} />
-//       </div>
-//       <div className='display-name'>{displayName}</div>
-//       <div className='username'>@{username}</div>
-//       <button
-//         className={`accept-request-btn btn-no-styles ${
-//           accepted ? 'accepted' : ''
-//         }`}
-//         disabled={accepted}
-//         onClick={handleAcceptRequest}
-//       >
-//         {accepted ? 'Accepted' : 'Accept'}
-//       </button>
-//     </div>
-//   )
-// }
 type SuggestedFriendProps = {
   friendData?: UserProfileDataType | null
   loading?: boolean
@@ -75,7 +36,7 @@ const SuggestedFriend = ({
         })
       } else {
         setRequested(false)
-        removePendingRequest(username).catch((err: any) => {
+        removeOutgoingRequest(username).catch((err: any) => {
           toast.error(err, { position: 'bottom-center' })
           setRequested(true)
         })
@@ -131,9 +92,6 @@ const SuggestedFriend = ({
 }
 
 const FriendsList = () => {
-  const [pendingFriendRequests, setPendingFriendRequests] = useState<
-    CombinedRequestedFriendDataType[]
-  >([])
   const [suggestedFriendList, setSuggestedFriendList] = useState<
     UserProfileDataType[]
   >([])
@@ -141,24 +99,6 @@ const FriendsList = () => {
   const [isSuggestedData, setIsSuggestedData] = useState(true)
 
   useEffect(() => {
-    getPendingFriendRequests()
-      .then(res => {
-        if (res) {
-          setPendingFriendRequests(res)
-          console.log(pendingFriendRequests)
-        } else {
-          setPendingFriendRequests([])
-        }
-      })
-      .catch((err: any) => {
-        toast.error(err, { position: 'bottom-center' })
-      })
-    // getFriends({ returnUserData: true }).then(res => {
-    //   if (res) {
-    //     // !!! fix
-    //     setFriendsList([])
-    //   }
-    // })
     setSuggestedLoading(true)
     getSuggestedFriends()
       .then(res => {
@@ -177,26 +117,6 @@ const FriendsList = () => {
 
   return (
     <div className='friends-container'>
-      {/* <div className='pending-friend-request-list'>
-        <div className='account-header'>Friend Requests</div>
-        {pendingFriendRequests.map(req => {
-          return <PendingFriendRequest key={req.friendUID} request={req} />
-        })}
-      </div> */}
-      {/* <div className='friends-list'>
-        {friendsList.map(friend => {
-          const { photoUrl, displayName, username } = friend
-          return (
-            <div className='friend-request' key={friend.friendUID}>
-              <div className='profile-picture-container'>
-                <img src={photoUrl} alt={displayName} />
-              </div>
-              <div className='display-name'>{displayName}</div>
-              <div className='username'>@{username}</div>
-            </div>
-          )
-        })}
-      </div> */}
       <div className='suggested-friends-container'>
         <div className='account-header'>Suggested Friends</div>
         <div className='suggested-friends-list'>

@@ -1,40 +1,48 @@
 import {
+  DocumentData,
+  QueryDocumentSnapshot,
   collection,
   doc,
-  getDoc,
+  getCountFromServer,
   getDocs,
   limit,
   orderBy,
   query,
+  startAfter,
 } from 'firebase/firestore'
 import { getUIDFromUsername, getUsername } from './auth'
 import { auth, db, firebaseFunctions } from './firestore'
-import {
-  CombinedFriendsDataType,
-  CombinedRequestedFriendDataType,
-  FriendsData,
-  UserProfileDataType,
-} from '../types'
+import { CombinedFriendsData, FriendsData, UserProfileDataType } from '../types'
 import { toast } from 'react-hot-toast'
 import { httpsCallable } from 'firebase/functions'
+import {
+  FRIENDS,
+  INCOMING_FRIEND_REQUESTS,
+  OUTGOING_FRIEND_REQUESTS,
+} from '../assets/globalVars/userProfileCollections'
 
-export const getFriendshipStatus = async (friendUID: string | null = null) => {
+export const getFriendshipStatus = async (friendUsername: string) => {
   const currUID = auth?.currentUser?.uid
+  const friendUID = await getUIDFromUsername(friendUsername)
 
   if (currUID && friendUID) {
     const cloudGetFriendshipStatus = httpsCallable(
       firebaseFunctions,
       'getFriendshipStatus'
     )
-    const status: any = await cloudGetFriendshipStatus({ currUID, friendUID })
+    const statusRes: any = await cloudGetFriendshipStatus({
+      currUID,
+      friendUID,
+    })
 
-    if (['friends', 'pending', 'requested', 'not_friends'].includes(status)) {
+    const status = statusRes.data
+
+    if (['friends', 'incoming', 'outgoing', 'not_friends'].includes(status)) {
       return status
     }
     return undefined
   }
 }
-
 export const addFriend = async (friendUsername: string) => {
   const uid = auth?.currentUser?.uid
   const currUsername = await getUsername()
@@ -60,7 +68,20 @@ export const addFriend = async (friendUsername: string) => {
     }
   }
 }
-
+export const removeFriend = async (friendUID: string) => {
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const cloudRemoveFriend = httpsCallable(firebaseFunctions, 'removeFriend')
+      cloudRemoveFriend({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
 export const acceptFriendRequest = async (friendUsername: string) => {
   const currUID = auth?.currentUser?.uid
   const currUsername = await getUsername()
@@ -72,61 +93,18 @@ export const acceptFriendRequest = async (friendUsername: string) => {
         firebaseFunctions,
         'acceptFriendRequest'
       )
-      cloudAcceptFriendRequest({ currUID, friendUID, friendUsername }).then(
-        () => {
-          const sendFriendAcceptedEmail = httpsCallable(
-            firebaseFunctions,
-            'sendFriendRequestEmail'
-          )
-          sendFriendAcceptedEmail({ currUID, friendUID, currUsername })
-        }
-      )
-
-      // const currUserProfileRef = doc(db, 'userProfileData', uid)
-      // const currUserRequestedRef = doc(
-      //   currUserProfileRef,
-      //   'requested',
-      //   friendUID
-      // )
-      // const currUserRequestedSnapshot = await getDoc(currUserRequestedRef)
-
-      // const friendProfileRef = doc(db, 'userProfileData', friendUID)
-      // const friendPendingRef = doc(friendProfileRef, 'pending', uid)
-      // const friendPendingSnapshot = await getDoc(friendPendingRef)
-      // if (
-      //   currUserRequestedSnapshot.exists() &&
-      //   friendPendingSnapshot.exists()
-      // ) {
-      //   const date = new Date().getTime()
-      //   const currUserFriendsRef = doc(currUserProfileRef, 'friends', friendUID)
-      //   const currUserFriendData: FriendsData = {
-      //     friendUID: friendUID,
-      //     friendUsername: friendUsername,
-      //     dateFriended: date,
-      //   }
-      //   await setDoc(currUserFriendsRef, currUserFriendData)
-
-      //   const friendFriendsRef = doc(friendProfileRef, 'friends', uid)
-      //   const friendFriendData: FriendsData = {
-      //     friendUID: uid,
-      //     friendUsername: currUsername,
-      //     dateFriended: date,
-      //   }
-      //   await setDoc(friendFriendsRef, friendFriendData)
-
-      //   await deleteDoc(currUserRequestedRef)
-      //   await deleteDoc(friendPendingRef)
-
-      //   const sendFriendMail = httpsCallable(
-      //     firebaseFunctions,
-      //     'sendFriendAcceptedEmail'
-      //   )
-      //   sendFriendMail({ currUID: uid, friendUID, currUsername })
-      // } else {
-      //   throw new Error(
-      //     'Friendship does not exist, please refresh and try again'
-      //   )
-      // }
+      cloudAcceptFriendRequest({
+        currUID,
+        currUsername,
+        friendUID,
+        friendUsername,
+      }).then(() => {
+        const sendFriendAcceptedEmail = httpsCallable(
+          firebaseFunctions,
+          'sendFriendRequestEmail'
+        )
+        sendFriendAcceptedEmail({ currUID, friendUID, currUsername })
+      })
     } catch (error: any) {
       const message = error.message || error
       console.log(error)
@@ -134,16 +112,17 @@ export const acceptFriendRequest = async (friendUsername: string) => {
     }
   }
 }
-export const removePendingRequest = async (friendUsername: string) => {
+export const removeIncomingRequest = async (friendUsername: string) => {
   try {
     const uid = auth?.currentUser?.uid
     const friendUID = await getUIDFromUsername(friendUsername)
     if (uid && friendUID) {
-      const cloudRemovePendingRequest = httpsCallable(
+      const cloudRemoveIncomingRequest = httpsCallable(
         firebaseFunctions,
-        'removePendingRequest'
+        'removeIncomingRequest'
       )
-      await cloudRemovePendingRequest({ currUID: uid, friendUID })
+      cloudRemoveIncomingRequest({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
     }
   } catch (error: any) {
     const message = error.message || error
@@ -152,49 +131,111 @@ export const removePendingRequest = async (friendUsername: string) => {
   }
 }
 
-export const getFriends = async <B extends boolean | undefined>(options: {
-  returnUserData?: B
-}): Promise<B extends true ? CombinedFriendsDataType[] : FriendsData[]> => {
+const getListFromFriendsCollection = async (
+  uid: string,
+  collectionName: string,
+  limitNum: number,
+  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null
+): Promise<
+  | {
+      friends: FriendsData[]
+      numFriends: number
+      newLastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
+    }
+  | undefined
+> => {
+  try {
+    const userProfileRef = doc(db, 'userProfileData', uid)
+    const userFriendsRef = collection(userProfileRef, `${collectionName}`)
+
+    let q = query(userFriendsRef, orderBy('date', 'desc'), limit(limitNum))
+    if (lastDoc) {
+      q = query(q, startAfter(lastDoc))
+    }
+    const userFriendsSnapshot = await getDocs(q)
+    const username = await getUsername()
+    const numFriends = (await getNumberOfFriends(username)) || 0
+    const friends: FriendsData[] = []
+    const newLastDoc =
+      userFriendsSnapshot.docs[userFriendsSnapshot.docs.length - 1]
+    userFriendsSnapshot.forEach(doc => {
+      friends.push(doc.data() as FriendsData)
+    })
+
+    return {
+      friends,
+      numFriends,
+      newLastDoc,
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
+const getAndCombineFriendsData = async (
+  friends: FriendsData[]
+): Promise<CombinedFriendsData[]> => {
+  const cloudGetUsersFriendData = httpsCallable(
+    firebaseFunctions,
+    'getUsersFriendData'
+  )
+  const combinedUsers: any = await cloudGetUsersFriendData({
+    usersFriendList: friends,
+  })
+  const combinedUsersData = combinedUsers.data as CombinedFriendsData[]
+
+  return combinedUsersData
+}
+
+export const getFriends = async <B extends boolean | undefined>(
+  lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null,
+  options?: {
+    returnUserData?: B
+  }
+): Promise<
+  B extends true
+    ? {
+        friendsData: CombinedFriendsData[]
+        numFriends: number
+        lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
+      }
+    : {
+        friendsData: FriendsData[]
+        numFriends: number
+        lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null
+      }
+> => {
   try {
     const uid = auth?.currentUser?.uid
     if (uid) {
-      const userProfileRef = doc(db, 'userProfileData', uid)
-      const userFriendsRef = collection(userProfileRef, 'friends')
-      const q = query(
-        userFriendsRef,
-        orderBy('dateFriended', 'desc'),
-        limit(20)
+      const friendsListRes = await getListFromFriendsCollection(
+        uid,
+        FRIENDS,
+        10,
+        lastDoc
       )
-      const userFriendsSnapshot = await getDocs(q)
+      if (!friendsListRes) {
+        throw new Error('Something went wrong')
+      }
 
-      const friends: FriendsData[] = []
-      userFriendsSnapshot.forEach(doc => {
-        friends.push(doc.data() as FriendsData)
-      })
+      const { friends, numFriends, newLastDoc } = friendsListRes
 
-      if (options.returnUserData) {
-        const userProfileDataRef = collection(db, 'userProfileData')
-        const combinedUserData: CombinedFriendsDataType[] = await Promise.all(
-          friends.map(
-            async (friend: FriendsData): Promise<CombinedFriendsDataType> => {
-              const friendUID = friend.friendUID
-              const userProfileDataDocRef = doc(userProfileDataRef, friendUID)
-              const userProfileDataSnapshot = await getDoc(
-                userProfileDataDocRef
-              )
-              const userProfileData =
-                userProfileDataSnapshot.data() as UserProfileDataType
-              const result: CombinedFriendsDataType = {
-                ...friend,
-                ...userProfileData,
-              }
-              return result
-            }
-          )
-        )
-        return combinedUserData
+      if (options?.returnUserData) {
+        const combinedUsersData = await getAndCombineFriendsData(friends)
+        const returnData = {
+          friendsData: combinedUsersData,
+          lastDoc: newLastDoc,
+          numFriends,
+        }
+        return returnData
       } else {
-        return friends as any
+        const returnData = {
+          friendsData: friends as any,
+          lastDoc: newLastDoc,
+          numFriends,
+        }
+        return returnData
       }
     }
   } catch (error: any) {
@@ -203,22 +244,19 @@ export const getFriends = async <B extends boolean | undefined>(options: {
     toast.error(message, { position: 'bottom-center' })
   }
 
-  return []
+  return { friendsData: [], lastDoc: null, numFriends: 0 }
 }
-
 export const getNumberOfFriends = async (username: string | null = null) => {
   try {
     const uid = username
       ? await getUIDFromUsername(username)
       : auth?.currentUser?.uid
     if (uid) {
-      // return numberOfFriends
-      const getNumFriends = httpsCallable(
-        firebaseFunctions,
-        'getNumberOfFriends'
-      )
-      const numFriendsData = await getNumFriends({ uid })
-      return numFriendsData.data as number
+      const userProfileDataRef = doc(db, 'userProfileData', uid)
+      const friendsCollection = collection(userProfileDataRef, `${FRIENDS}`)
+      const totalResultsSnapshot = await getCountFromServer(friendsCollection)
+
+      return totalResultsSnapshot.data().count
     }
   } catch (error: any) {
     const message = error.message || error
@@ -226,7 +264,6 @@ export const getNumberOfFriends = async (username: string | null = null) => {
     toast.error(message, { position: 'bottom-center' })
   }
 }
-
 export const getSuggestedFriends = async () => {
   try {
     const uid = auth?.currentUser?.uid
@@ -246,24 +283,86 @@ export const getSuggestedFriends = async () => {
     toast.error(message, { position: 'bottom-center' })
   }
 }
-
-export const getPendingFriendRequests = async (): Promise<
-  CombinedRequestedFriendDataType[] | undefined
-> => {
+export const getIncomingFriendRequests = async () => {
   try {
     const uid = auth?.currentUser?.uid
     if (uid) {
-      const getPendingRequests = httpsCallable(
-        firebaseFunctions,
-        'getPendingFriendRequests'
+      const friendsListRes = await getListFromFriendsCollection(
+        uid,
+        INCOMING_FRIEND_REQUESTS,
+        20
       )
-      const pendingRequestsRes = await getPendingRequests({ uid })
-      const pendingRequestsData =
-        pendingRequestsRes.data as CombinedRequestedFriendDataType[]
-      if (pendingRequestsData) {
-        return pendingRequestsData
-      }
-      return undefined
+      if (!friendsListRes) throw new Error('Something went wrong')
+      const { friends: incomingFriendRequests } = friendsListRes
+
+      const combinedUsersData = await getAndCombineFriendsData(
+        incomingFriendRequests
+      )
+
+      return combinedUsersData as CombinedFriendsData[]
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
+export const getOutgoingFriendRequests = async () => {
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const friendsListRes = await getListFromFriendsCollection(
+        uid,
+        OUTGOING_FRIEND_REQUESTS,
+        20
+      )
+      if (!friendsListRes) throw new Error('Something went wrong')
+      const { friends: outgoingFriendRequests } = friendsListRes
+
+      const combinedUsersData = await getAndCombineFriendsData(
+        outgoingFriendRequests
+      )
+
+      return combinedUsersData as CombinedFriendsData[]
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
+
+export const removeOutgoingRequest = async (friendUID: string) => {
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid && friendUID) {
+      const cloudRemoveOutgoingRequest = httpsCallable(
+        firebaseFunctions,
+        'removeOutgoingRequest'
+      )
+      cloudRemoveOutgoingRequest({ currUID: uid, friendUID })
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    }
+  } catch (error: any) {
+    const message = error.message || error
+    console.log(error)
+    toast.error(message, { position: 'bottom-center' })
+  }
+}
+export const getNumIncoming = async () => {
+  try {
+    const uid = auth?.currentUser?.uid
+    if (uid) {
+      const userProfileDataRef = doc(db, 'userProfileData', uid)
+      const incomingFriendRequestsCollection = collection(
+        userProfileDataRef,
+        `${INCOMING_FRIEND_REQUESTS}`
+      )
+      const totalResultsSnapshot = await getCountFromServer(
+        incomingFriendRequestsCollection
+      )
+      const totalResults = totalResultsSnapshot.data().count
+      return totalResults
     }
   } catch (error: any) {
     const message = error.message || error

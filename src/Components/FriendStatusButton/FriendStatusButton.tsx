@@ -4,14 +4,14 @@ import { FriendsStatusType } from '../../types'
 import {
   acceptFriendRequest,
   addFriend,
-  removePendingRequest,
+  removeOutgoingRequest,
 } from '../../services/friends'
 import toast from 'react-hot-toast'
 
 const getBtnText = (friendshipStatus: FriendsStatusType): string => {
   if (friendshipStatus === 'not_friends') return 'add friend'
-  else if (friendshipStatus === 'pending') return 'requested'
-  else if (friendshipStatus === 'requested') return 'accept request'
+  else if (friendshipStatus === 'outgoing') return 'requested'
+  else if (friendshipStatus === 'incoming') return 'accept request'
   return friendshipStatus
 }
 
@@ -29,22 +29,22 @@ const FriendStatusButton = ({
 }: FriendStatusButtonProps) => {
   const handleClick = () => {
     if (friendshipStatus === 'not_friends') {
-      setFriendshipStatus('pending')
+      setFriendshipStatus('outgoing')
       addFriend(accountUsername).catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
         setFriendshipStatus('not_friends')
       })
-    } else if (friendshipStatus === 'pending') {
+    } else if (friendshipStatus === 'outgoing') {
       setFriendshipStatus('not_friends')
-      removePendingRequest(accountUsername).catch((err: any) => {
+      removeOutgoingRequest(accountUsername).catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
-        setFriendshipStatus('pending')
+        setFriendshipStatus('outgoing')
       })
-    } else if (friendshipStatus === 'requested') {
+    } else if (friendshipStatus === 'incoming') {
       setFriendshipStatus('friends')
       acceptFriendRequest(accountUsername).catch((err: any) => {
         toast.error(err, { position: 'bottom-center' })
-        setFriendshipStatus('requested')
+        setFriendshipStatus('incoming')
       })
     }
   }

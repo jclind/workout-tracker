@@ -167,6 +167,29 @@ label.fade {
   }
 }
 
+.friends-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: height 0.3s ease-in-out;
+}
+
+.friends-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  .no-data-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+  }
+  p {
+    max-width: 80%;
+    color: $secondary-text;
+    text-align: center;
+  }
+}
+
 // Scroll bar
 *::-webkit-scrollbar {
   width: 6px;

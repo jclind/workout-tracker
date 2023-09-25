@@ -1,0 +1,10 @@
+@import '../../../helpers.scss';
+
+.incoming-requests-page {
+  width: 100%;
+  .list {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+}

@@ -1,0 +1,12 @@
+@import '../../helpers.scss';
+
+.no-data-animation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  width: 150px;
+  border-radius: 50%;
+  background: radial-gradient($secondary-background, $primary-background 70%);
+  padding: 2rem;
+}

@@ -9,45 +9,19 @@ service cloud.firestore {
     	}
     }
     match /userProfileData/{userID} {
-    	allow read, write
-      match /pending/{friendUID} {
-      	allow list: if request.auth.uid == userID
-        allow get: if request.auth.uid == userID || request.auth.uid == friendUID
-      	allow create, update: if isValidPendingData() && (request.auth.uid == userID || request.auth.uid == friendUID)
-        allow delete: if request.auth.uid == userID || request.auth.uid == friendUID
+    	allow read
+      match /incomingFriendRequests/{friendUID} {
+      	allow read: if request.auth.uid == userID
       }
-      match /requested/{friendUID} {
-      	allow list: if request.auth.uid == userID
-        allow get: if request.auth.uid == userID || request.auth.uid == friendUID
-      	allow delete: if request.auth.uid == userID || request.auth.uid == friendUID
-      	allow create, update: if isValidRequestedData() && request.auth.uid != userID && request.auth.uid == friendUID
+      match /outgoingFriendRequests/{friendUID} {
+      	allow read: if request.auth.uid == userID
       }
       match /friends/{friendUID} {
-        allow get, list, read: if request.auth.uid is string
-        allow write: if isValidFriendData() && (request.auth.uid == userID || request.auth.uid == friendUID)
+      	allow read: if request.auth.uid == userID
       }
     }
     match /usernames/{username} {
     	allow read, write
     }
   }
-}
-
-function isValidPendingData() {
-  return request.resource.data is map &&
-         request.resource.data.pendingUsername is string &&
-         request.resource.data.datePending is number &&
-         request.resource.data.datePending > request.time.toMillis() - 10000
-}
-function isValidRequestedData() {
-  return request.resource.data is map &&
-         request.resource.data.requestedUsername is string &&
-         request.resource.data.dateRequested is number &&
-         request.resource.data.dateRequested > request.time.toMillis() - 10000
-}
-function isValidFriendData() {
-  return request.resource.data is map &&
-         request.resource.data.friendUsername is string &&
-         request.resource.data.dateFriended is number &&
-         request.resource.data.dateFriended > request.time.toMillis() - 10000
 }

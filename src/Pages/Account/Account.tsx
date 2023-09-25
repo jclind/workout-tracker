@@ -59,13 +59,6 @@ const Account = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currUserIsAuthor])
 
-  // const handleAddFriend = () => {
-  //   if (username) {
-  //     addFriend(username)
-  //     setFriendshipStatus('pending')
-  //   }
-  // }
-
   if (!username) return null
 
   return (
@@ -75,15 +68,18 @@ const Account = () => {
         loading={userDetailsLoading}
         setLoading={setUserDetailsLoading}
         numFriends={numFriends}
+        currUserIsAuthor={currUserIsAuthor}
       />
       {currUserIsAuthor && <LastWorkout />}
-      {currUserIsAuthor === false && friendshipStatus && (
-        <FriendStatusButton
-          friendshipStatus={friendshipStatus}
-          setFriendshipStatus={setFriendshipStatus}
-          accountUsername={username}
-        />
-      )}
+      {currUserIsAuthor === false &&
+        friendshipStatus &&
+        friendshipStatus !== 'friends' && (
+          <FriendStatusButton
+            friendshipStatus={friendshipStatus}
+            setFriendshipStatus={setFriendshipStatus}
+            accountUsername={username}
+          />
+        )}
 
       {currUserIsAuthor && <FriendsList />}
     </div>
