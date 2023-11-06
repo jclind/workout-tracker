@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
-import { auth, firebaseFunctions } from './services/firestore'
+import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import {
   getUsername,
@@ -20,7 +20,6 @@ import { PUMP_TRACK_LS_USERNAME } from './services/PUMP_TRACK_LS'
 import Friends from './Pages/Friends/Friends'
 import IncomingRequests from './Components/FriendsPage/IncomingRequests/IncomingRequests'
 import OutgoingRequests from './Components/FriendsPage/OutgoingRequests/OutgoingRequests'
-import { httpsCallable } from 'firebase/functions'
 
 import * as Sentry from '@sentry/react'
 
@@ -54,15 +53,6 @@ function App() {
   const [loginLoading, setLoginLoading] = useState(false)
 
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(true)
-
-  useEffect(() => {
-    // const updateExerciseMaxWeight = httpsCallable(
-    //   firebaseFunctions,
-    //   'updateExerciseMaxWeight'
-    // )
-    // console.log('yo')
-    // updateExerciseMaxWeight()
-  }, [])
 
   useEffect(() => {
     if (authLoading || loginLoading) {

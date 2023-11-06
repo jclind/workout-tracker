@@ -805,7 +805,7 @@ export const updateExerciseMaxWeight = functions.https.onCall(async () => {
   //   totalExercises: admin.firestore.FieldValue.increment(numExercises),
   // })
 })
-function calculateMaxWeight(weights: WeightGroupType[]) {
+const calculateMaxWeight = (weights: WeightGroupType[]) => {
   let maxWeight = 0
 
   weights.forEach(weightGroup => {
