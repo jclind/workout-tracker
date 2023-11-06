@@ -324,6 +324,27 @@ export const queryChartExerciseData = async (
   }
 }
 
+export const getSingleExercisePR = async (exerciseName: string) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
+
+      const q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        orderBy('workoutDate', 'desc'),
+        limit(1)
+      )
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(error)
+      toast.error(message, { position: 'bottom-center' })
+    }
+  }
+}
+
 export const getWorkouts = async (
   resultsPerPage = 10,
   lastDoc: QueryDocumentSnapshot<DocumentData, DocumentData> | null = null,

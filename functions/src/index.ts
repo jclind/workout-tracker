@@ -23,15 +23,35 @@ export type UserProfileDataType = {
   lastActive?: number
 }
 
+export type ExercisesServerDataType = {
+  id: string
+  index: number
+  name: string
+  originalString: string
+  weights: WeightGroupType[]
+  workoutDate: number | null
+  workoutID: string
+}
+
+export type WeightGroupType = {
+  sets: number[]
+  weight: number
+  comment: string
+}
+
 export type CombinedFriendsData = FriendsData & UserProfileDataType
 
 admin.initializeApp()
 const firestore = admin.firestore()
 
 // Friend cloud functions
-
+type SendFriendRequestEmailType = {
+  currUID: string
+  friendUID: string
+  currUsername: string
+}
 export const sendFriendRequestEmail = functions.https.onCall(
-  async (data, context) => {
+  async (data: SendFriendRequestEmailType, context) => {
     try {
       if (!context.auth) {
         throw new functions.https.HttpsError(
@@ -753,3 +773,46 @@ export const updateTotalWorkoutsAndExercises = functions.https.onCall(
     })
   }
 )
+
+export const updateExerciseMaxWeight = functions.https.onCall(async () => {
+  const usersDataCollection = admin.firestore().collection('usersData')
+  const usersDataDocs = await usersDataCollection.listDocuments()
+
+  for (const usersDataDoc of usersDataDocs) {
+    const exercisesCollection = usersDataDoc.collection('exercises')
+    const exerciseDocs = await exercisesCollection.listDocuments()
+
+    for (const exerciseDoc of exerciseDocs) {
+      const exerciseData = (
+        await exerciseDoc.get()
+      ).data() as ExercisesServerDataType
+      const weights = exerciseData?.weights || ([] as WeightGroupType[])
+
+      if (weights.length === 0) {
+        console.error('No weights found for the exercise')
+        continue
+      }
+
+      const maxWeight = calculateMaxWeight(weights)
+
+      console.log(exerciseData, maxWeight)
+      await exerciseDoc.update({ maxWeight: maxWeight })
+    }
+  }
+
+  // firestore.doc(`userProfileData/${uid}`).update({
+  //   totalWorkouts: admin.firestore.FieldValue.increment(numWorkouts),
+  //   totalExercises: admin.firestore.FieldValue.increment(numExercises),
+  // })
+})
+function calculateMaxWeight(weights: WeightGroupType[]) {
+  let maxWeight = 0
+
+  weights.forEach(weightGroup => {
+    if (weightGroup.weight > maxWeight) {
+      maxWeight = weightGroup.weight
+    }
+  })
+
+  return maxWeight
+}
