@@ -774,45 +774,45 @@ export const updateTotalWorkoutsAndExercises = functions.https.onCall(
   }
 )
 
-export const updateExerciseMaxWeight = functions.https.onCall(async () => {
-  const usersDataCollection = admin.firestore().collection('usersData')
-  const usersDataDocs = await usersDataCollection.listDocuments()
+// export const updateExerciseMaxWeight = functions.https.onCall(async () => {
+//   const usersDataCollection = admin.firestore().collection('usersData')
+//   const usersDataDocs = await usersDataCollection.listDocuments()
 
-  for (const usersDataDoc of usersDataDocs) {
-    const exercisesCollection = usersDataDoc.collection('exercises')
-    const exerciseDocs = await exercisesCollection.listDocuments()
+//   for (const usersDataDoc of usersDataDocs) {
+//     const exercisesCollection = usersDataDoc.collection('exercises')
+//     const exerciseDocs = await exercisesCollection.listDocuments()
 
-    for (const exerciseDoc of exerciseDocs) {
-      const exerciseData = (
-        await exerciseDoc.get()
-      ).data() as ExercisesServerDataType
-      const weights = exerciseData?.weights || ([] as WeightGroupType[])
+//     for (const exerciseDoc of exerciseDocs) {
+//       const exerciseData = (
+//         await exerciseDoc.get()
+//       ).data() as ExercisesServerDataType
+//       const weights = exerciseData?.weights || ([] as WeightGroupType[])
 
-      if (weights.length === 0) {
-        console.error('No weights found for the exercise')
-        continue
-      }
+//       if (weights.length === 0) {
+//         console.error('No weights found for the exercise')
+//         continue
+//       }
 
-      const maxWeight = calculateMaxWeight(weights)
+//       const maxWeight = calculateMaxWeight(weights)
 
-      console.log(exerciseData, maxWeight)
-      await exerciseDoc.update({ maxWeight: maxWeight })
-    }
-  }
+//       console.log(exerciseData, maxWeight)
+//       await exerciseDoc.update({ maxWeight: maxWeight })
+//     }
+//   }
 
-  // firestore.doc(`userProfileData/${uid}`).update({
-  //   totalWorkouts: admin.firestore.FieldValue.increment(numWorkouts),
-  //   totalExercises: admin.firestore.FieldValue.increment(numExercises),
-  // })
-})
-const calculateMaxWeight = (weights: WeightGroupType[]) => {
-  let maxWeight = 0
+//   // firestore.doc(`userProfileData/${uid}`).update({
+//   //   totalWorkouts: admin.firestore.FieldValue.increment(numWorkouts),
+//   //   totalExercises: admin.firestore.FieldValue.increment(numExercises),
+//   // })
+// })
+// const calculateMaxWeight = (weights: WeightGroupType[]) => {
+//   let maxWeight = 0
 
-  weights.forEach(weightGroup => {
-    if (weightGroup.weight > maxWeight) {
-      maxWeight = weightGroup.weight
-    }
-  })
+//   weights.forEach(weightGroup => {
+//     if (weightGroup.weight > maxWeight) {
+//       maxWeight = weightGroup.weight
+//     }
+//   })
 
-  return maxWeight
-}
+//   return maxWeight
+// }

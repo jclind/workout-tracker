@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-modal'
 import './ViewAllExercisesModal.scss'
-import { ExercisesServerDataType } from '../../types'
-import { queryAllSingleExercise } from '../../services/tracker'
+import { ExercisePRWeightOBJ, ExercisesServerDataType } from '../../types'
+import {
+  getSingleExercisePR,
+  queryAllSingleExercise,
+} from '../../services/tracker'
 import { DocumentData, QueryDocumentSnapshot } from 'firebase/firestore'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import { formatDateToString } from '../../util/dateUtil'
 import { toast } from 'react-hot-toast'
 import { TailSpin } from 'react-loader-spinner'
+import Skeleton from '@mui/material/Skeleton'
+import styles from '../../_exports.scss'
 
 const customStyles = {
   content: {
@@ -42,6 +47,9 @@ const ViewAllExercisesModal = ({
   const [data, setData] = useState<ExercisesServerDataType[]>([])
   const [isMoreData, setIsMoreData] = useState(true)
   const [moreLoading, setMoreLoading] = useState(false)
+  const [currPRData, setCurrPRData] = useState<undefined | ExercisePRWeightOBJ>(
+    undefined
+  )
 
   const [lastQueryDoc, setLastQueryDoc] = useState<QueryDocumentSnapshot<
     DocumentData,
@@ -50,6 +58,11 @@ const ViewAllExercisesModal = ({
 
   useEffect(() => {
     getNextExercises()
+    getSingleExercisePR(exerciseName).then(res => {
+      if (!res) setCurrPRData({ maxWeight: null, workoutDate: null })
+      else setCurrPRData(res)
+      console.log(res)
+    })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -81,6 +94,32 @@ const ViewAllExercisesModal = ({
     <Modal isOpen={isOpen} onRequestClose={closeModal} style={customStyles}>
       <div className='view-all-exercises-content'>
         <h3>Previous {exerciseName} Data</h3>
+        {currPRData !== undefined && (
+          <div className='exercise-pr'>
+            <div className='label-text'>PR:</div>
+            {!currPRData.maxWeight ? (
+              <Skeleton
+                sx={{ bgcolor: styles.tertiaryBackground }}
+                variant='text'
+                width={60}
+                height={25}
+              />
+            ) : (
+              <>
+                <span className='weight'>
+                  {currPRData.maxWeight === null
+                    ? 'loading'
+                    : `${currPRData.maxWeight}lbs`}
+                </span>
+                {currPRData.workoutDate && (
+                  <span className='pr-date'>
+                    - {formatDateToString(currPRData.workoutDate)}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+        )}
         <div className='data'>
           {data.map(exercise => {
             const date = exercise.workoutDate

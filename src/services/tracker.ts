@@ -18,6 +18,7 @@ import {
 import {
   CurrentWorkoutType,
   ExerciseDataType,
+  ExercisePRWeightOBJ,
   ExercisesServerDataType,
   WorkoutDataType,
 } from '../types'
@@ -325,26 +326,40 @@ export const queryChartExerciseData = async (
   }
 }
 
-// export const getSingleExercisePR = async (exerciseName: string) => {
-//   const uid = auth?.currentUser?.uid
-//   if (uid) {
-//     try {
-//       const userDataRef = doc(db, 'usersData', uid)
-//       const exercisesRef = collection(userDataRef, 'exercises')
+export const getSingleExercisePR = async (
+  exerciseName: string
+): Promise<undefined | ExercisePRWeightOBJ> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
 
-//       const q = query(
-//         exercisesRef,
-//         where('name', '==', exerciseName.toLowerCase()),
-//         orderBy('workoutDate', 'desc'),
-//         limit(1)
-//       )
-//     } catch (error: any) {
-//       const message = error.message || error
-//       console.log(error)
-//       toast.error(message, { position: 'bottom-center' })
-//     }
-//   }
-// }
+      const q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        orderBy('maxWeight', 'desc'),
+        orderBy('workoutDate', 'asc'),
+        limit(1)
+      )
+
+      const querySnapshot = await getDocs(q)
+      let maxWeight: number | null = null
+      let workoutDate: number | null = null
+      querySnapshot.forEach(doc => {
+        const data = doc.data() as ExercisesServerDataType
+        maxWeight = data.maxWeight
+        workoutDate = data.workoutDate
+      })
+
+      return { maxWeight, workoutDate }
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(error)
+      toast.error(message, { position: 'bottom-center' })
+    }
+  }
+}
 
 export const getWorkouts = async (
   resultsPerPage = 10,
