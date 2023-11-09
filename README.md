@@ -32,15 +32,19 @@ Pump Track is a workout-focused app designed with simplicity in mind. It empower
 To run PumpTrack locally, follow these steps:
 
 1. Clone this repository:
-    ```git clone https://github.com/jclind/pump-track.git```
-2. Install project dependencies:
-    ```
-    cd PumpTrack
-    npm install
-    ```
-3. Start the development server:
-    ```npm start```
-4. Open your browser and navigate to `http://localhost:3000` to access PumpTrack.
+```
+git clone https://github.com/jclind/pump-track.git
+```
+3. Install project dependencies:
+```
+cd PumpTrack    
+npm install
+```
+4. Start the development server:
+```
+npm start
+```
+6. Open your browser and navigate to `http://localhost:3000` to access PumpTrack.
 
 ## Contributing
 
