@@ -19,7 +19,6 @@ const ExercisePR = ({ exerciseName }: ExercisePRProps) => {
     getSingleExercisePR(exerciseName).then(res => {
       if (!res) setCurrPRData({ maxWeight: null, workoutDate: null })
       else setCurrPRData(res)
-      console.log(res)
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
