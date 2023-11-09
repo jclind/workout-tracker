@@ -18,6 +18,7 @@ import {
 import {
   CurrentWorkoutType,
   ExerciseDataType,
+  ExercisePRWeightOBJ,
   ExercisesServerDataType,
   WorkoutDataType,
 } from '../types'
@@ -28,6 +29,7 @@ import { getTitleAndDate } from '../util/getTitleAndDate'
 import { updateUserActivity } from './auth'
 import toast from 'react-hot-toast'
 import { httpsCallable } from 'firebase/functions'
+import { calculateMaxWeight } from '../util/calculateMaxWeight'
 
 export const addWorkout = async (
   name: string,
@@ -39,7 +41,7 @@ export const addWorkout = async (
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
-      const promises: Promise<void>[] = []
+      // const promises: Promise<void>[] = []
       const workoutID = uuidv4()
       const parsedExercises: ExerciseDataType[] = exercises.map(ex => {
         return parseExercise(ex.text, ex.id)
@@ -50,7 +52,7 @@ export const addWorkout = async (
 
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
-      const exercisesRef = collection(userDataRef, 'exercises')
+      // const exercisesRef = collection(userDataRef, 'exercises')
       await updateUniqueTitles('workoutTitles', workoutTitle)
 
       const workoutData: WorkoutDataType = {
@@ -62,27 +64,8 @@ export const addWorkout = async (
 
       await setDoc(workoutDocRef, { ...workoutData })
 
-      const exerciseTitles: string[] = []
+      await addExercises(uid, parsedExercises, workoutID, workoutDate)
 
-      parsedExercises.forEach((exercise, idx) => {
-        const { id, name } = exercise
-        const exercisesRefDoc = doc(exercisesRef, id)
-        if (name) {
-          exerciseTitles.push(name)
-          promises.push(
-            setDoc(exercisesRefDoc, {
-              ...exercise,
-              name: name.toLowerCase(),
-              workoutID,
-              workoutDate,
-              index: idx,
-            })
-          )
-        }
-      })
-
-      await updateUniqueTitles('exerciseTitles', exerciseTitles)
-      await Promise.all(promises)
       await updateTotalWorkoutsAndExercises(1, parsedExercises.length)
       await updateUserActivity()
 
@@ -105,17 +88,15 @@ export const importWorkouts = async (
 
       const userDataRef = doc(db, 'usersData', uid)
       const workoutsRef = collection(userDataRef, 'workouts')
-      const exercisesRef = collection(userDataRef, 'exercises')
 
       const workoutTitles: string[] = []
-      const exerciseTitles: string[] = []
 
       let numWorkouts = 0
       let numExercises = 0
 
       workouts.forEach(workout => {
         const workoutID = workout.id
-        const workoutDate = workout.date
+        const workoutDate = workout.date || new Date().getTime()
         const workoutData = { ...workout, name: workout.name.toLowerCase() }
 
         const workoutsRefDoc = doc(workoutsRef, workoutID)
@@ -126,26 +107,11 @@ export const importWorkouts = async (
 
         numWorkouts++
 
-        workout.exercises.forEach((exercise, idx) => {
-          const { id, name } = exercise
-          const exercisesRefDoc = doc(exercisesRef, id)
-          if (name) {
-            numExercises++
-            exerciseTitles.push(name)
-            promises.push(
-              setDoc(exercisesRefDoc, {
-                ...exercise,
-                name: name.toLowerCase(),
-                workoutID,
-                workoutDate,
-                index: idx,
-              })
-            )
-          }
-        })
+        promises.push(
+          addExercises(uid, workout.exercises, workoutID, workoutDate)
+        )
       })
       await updateUniqueTitles('workoutTitles', workoutTitles)
-      await updateUniqueTitles('exerciseTitles', exerciseTitles)
       await Promise.all(promises)
       await updateTotalWorkoutsAndExercises(numWorkouts, numExercises)
       return workouts
@@ -154,6 +120,42 @@ export const importWorkouts = async (
       console.log(error)
       toast.error(message, { position: 'bottom-center' })
     }
+  }
+}
+// Updated all given exercises and adds all exercise names to the updateUniqueTitles funciton
+export const addExercises = async (
+  uid: string,
+  exercises: ExerciseDataType[],
+  workoutID: string,
+  workoutDate: number
+) => {
+  if (uid) {
+    const userDataRef = doc(db, 'usersData', uid)
+    const exercisesRef = collection(userDataRef, 'exercises')
+
+    const promises: Promise<void>[] = []
+    const exerciseTitles: string[] = []
+
+    exercises.forEach((exercise, idx) => {
+      const { id, name } = exercise
+      const exercisesRefDoc = doc(exercisesRef, id)
+      const maxWeight = calculateMaxWeight(exercise.weights)
+      if (name) {
+        exerciseTitles.push(name)
+        promises.push(
+          setDoc(exercisesRefDoc, {
+            ...exercise,
+            name: name.toLowerCase(),
+            workoutID,
+            workoutDate,
+            index: idx,
+            maxWeight,
+          })
+        )
+      }
+    })
+    await updateUniqueTitles('exerciseTitles', exerciseTitles)
+    await Promise.all(promises)
   }
 }
 export const deleteWorkout = async (workoutID: string) => {
@@ -316,6 +318,41 @@ export const queryChartExerciseData = async (
       })
 
       return { data: results }
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(error)
+      toast.error(message, { position: 'bottom-center' })
+    }
+  }
+}
+
+export const getSingleExercisePR = async (
+  exerciseName: string
+): Promise<undefined | ExercisePRWeightOBJ> => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const userDataRef = doc(db, 'usersData', uid)
+      const exercisesRef = collection(userDataRef, 'exercises')
+
+      const q = query(
+        exercisesRef,
+        where('name', '==', exerciseName.toLowerCase()),
+        orderBy('maxWeight', 'desc'),
+        orderBy('workoutDate', 'asc'),
+        limit(1)
+      )
+
+      const querySnapshot = await getDocs(q)
+      let maxWeight: number | null = null
+      let workoutDate: number | null = null
+      querySnapshot.forEach(doc => {
+        const data = doc.data() as ExercisesServerDataType
+        maxWeight = data.maxWeight
+        workoutDate = data.workoutDate
+      })
+
+      return { maxWeight, workoutDate }
     } catch (error: any) {
       const message = error.message || error
       console.log(error)

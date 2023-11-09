@@ -8,6 +8,7 @@ import { getDataFromExercise } from '../../util/getDataFromExercise'
 import { formatDateToString } from '../../util/dateUtil'
 import { toast } from 'react-hot-toast'
 import { TailSpin } from 'react-loader-spinner'
+import ExercisePR from '../ExercisePR/ExercisePR'
 
 const customStyles = {
   content: {
@@ -50,6 +51,7 @@ const ViewAllExercisesModal = ({
 
   useEffect(() => {
     getNextExercises()
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -81,6 +83,7 @@ const ViewAllExercisesModal = ({
     <Modal isOpen={isOpen} onRequestClose={closeModal} style={customStyles}>
       <div className='view-all-exercises-content'>
         <h3>Previous {exerciseName} Data</h3>
+        <ExercisePR exerciseName={exerciseName} />
         <div className='data'>
           {data.map(exercise => {
             const date = exercise.workoutDate

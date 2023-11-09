@@ -25,6 +25,12 @@ export type ExercisesServerDataType = {
   weights: WeightGroupType[]
   workoutDate: number | null
   workoutID: string
+  maxWeight: number
+}
+
+export type ExercisePRWeightOBJ = {
+  maxWeight: number | null
+  workoutDate: number | null
 }
 
 export type WeightGroupType = {
