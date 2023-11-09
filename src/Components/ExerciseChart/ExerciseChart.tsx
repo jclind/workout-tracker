@@ -26,6 +26,7 @@ import {
 } from '../../util/chartUtil'
 import { TailSpin } from 'react-loader-spinner'
 import { AiOutlineLineChart } from 'react-icons/ai'
+import ExercisePR from '../ExercisePR/ExercisePR'
 
 ChartJS.register(
   TimeScale, //Register timescale instead of category for X axis
@@ -120,6 +121,7 @@ const ExerciseChart = ({
           })}
         </div>
       </div>
+
       {loading ? (
         <div className='no-chart-data chart-data-loading'>
           <TailSpin
@@ -142,6 +144,9 @@ const ExerciseChart = ({
           <AiOutlineLineChart className='icon' />
           <h4>No Data!</h4>
         </div>
+      )}
+      {selectedExercise?.label && (
+        <ExercisePR exerciseName={selectedExercise?.label} />
       )}
     </>
   )
