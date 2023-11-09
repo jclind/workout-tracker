@@ -44,7 +44,7 @@ npm install
 ```
 npm start
 ```
-6. Open your browser and navigate to `http://localhost:3000` to access PumpTrack.
+5. Open your browser and navigate to `http://localhost:3000` to access PumpTrack.
 
 ## Contributing
 
