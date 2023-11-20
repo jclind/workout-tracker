@@ -4,6 +4,7 @@ import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import {
   getUsername,
+  logout,
   signupWithGoogle,
   updateUserActivity,
 } from './services/auth'
@@ -80,6 +81,29 @@ function App() {
     return () => unsubscribe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const handleTimeout = () => {
+      toast.error('Error Timeout, something went wrong. Try refreshing', {
+        position: 'bottom-center',
+      })
+      logout()
+      setShowLoadingOverlay(false)
+    }
+
+    const timeoutDuration = 10000
+
+    if (showLoadingOverlay) {
+      const timeoutId = setTimeout(() => {
+        handleTimeout()
+      }, timeoutDuration)
+
+      // Cleanup the timeout if stateVariable changes before the timeout triggers
+      return () => clearTimeout(timeoutId)
+    }
+
+    return () => {}
+  }, [showLoadingOverlay])
 
   const handleSignup = () => {
     setLoginLoading(true)
