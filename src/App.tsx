@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Modal from 'react-modal'
-import { auth } from './services/firestore'
+// import { auth } from './services/firestore'
 import { AiFillGoogleCircle } from 'react-icons/ai'
 import {
   getUsername,
@@ -22,6 +22,19 @@ import IncomingRequests from './Components/FriendsPage/IncomingRequests/Incoming
 import OutgoingRequests from './Components/FriendsPage/OutgoingRequests/OutgoingRequests'
 
 import * as Sentry from '@sentry/react'
+
+import { trackerEcho } from 'pump-track-common/services/tracker'
+// import {FriendsData} from 'pump-track-common/dist/'
+import { FriendsData } from 'pump-track-common/types'
+// import { useAuthState } from 'pump-track-common/index'
+import { useAuthState } from 'pump-track-common'
+// import { useAuthState } from 'pump-track-common/hooks'
+// import { useAuthState } from 'pump-track-common/hooks/useAuthState'
+
+// import {useAuthState} from 'pump-track-common/hooks'
+
+// import { useAuthState } from 'pump-track-common/hooks/useAuthState'
+// import { useAuthState } from 'pump-track-common/hooks/userAuthState'
 
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_DSN,
@@ -46,6 +59,11 @@ Sentry.init({
 Modal.setAppElement('#root')
 
 function App() {
+  const test: FriendsData | null = null
+
+  console.log(useAuthState.toString())
+
+  // const { user, loading: authLoading } = useAuthState()
   const [user, setUser] = useState<User | null>(null)
   const [authLoading, setAuthLoading] = useState(true)
 
@@ -63,23 +81,23 @@ function App() {
     }
   }, [authLoading, loginLoading])
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(userInstance => {
-      if (userInstance) {
-        getUsername().then(() => {
-          setUser(userInstance)
-          updateUserActivity()
-        })
-      } else {
-        setUser(null)
-        localStorage.removeItem(PUMP_TRACK_LS_USERNAME)
-      }
-      setAuthLoading(false)
-    })
+  // useEffect(() => {
+  //   const unsubscribe = auth.onAuthStateChanged(userInstance => {
+  //     if (userInstance) {
+  //       getUsername().then(() => {
+  //         setUser(userInstance)
+  //         updateUserActivity()
+  //       })
+  //     } else {
+  //       setUser(null)
+  //       localStorage.removeItem(PUMP_TRACK_LS_USERNAME)
+  //     }
+  //     setAuthLoading(false)
+  //   })
 
-    return () => unsubscribe()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  //   return () => unsubscribe()
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [])
 
   const handleSignup = () => {
     setLoginLoading(true)
