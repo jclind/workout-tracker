@@ -1,0 +1,21 @@
+@import '../../helpers.scss';
+
+.editing-workout {
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+  border: 2px solid $tertiary;
+  border-radius: $border-radius;
+  margin: 1rem 0;
+  label {
+    color: $tertiary-text;
+  }
+}
+.edit-input-container {
+  width: 100%;
+  padding-bottom: 0.5rem;
+
+  input {
+    width: 100%;
+  }
+}

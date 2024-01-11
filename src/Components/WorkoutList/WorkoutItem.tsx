@@ -1,5 +1,5 @@
-import React from 'react'
-import { WorkoutDataType } from '../../types'
+import React, { useState } from 'react'
+import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { parseExercise } from '../../util/parseExercise'
 import {
   deleteWorkout,
@@ -10,8 +10,9 @@ import toast from 'react-hot-toast'
 import WorkoutTitle from './WorkoutTitle'
 import { formatDateToString } from '../../util/dateUtil'
 import ActionsDropdown from '../ActionsDropdown/ActionsDropdown'
-import { BsTrashFill } from 'react-icons/bs'
+import { BsPencilSquare, BsTrashFill } from 'react-icons/bs'
 import ExerciseItem from './ExerciseItem'
+import EditingWorkout from './EditingWorkout'
 
 type WorkoutItemProps = {
   workout: WorkoutDataType
@@ -19,6 +20,8 @@ type WorkoutItemProps = {
 }
 
 const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
+  const [isEditing, setIsEditing] = useState(false)
+
   const handleUpdateExercise = (
     exerciseID: string,
     updatedExerciseStr: string,
@@ -79,6 +82,25 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
       }
     )
   }
+  const handleEditWorkout = () => {
+    setIsEditing(true)
+    console.log('EDITING')
+  }
+
+  const handleExerciseEnter = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+    index: number,
+    currArr: ExerciseDataType[]
+  ) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+
+      if (index === currArr.length - 1) {
+        console.log('HERE')
+      }
+    }
+  }
+  if (isEditing) return <EditingWorkout workout={workout} />
 
   return (
     <div className='single-workout'>
@@ -92,28 +114,29 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
           <ActionsDropdown
             buttons={[
               {
+                text: 'Edit',
+                icon: <BsPencilSquare className='icon' />,
+                type: 'default',
+                action: handleEditWorkout,
+              },
+              {
                 text: 'Delete',
                 icon: <BsTrashFill className='icon' />,
                 type: 'danger',
                 action: handleDeleteWorkout,
               },
-              // {
-              //   text: 'Edit',
-              //   icon: <BsPencilSquare className='icon' />,
-              //   type: 'default',
-              //   action: handleEditWorkout,
-              // },
             ]}
           />
         </div>
       </div>
       <div className='exercise-list'>
-        {workout.exercises.map(exercise => {
+        {workout.exercises.map((exercise, index, currArr) => {
           return (
             <ExerciseItem
               key={exercise.id}
               exercise={exercise}
               handleUpdateExercise={handleUpdateExercise}
+              handleEnter={e => handleExerciseEnter(e, index, currArr)}
             />
           )
         })}

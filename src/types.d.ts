@@ -17,6 +17,11 @@ export type ExerciseDataType = {
   originalString: string
 }
 
+export type InitialExerciseType = {
+  id: string
+  text: string
+}
+
 export type ExercisesServerDataType = {
   id: string
   index: number

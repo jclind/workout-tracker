@@ -9,10 +9,12 @@ type ExerciseItemProps = {
     updatedExerciseStr: string,
     originalExerciseStr: string
   ) => void
+  handleEnter: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
 }
 const ExerciseItem = ({
   exercise,
   handleUpdateExercise,
+  handleEnter,
 }: ExerciseItemProps) => {
   const [editedStr, setEditedStr] = useState(exercise.originalString)
   const [isFocused, setIsFocused] = useState(false)
@@ -51,6 +53,7 @@ const ExerciseItem = ({
       onKeyDown={handleKeyDown}
       ref={textareaRef}
       key={exercise.id}
+      onKeyDownCapture={e => handleEnter(e)}
     />
   )
 }

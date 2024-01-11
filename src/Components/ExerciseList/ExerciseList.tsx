@@ -3,7 +3,7 @@ import './ExerciseList.scss'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
 import InfoModal from '../InfoModal/InfoModal'
 import FormInput from '../FormInput/FormInput'
-import { v4 as uuidv4 } from 'uuid'
+
 import {
   addWorkout,
   getCurrentWorkoutData,
@@ -11,19 +11,20 @@ import {
   updateCurrentWorkout,
 } from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
-import { WorkoutDataType } from '../../types'
+import { InitialExerciseType, WorkoutDataType } from '../../types'
 import { getDataFromExercise } from '../../util/getDataFromExercise'
 import ViewAllExercisesModal from '../ViewAllExercisesModal/ViewAllExercisesModal'
 import { TailSpin } from 'react-loader-spinner'
 import { toast } from 'react-hot-toast'
+import { generateNewExercise } from '../../util/generateNewExercise'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
 type ExerciseInputsProps = {
-  exercise: ExerciseType
+  exercise: InitialExerciseType
   idx: number
   numExercises: number
-  exercises: ExerciseType[]
+  exercises: InitialExerciseType[]
   addExercise: () => string
   removeExercise: (id: string) => void
   updateExercise: (exerciseID: string, text: string) => void
@@ -166,19 +167,6 @@ const ExerciseInputs = ({
   )
 }
 
-type ExerciseType = {
-  id: string
-  text: string
-}
-
-const generateNewExercise = (): ExerciseType => {
-  const id = uuidv4()
-  return {
-    id,
-    text: '',
-  }
-}
-
 type ExerciseListProps = {
   setWorkoutList: React.Dispatch<React.SetStateAction<WorkoutDataType[]>>
   loading: boolean
@@ -194,7 +182,7 @@ const ExerciseList = ({
   workoutTitle,
   setWorkoutTitle,
 }: ExerciseListProps) => {
-  const [exercises, setExercises] = useState<ExerciseType[]>([
+  const [exercises, setExercises] = useState<InitialExerciseType[]>([
     generateNewExercise(),
   ])
 

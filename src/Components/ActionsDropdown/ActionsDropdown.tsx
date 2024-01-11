@@ -41,16 +41,21 @@ const ActionsDropdown = ({ buttons }: ActionsDropdownProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null)
   useOutsideAlerter(wrapperRef, setIsOpen)
 
+  const handleToggleClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen(prev => !prev)
+  }
+
   return (
-    <div className='actions-dropdown-container'>
-      <button
-        className='trigger btn-no-styles'
-        onClick={() => setIsOpen(prev => !prev)}
-      >
+    <div className='actions-dropdown-container' ref={wrapperRef}>
+      <button className='trigger btn-no-styles' onClick={handleToggleClick}>
         <AiOutlineEllipsis className='icon' />
       </button>
       {isOpen && (
-        <div className='dropdown' ref={wrapperRef}>
+        <div className='dropdown'>
           {buttons.map(item => {
             return (
               <button
