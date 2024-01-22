@@ -18,6 +18,7 @@ import { TailSpin } from 'react-loader-spinner'
 import { toast } from 'react-hot-toast'
 import { generateNewExercise } from '../../util/generateNewExercise'
 
+// Hold a mapping of exercise id's to the corresponding input ref
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
 type ExerciseInputsProps = {

@@ -10,11 +10,70 @@
   label {
     color: $tertiary-text;
   }
+  .exercises-container {
+    display: flex;
+    flex-direction: column;
+  }
+  .add-exercise {
+    width: fit-content;
+  }
+  .actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+    .right,
+    .left {
+      display: flex;
+      gap: 0.5rem;
+    }
+    button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      background: none;
+      padding: 0.5rem 0;
+      color: $primary;
+      font-weight: 700;
+      // box-sizing: border-box;
+      width: 90px;
+    }
+    button.delete-btn {
+      background: $error-red;
+    }
+    button.cancel-btn {
+      background: $tertiary-background;
+      color: $secondary-text;
+    }
+    button.save-btn {
+      background: $secondary;
+    }
+  }
 }
 .edit-input-container {
+  position: relative;
   width: 100%;
   padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
 
+  .input-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    button.remove-exercise-btn {
+      width: 2rem;
+      color: $tertiary-text;
+      &:hover {
+        color: $error-red;
+      }
+      .icon {
+        height: 18px;
+        width: 18px;
+      }
+    }
+  }
   input {
     width: 100%;
   }

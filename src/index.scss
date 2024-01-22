@@ -65,6 +65,18 @@ button.load-more {
   width: 85px;
 }
 
+.add-exercise {
+  display: flex;
+  justify-content: center;
+  button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: $tertiary-text !important;
+  }
+}
 input {
   background: $primary-background;
   border: 1px solid $border-color;

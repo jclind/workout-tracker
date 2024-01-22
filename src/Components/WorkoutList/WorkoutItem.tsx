@@ -100,7 +100,8 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
       }
     }
   }
-  if (isEditing) return <EditingWorkout workout={workout} />
+  if (isEditing)
+    return <EditingWorkout workout={workout} setIsEditing={setIsEditing} />
 
   return (
     <div className='single-workout'>
