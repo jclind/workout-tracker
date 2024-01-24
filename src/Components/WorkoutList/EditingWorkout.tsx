@@ -11,6 +11,7 @@ import { formatDateToString } from '../../util/dateUtil'
 import { MdClose } from 'react-icons/md'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
 import { BsTrashFill } from 'react-icons/bs'
+import { generateNewExercise } from '../../util/generateNewExercise'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -18,10 +19,11 @@ type EditInputProps = {
   val: string
   setVal: (val: string) => void
   label?: string
-  handleEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  handleEnter?: () => void
   inputRef?: React.RefObject<HTMLInputElement>
   removeInput?: () => void
   onBlur?: () => void
+  onBackspaceEmpty?: () => void
 }
 
 const EditInput = ({
@@ -32,7 +34,19 @@ const EditInput = ({
   inputRef,
   removeInput,
   onBlur,
+  onBackspaceEmpty,
 }: EditInputProps) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && handleEnter) {
+      e.preventDefault()
+      handleEnter()
+    }
+    if (!val && e.key === 'Backspace' && onBackspaceEmpty) {
+      e.preventDefault()
+      onBackspaceEmpty()
+    }
+  }
+
   return (
     <div className='edit-input-container'>
       {label && <label className='label'>{label}</label>}
@@ -41,7 +55,7 @@ const EditInput = ({
         <input
           value={val}
           onChange={e => setVal(e.target.value)}
-          onKeyDown={handleEnter}
+          onKeyDown={handleKeyDown}
           ref={inputRef}
           onBlur={onBlur}
         />
@@ -60,13 +74,15 @@ const EditInput = ({
 
 type EditExerciseProps = {
   exercise: InitialExerciseType
-  handleEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void
+  handleEnter: (nextID: string) => void
   removeExercise: (id: string) => void
+  handleBackspace: () => void
 }
 const EditExercise = ({
   exercise,
   handleEnter,
   removeExercise,
+  handleBackspace,
 }: EditExerciseProps) => {
   const [text, setText] = useState(exercise.text)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -83,10 +99,11 @@ const EditExercise = ({
     <EditInput
       val={text}
       setVal={setText}
-      handleEnter={handleEnter}
+      handleEnter={() => handleEnter(exerciseID)}
       inputRef={inputRef}
       removeInput={() => removeExercise(exerciseID)}
       onBlur={handleBlur}
+      onBackspaceEmpty={handleBackspace}
     />
   )
 }
@@ -108,9 +125,47 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
   const removeExercise = (exerciseID: string) => {
     setModifiedExercises(prev => prev.filter(ex => ex.id !== exerciseID))
   }
-  const handleAddExercise = () => {}
+  const addExercise = () => {
+    const newExercise = generateNewExercise()
+    setModifiedExercises(prev => [...prev, newExercise])
+    return newExercise.id
+  }
   const handleCancel = () => {
     setIsEditing(false)
+  }
+  const handleEnter = (
+    id: string,
+    index: number,
+    exercises: InitialExerciseType[]
+  ) => {
+    if (index < exercises.length - 1) {
+      const nextExerciseFocus = exercises[index + 1] || exercises[0]
+      const nextExerciseFocusID = nextExerciseFocus.id
+      const focusRef = idRefHash[nextExerciseFocusID]
+
+      if (id && focusRef && focusRef.current) {
+        focusRef.current.focus()
+      }
+    } else {
+      const nextID = addExercise()
+      setTimeout(() => {
+        handleEnter(nextID, index, [...exercises, { id: nextID, text: '' }])
+      }, 0)
+    }
+  }
+  const handleBackspace = (index: number, exercises: InitialExerciseType[]) => {
+    const numExercises = exercises.length
+    const currExercise = exercises[index]
+    if (numExercises > 1) {
+      removeExercise(currExercise.id)
+
+      const nextExerciseFocus = exercises[index - 1] || exercises[0]
+      const nextExerciseFocusID = nextExerciseFocus.id
+      const focusRef = idRefHash[nextExerciseFocusID]
+      if (nextExerciseFocusID && focusRef && focusRef.current) {
+        focusRef.current.focus()
+      }
+    }
   }
 
   return (
@@ -125,28 +180,18 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
       <label>Exercises</label>
       <div className='exercises-container'>
         {modifiedExercises.map((exercise, index, currArr) => {
-          const handleEnter = (
-            e: React.KeyboardEvent<HTMLInputElement>,
-            index: number,
-            currArr: InitialExerciseType[]
-          ) => {
-            e.preventDefault()
-
-            if (index >= currArr.length - 1) {
-              // setModifiedExercises
-            }
-          }
           return (
             <EditExercise
               exercise={exercise}
-              handleEnter={e => handleEnter(e, index, currArr)}
+              handleEnter={id => handleEnter(id, index, currArr)}
               removeExercise={removeExercise}
+              handleBackspace={() => handleBackspace(index, currArr)}
             />
           )
         })}
       </div>
       <div className='add-exercise'>
-        <button className='btn-no-styles' onClick={handleAddExercise}>
+        <button className='btn-no-styles' onClick={addExercise}>
           <AiOutlinePlusCircle className='icon' />
           Add Exercise
         </button>
