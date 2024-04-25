@@ -133,6 +133,7 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
   const handleCancel = () => {
     setIsEditing(false)
   }
+  const handleSaveEdit = () => {}
   const handleEnter = (
     id: string,
     index: number,
@@ -206,7 +207,9 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
           <button className='cancel-btn' onClick={handleCancel}>
             Cancel
           </button>
-          <button className='save-btn'>Save</button>
+          <button className='save-btn' onClick={handleSaveEdit}>
+            Save
+          </button>
         </div>
       </div>
     </div>

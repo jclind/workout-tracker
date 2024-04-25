@@ -467,6 +467,19 @@ export const updateTotalWorkoutsAndExercises = async (
   }
 }
 
+/**
+ * Updates a specific exercise in the user's workout and exercise datasets
+ * This function updates the changed exercise in the following areas:
+ * - The workout collection data
+ * - The exercise collection
+ * - The list of unique exercise names in the user's data
+ * @param exerciseID - The ID of the exercise to update.
+ * @param workoutID - The ID of the workout containing the exercise.
+ * @param exerciseList - The list of exercises in the workout.
+ * @param updatedExerciseData - The updated exercise data following the "ExerciseDataType" ts type.
+ * @param originalExerciseName - The original name of the exercise before the update
+ * @returns {Promise<void>} A promise that resolves once the exercise is updated
+ */
 export const updateExercise = async (
   exerciseID: string,
   workoutID: string,
@@ -508,9 +521,16 @@ export const updateExercise = async (
     }
   }
 }
+
+/**
+ * Updates the name and or date of a given workout.
+ * @param currWorkoutData - The full workout data to be updated.
+ * @param updatedData - The updated name and or date to be updated.
+ *
+ */
 export const updateWorkout = async (
   currWorkoutData: WorkoutDataType,
-  updatedData: { name?: string; date?: number }
+  updatedData: { name?: string; date?: number; exercises?: ExerciseDataType[] }
 ) => {
   const uid = auth?.currentUser?.uid
   if (uid) {
@@ -525,6 +545,18 @@ export const updateWorkout = async (
         const addedTitle = updatedData.name
         const removedTitle = currWorkoutData.name
         await updateUniqueTitles('workoutTitles', addedTitle, removedTitle)
+      }
+
+      if (true) {
+        /* 
+        Need to look for:
+
+        Exercises being deleted
+        Exercises being added
+        Exercises being edited
+        
+        
+        */
       }
     } catch (error: any) {
       const message = error.message || error
