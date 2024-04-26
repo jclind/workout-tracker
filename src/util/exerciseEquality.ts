@@ -56,18 +56,33 @@ export const findAddedExercises = (
 export const findEditedExercises = (
   e1: ExerciseDataType[],
   e2: ExerciseDataType[]
-) => {
-  const editedExercises: ExerciseDataType[] = []
+): { original: ExerciseDataType; edited: ExerciseDataType }[] => {
+  const editedExercises: {
+    original: ExerciseDataType
+    edited: ExerciseDataType
+  }[] = []
 
   const exerciseIdsInArray2 = new Set(e2.map(exercise => exercise.id))
 
-  const preservedExercises: ExerciseDataType[] = []
+  const preservedExerciseIDs: string[] = []
 
   for (const exercise1 of e1) {
     if (exerciseIdsInArray2.has(exercise1.id)) {
-      preservedExercises.push(exercise1)
+      preservedExerciseIDs.push(exercise1.id)
     }
   }
+  preservedExerciseIDs.forEach(id => {
+    const exercise1 = e1.find(exercise1 => exercise1.id === id)
+    const exercise2 = e2.find(exercise2 => exercise2.id === id)
+
+    // if the exercises aren't equal add them to the editedExercises array
+    if (exercise1 && exercise2 && !exercisesAreEqual(exercise1, exercise2)) {
+      const editedExercise = { original: exercise1, edited: exercise2 }
+      editedExercises.push(editedExercise)
+    }
+  })
+
+  return editedExercises
 }
 
 export const exercisesAreEqual = (

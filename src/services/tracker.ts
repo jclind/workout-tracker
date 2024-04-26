@@ -30,6 +30,11 @@ import { updateUserActivity } from './auth'
 import toast from 'react-hot-toast'
 import { httpsCallable } from 'firebase/functions'
 import { calculateMaxWeight } from '../util/calculateMaxWeight'
+import {
+  findAddedExercises,
+  findDeletedExercises,
+  findEditedExercises,
+} from '../util/exerciseEquality'
 
 export const addWorkout = async (
   name: string,
@@ -522,6 +527,29 @@ export const updateExercise = async (
   }
 }
 
+export const deleteExercises = async (exercises: ExerciseDataType[]) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const promises: Promise<any>[] = []
+    for (const exercise of exercises) {
+      const exerciseID = exercise.id
+      if (exerciseID) {
+        const userDataRef = doc(db, 'usersData', uid)
+        const exerciseDocRef = doc(userDataRef, 'exercises', exerciseID)
+
+        const removedTitle = exercise.name
+        if (removedTitle) {
+          promises.push(
+            updateUniqueTitles('exerciseTitles', null, removedTitle)
+          )
+          promises.push(deleteDoc(exerciseDocRef))
+        }
+      }
+    }
+    await Promise.all(promises)
+  }
+}
+
 /**
  * Updates the name and or date of a given workout.
  * @param currWorkoutData - The full workout data to be updated.
@@ -536,6 +564,7 @@ export const updateWorkout = async (
   if (uid) {
     try {
       const workoutID = currWorkoutData.id
+      const workoutDate = updatedData.date ?? currWorkoutData.date ?? 0
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
       await updateDoc(workoutDocRef, {
@@ -547,7 +576,7 @@ export const updateWorkout = async (
         await updateUniqueTitles('workoutTitles', addedTitle, removedTitle)
       }
 
-      if (true) {
+      if (updatedData.exercises) {
         /* 
         Need to look for:
 
@@ -557,6 +586,22 @@ export const updateWorkout = async (
         
         
         */
+        const originalExercises = currWorkoutData.exercises
+        const newExercises = updatedData.exercises
+        const deletedExercises = findDeletedExercises(
+          originalExercises,
+          newExercises
+        )
+        await deleteExercises(deletedExercises)
+        const addedExercises = findAddedExercises(
+          originalExercises,
+          newExercises
+        )
+        await addExercises(uid, addedExercises, workoutID, workoutDate)
+        const editedExercises = findEditedExercises(
+          originalExercises,
+          newExercises
+        )
       }
     } catch (error: any) {
       const message = error.message || error
