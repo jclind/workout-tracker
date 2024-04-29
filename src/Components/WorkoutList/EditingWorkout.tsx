@@ -12,6 +12,8 @@ import { MdClose } from 'react-icons/md'
 import { AiOutlinePlusCircle } from 'react-icons/ai'
 import { BsTrashFill } from 'react-icons/bs'
 import { generateNewExercise } from '../../util/generateNewExercise'
+import { updateWorkout } from '../../services/tracker'
+import { parseExercise } from '../../util/parseExercise'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -75,16 +77,18 @@ const EditInput = ({
 type EditExerciseProps = {
   exercise: InitialExerciseType
   handleEnter: (nextID: string) => void
+  updateExerciseText: (exerciseID: string, updatedText: string) => void
   removeExercise: (id: string) => void
   handleBackspace: () => void
 }
 const EditExercise = ({
   exercise,
   handleEnter,
+  updateExerciseText,
   removeExercise,
   handleBackspace,
 }: EditExerciseProps) => {
-  const [text, setText] = useState(exercise.text)
+  const [updatedText, setUpdatedText] = useState(exercise.text)
   const inputRef = useRef<HTMLInputElement>(null)
   const exerciseID = exercise.id ?? ''
   useEffect(() => {
@@ -93,12 +97,14 @@ const EditExercise = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const handleBlur = () => {}
+  const handleBlur = () => {
+    updateExerciseText(exercise.id, updatedText)
+  }
 
   return (
     <EditInput
-      val={text}
-      setVal={setText}
+      val={updatedText}
+      setVal={setUpdatedText}
       handleEnter={() => handleEnter(exerciseID)}
       inputRef={inputRef}
       removeInput={() => removeExercise(exerciseID)}
@@ -133,7 +139,19 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
   const handleCancel = () => {
     setIsEditing(false)
   }
-  const handleSaveEdit = () => {}
+  const handleSaveEdit = () => {
+    const newDate = new Date(date).getTime()
+    const newExercises: ExerciseDataType[] = modifiedExercises.map(ex =>
+      parseExercise(ex.text, ex.id)
+    )
+    const updatedData = {
+      name: workoutTitle,
+      date: newDate,
+      exercises: newExercises,
+    }
+    console.log(newExercises)
+    updateWorkout(workout, updatedData)
+  }
   const handleEnter = (
     id: string,
     index: number,
@@ -169,6 +187,16 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
     }
   }
 
+  const updateExerciseText = (exerciseID: string, updatedText: string) => {
+    const updatedExercise = modifiedExercises.map(ex => {
+      if (ex.id === exerciseID) {
+        return { ...ex, text: updatedText }
+      }
+      return ex
+    })
+    setModifiedExercises(updatedExercise)
+  }
+
   return (
     <div className='editing-workout'>
       <EditInput
@@ -185,6 +213,7 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
             <EditExercise
               exercise={exercise}
               handleEnter={id => handleEnter(id, index, currArr)}
+              updateExerciseText={updateExerciseText}
               removeExercise={removeExercise}
               handleBackspace={() => handleBackspace(index, currArr)}
             />

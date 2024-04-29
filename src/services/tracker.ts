@@ -592,16 +592,20 @@ export const updateWorkout = async (
           originalExercises,
           newExercises
         )
-        await deleteExercises(deletedExercises)
+        // await deleteExercises(deletedExercises)
         const addedExercises = findAddedExercises(
           originalExercises,
           newExercises
         )
-        await addExercises(uid, addedExercises, workoutID, workoutDate)
+        // await addExercises(uid, addedExercises, workoutID, workoutDate)
         const editedExercises = findEditedExercises(
           originalExercises,
           newExercises
         )
+
+        console.log('deletedExercises:', deletedExercises)
+        console.log('addedExercises:', addedExercises)
+        console.log('editedExercises:', editedExercises)
       }
     } catch (error: any) {
       const message = error.message || error
