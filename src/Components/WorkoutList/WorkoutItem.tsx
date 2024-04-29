@@ -3,7 +3,7 @@ import { ExerciseDataType, WorkoutDataType } from '../../types'
 import { parseExercise } from '../../util/parseExercise'
 import {
   deleteWorkout,
-  updateExercise,
+  updateExerciseInWorkoutAndCollection,
   updateWorkout,
 } from '../../services/tracker'
 import toast from 'react-hot-toast'
@@ -23,38 +23,30 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
   const [isEditing, setIsEditing] = useState(false)
 
   const handleUpdateExercise = (
-    exerciseID: string,
+    updatedExerciseID: string,
     updatedExerciseStr: string,
     originalExerciseStr: string
   ) => {
-    const currExercise = workout.exercises.find(ex => ex.id === exerciseID)
+    const currExercise = workout.exercises.find(
+      ex => ex.id === updatedExerciseID
+    )
     if (currExercise?.originalString !== updatedExerciseStr)
       if (currExercise) {
-        const parsedExercise = parseExercise(updatedExerciseStr, exerciseID)
-        // const updatedWorkoutList: WorkoutDataType[] = workoutList.map(
-        //   currWorkout => {
-        //     if (currWorkout.id === workout.id) {
-        //       const updatedExercises = workout.exercises.map(ex => {
-        //         if (ex.id === exerciseID) return currExercise
-        //         return ex
-        //       })
-        //       const updatedWorkout: WorkoutDataType = {
-        //         ...currWorkout,
-        //         exercises: updatedExercises,
-        //       }
-        //       return updatedWorkout
-        //     }
-        //     return currWorkout
-        //   }
-        // )
-        // setWorkoutList(updatedWorkoutList)
+        const updatedExercise = parseExercise(
+          updatedExerciseStr,
+          updatedExerciseID
+        )
+        const updatedExerciseList = workout.exercises.map(exercise => {
+          if (exercise.id === updatedExerciseID) return updatedExercise
+          return exercise
+        })
         const originalExerciseName = parseExercise(originalExerciseStr).name
-        updateExercise(
-          exerciseID,
+        updateExerciseInWorkoutAndCollection(
+          originalExerciseName,
+          updatedExercise,
+          updatedExerciseList,
           workout.id,
-          workout.exercises,
-          parsedExercise,
-          originalExerciseName
+          workout.date
         )
       }
   }

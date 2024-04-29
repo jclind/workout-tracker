@@ -127,7 +127,7 @@ export const importWorkouts = async (
     }
   }
 }
-// Updated all given exercises and adds all exercise names to the updateUniqueTitles funciton
+// Updates all given exercises and adds all exercise names to the updateUniqueTitles funciton
 export const addExercises = async (
   uid: string,
   exercises: ExerciseDataType[],
@@ -472,6 +472,38 @@ export const updateTotalWorkoutsAndExercises = async (
   }
 }
 
+export const updateSingleExercise = async (
+  originalExerciseName: string,
+  updatedExercise: ExerciseDataType,
+  workoutID: string,
+  workoutDate: number | null,
+  index: number
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    const exerciseID = updatedExercise.id
+    const userDataRef = doc(db, 'usersData', uid)
+    const exerciseDocRef = doc(userDataRef, 'exercises', exerciseID)
+
+    const updatedData: ExercisesServerDataType = {
+      ...updatedExercise,
+      index,
+      maxWeight: calculateMaxWeight(updatedExercise.weights),
+      workoutID,
+      workoutDate,
+    }
+
+    await updateDoc(exerciseDocRef, {
+      ...updatedData,
+    })
+    await updateUniqueTitles(
+      'exerciseTitles',
+      updatedData.name,
+      originalExerciseName
+    )
+  }
+}
+
 /**
  * Updates a specific exercise in the user's workout and exercise datasets
  * This function updates the changed exercise in the following areas:
@@ -485,40 +517,75 @@ export const updateTotalWorkoutsAndExercises = async (
  * @param originalExerciseName - The original name of the exercise before the update
  * @returns {Promise<void>} A promise that resolves once the exercise is updated
  */
-export const updateExercise = async (
-  exerciseID: string,
+export const updateExerciseInWorkoutAndCollection = async (
+  originalExerciseName: string,
+  updatedExercise: ExerciseDataType,
+  updatedExerciseList: ExerciseDataType[],
   workoutID: string,
-  exerciseList: ExerciseDataType[],
-  updatedExerciseData: ExerciseDataType,
-  originalExerciseName: string
+  workoutDate: number | null
 ) => {
   const uid = auth?.currentUser?.uid
   if (uid) {
     try {
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
-      const exerciseDocRef = doc(userDataRef, 'exercises', exerciseID)
 
-      const updatedExerciseList = exerciseList.map(ex => {
-        if (ex.id === exerciseID) return updatedExerciseData
-
-        return ex
-      })
+      const exerciseIndex = updatedExerciseList.findIndex(
+        ex => ex.id === updatedExercise.id
+      )
 
       await updateDoc(workoutDocRef, {
         exercises: updatedExerciseList,
       })
 
-      await updateDoc(exerciseDocRef, {
-        name: updatedExerciseData.name,
-        weights: updatedExerciseData.weights,
-        originalString: updatedExerciseData.originalString,
-      })
-      await updateUniqueTitles(
-        'exerciseTitles',
-        updatedExerciseData.name,
-        originalExerciseName
+      updateSingleExercise(
+        originalExerciseName,
+        updatedExercise,
+        workoutID,
+        workoutDate,
+        exerciseIndex
       )
+    } catch (error: any) {
+      const message = error.message || error
+      console.log(error)
+      toast.error(message, { position: 'bottom-center' })
+    }
+  }
+}
+
+const updateExercises = async (
+  updatedExercises: ExerciseDataType[],
+  originalExercises: ExerciseDataType[],
+  workoutID: string,
+  updatedDate: number | null = null
+) => {
+  const uid = auth?.currentUser?.uid
+  if (uid) {
+    try {
+      const promises: Promise<any>[] = []
+      updatedExercises.forEach((exercise, index) => {
+        const originalExercise = originalExercises.find(
+          ex => ex.id === exercise.id
+        )
+
+        const originalExerciseName = originalExercise?.originalString
+        if (!originalExerciseName) {
+          throw new Error(
+            'ERROR! originalExercise.originalString does not exist!'
+          )
+        } else {
+          promises.push(
+            updateSingleExercise(
+              originalExerciseName,
+              exercise,
+              workoutID,
+              updatedDate,
+              index
+            )
+          )
+        }
+      })
+      await Promise.all(promises)
     } catch (error: any) {
       const message = error.message || error
       console.log(error)
@@ -565,6 +632,7 @@ export const updateWorkout = async (
     try {
       const workoutID = currWorkoutData.id
       const workoutDate = updatedData.date ?? currWorkoutData.date ?? 0
+      console.log(workoutDate, updatedData.date, currWorkoutData.date)
       const userDataRef = doc(db, 'usersData', uid)
       const workoutDocRef = doc(userDataRef, 'workouts', workoutID)
       await updateDoc(workoutDocRef, {
@@ -577,31 +645,41 @@ export const updateWorkout = async (
       }
 
       if (updatedData.exercises) {
-        /* 
-        Need to look for:
-
-        Exercises being deleted
-        Exercises being added
-        Exercises being edited
-        
-        
-        */
+        const promises: Promise<any>[] = []
         const originalExercises = currWorkoutData.exercises
         const newExercises = updatedData.exercises
         const deletedExercises = findDeletedExercises(
           originalExercises,
           newExercises
         )
-        // await deleteExercises(deletedExercises)
+        promises.push(deleteExercises(deletedExercises))
         const addedExercises = findAddedExercises(
           originalExercises,
           newExercises
         )
-        // await addExercises(uid, addedExercises, workoutID, workoutDate)
+        promises.push(addExercises(uid, addedExercises, workoutID, workoutDate))
         const editedExercises = findEditedExercises(
           originalExercises,
           newExercises
         )
+        promises.push(
+          updateExercises(
+            editedExercises.edited,
+            editedExercises.original,
+            workoutID,
+            workoutDate
+          )
+        )
+
+        promises.push(
+          updateDoc(workoutDocRef, {
+            exercises: updatedData.exercises,
+          })
+        )
+
+        console.log('here!')
+
+        await Promise.all(promises)
 
         console.log('deletedExercises:', deletedExercises)
         console.log('addedExercises:', addedExercises)

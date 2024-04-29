@@ -14,6 +14,9 @@ import { BsTrashFill } from 'react-icons/bs'
 import { generateNewExercise } from '../../util/generateNewExercise'
 import { updateWorkout } from '../../services/tracker'
 import { parseExercise } from '../../util/parseExercise'
+import styles from '../../_exports.scss'
+import { TailSpin } from 'react-loader-spinner'
+import { getTitleAndDate } from '../../util/getTitleAndDate'
 
 const idRefHash: { [x: string]: React.RefObject<HTMLInputElement> } = {}
 
@@ -128,6 +131,8 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
     InitialExerciseType[]
   >(workout.exercises.map(ex => ({ id: ex.id, text: ex.originalString })))
 
+  const [isSaveLoading, setIsSaveLoading] = useState(false)
+
   const removeExercise = (exerciseID: string) => {
     setModifiedExercises(prev => prev.filter(ex => ex.id !== exerciseID))
   }
@@ -140,7 +145,8 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
     setIsEditing(false)
   }
   const handleSaveEdit = () => {
-    const newDate = new Date(date).getTime()
+    const newDate = getTitleAndDate(date).date ?? undefined
+    console.log(newDate)
     const newExercises: ExerciseDataType[] = modifiedExercises.map(ex =>
       parseExercise(ex.text, ex.id)
     )
@@ -187,14 +193,19 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
     }
   }
 
-  const updateExerciseText = (exerciseID: string, updatedText: string) => {
+  const updateExerciseText = async (
+    exerciseID: string,
+    updatedText: string
+  ) => {
+    setIsSaveLoading(true)
     const updatedExercise = modifiedExercises.map(ex => {
       if (ex.id === exerciseID) {
         return { ...ex, text: updatedText }
       }
       return ex
     })
-    setModifiedExercises(updatedExercise)
+    await setModifiedExercises(updatedExercise)
+    setIsSaveLoading(false)
   }
 
   return (
@@ -211,6 +222,7 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
         {modifiedExercises.map((exercise, index, currArr) => {
           return (
             <EditExercise
+              key={exercise.id}
               exercise={exercise}
               handleEnter={id => handleEnter(id, index, currArr)}
               updateExerciseText={updateExerciseText}
@@ -237,7 +249,16 @@ const EditingWorkout = ({ workout, setIsEditing }: EditingWorkoutProps) => {
             Cancel
           </button>
           <button className='save-btn' onClick={handleSaveEdit}>
-            Save
+            {isSaveLoading ? (
+              <TailSpin
+                height='25'
+                width='25'
+                color={styles.primaryText}
+                ariaLabel='loading'
+              />
+            ) : (
+              'Save'
+            )}
           </button>
         </div>
       </div>
