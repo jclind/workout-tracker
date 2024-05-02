@@ -75,6 +75,11 @@
       }
     }
   }
+  .input-container.disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+    pointer-events: none;
+  }
   input {
     width: 100%;
   }

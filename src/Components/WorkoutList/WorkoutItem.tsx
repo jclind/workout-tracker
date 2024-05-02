@@ -20,6 +20,7 @@ type WorkoutItemProps = {
 }
 
 const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
+  const [currWorkout, setCurrWorkout] = useState<WorkoutDataType>(workout)
   const [isEditing, setIsEditing] = useState(false)
 
   const handleUpdateExercise = (
@@ -27,7 +28,7 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
     updatedExerciseStr: string,
     originalExerciseStr: string
   ) => {
-    const currExercise = workout.exercises.find(
+    const currExercise = currWorkout.exercises.find(
       ex => ex.id === updatedExerciseID
     )
     if (currExercise?.originalString !== updatedExerciseStr)
@@ -36,7 +37,7 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
           updatedExerciseStr,
           updatedExerciseID
         )
-        const updatedExerciseList = workout.exercises.map(exercise => {
+        const updatedExerciseList = currWorkout.exercises.map(exercise => {
           if (exercise.id === updatedExerciseID) return updatedExercise
           return exercise
         })
@@ -45,17 +46,17 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
           originalExerciseName,
           updatedExercise,
           updatedExerciseList,
-          workout.id,
-          workout.date
+          currWorkout.id,
+          currWorkout.date
         )
       }
   }
   const handleUpdateTitle = (updatedTitle: string) => {
-    if (workout.name !== updatedTitle) {
-      updateWorkout(workout, { name: updatedTitle })
+    if (currWorkout.name !== updatedTitle) {
+      updateWorkout(currWorkout, { name: updatedTitle })
     }
   }
-  const date = workout.date
+  const date = currWorkout.date
 
   const handleDeleteWorkout = () => {
     const deletePromise = deleteWorkout(workout.id)
@@ -93,13 +94,19 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
     }
   }
   if (isEditing)
-    return <EditingWorkout workout={workout} setIsEditing={setIsEditing} />
+    return (
+      <EditingWorkout
+        workout={currWorkout}
+        setWorkout={setCurrWorkout}
+        setIsEditing={setIsEditing}
+      />
+    )
 
   return (
     <div className='single-workout'>
       <div className='head'>
         <WorkoutTitle
-          title={workout.name}
+          title={currWorkout.name}
           handleUpdateTitle={handleUpdateTitle}
         />
         {date && <div className='date'>{formatDateToString(date)}</div>}
@@ -123,7 +130,7 @@ const WorkoutItem = ({ workout, setWorkoutList }: WorkoutItemProps) => {
         </div>
       </div>
       <div className='exercise-list'>
-        {workout.exercises.map((exercise, index, currArr) => {
+        {currWorkout.exercises.map((exercise, index, currArr) => {
           return (
             <ExerciseItem
               key={exercise.id}
