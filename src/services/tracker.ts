@@ -778,29 +778,31 @@ export const updateUniqueTitles = async (
       const titlesDocData = userDataDoc.data()
       const titles = titlesDocData?.[field] || {}
 
+      const updatedTitles = { ...titles }
+
       if (addedTitles) {
         if (typeof addedTitles === 'string') {
           const title = addedTitles.toLowerCase().trim()
           // Add workout title the workoutTitles object
-          titles[title] = ++titles[title] || 1
+          updatedTitles[title] = ++updatedTitles[title] || 1
         } else {
           addedTitles.forEach(title => {
-            titles[title] = ++titles[title] || 1
+            updatedTitles[title] = ++updatedTitles[title] || 1
           })
         }
       }
       if (removedTitles) {
         if (typeof removedTitles === 'string') {
           const title = removedTitles.toLowerCase().trim()
-          titles[title] = --titles[title] || 0
+          updatedTitles[title] = --updatedTitles[title] || 0
         } else {
           removedTitles.forEach(title => {
-            titles[title] = --titles[title] || 0
+            updatedTitles[title] = --updatedTitles[title] || 0
           })
         }
       }
       const filteredTitles: { [key: string]: number } = {}
-      for (const [key, value] of Object.entries(titles)) {
+      for (const [key, value] of Object.entries(updatedTitles)) {
         if (typeof value === 'number' && value > 0) {
           filteredTitles[key] = value
         }
