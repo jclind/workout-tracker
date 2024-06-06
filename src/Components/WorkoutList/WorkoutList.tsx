@@ -30,6 +30,7 @@ const WorkoutList = ({
   const [moreLoading, setMoreLoading] = useState(false)
   const [nameFilter, setNameFilter] = useState<string | null>(null)
   const [workoutTitles, setWorkoutTitles] = useState<string[]>([])
+  const [isFilterLoading, setIsFilterLoading] = useState<boolean>(true)
 
   const titleRef = useRef<HTMLHeadingElement>(null)
   const scrollParentRef = useRef<HTMLDivElement>(null)
@@ -84,6 +85,17 @@ const WorkoutList = ({
         setLoading(false)
         setMoreLoading(false)
       })
+      .finally(() => {
+        setIsFilterLoading(false)
+      })
+  }
+
+  const handleSelectNameFilter = (title: string) => {
+    setIsFilterLoading(true)
+    setNameFilter(() => {
+      if (nameFilter === title) return ''
+      return title
+    })
   }
 
   if (workoutList.length <= 0 && !nameFilter) return null
@@ -113,12 +125,7 @@ const WorkoutList = ({
                 className={`btn-no-styles ${
                   title === nameFilter ? 'active' : ''
                 }`}
-                onClick={() =>
-                  setNameFilter(() => {
-                    if (nameFilter === title) return ''
-                    return title
-                  })
-                }
+                onClick={() => handleSelectNameFilter(title)}
               >
                 {title}
               </button>
@@ -126,7 +133,11 @@ const WorkoutList = ({
           })}
         </div>
       </div>
-      <div className='workout-list'>
+      <div
+        className={`workout-list ${
+          isFilterLoading ? 'workout-list-loading' : ''
+        }`}
+      >
         {workoutList.map(workout => (
           <WorkoutItem
             workout={workout}

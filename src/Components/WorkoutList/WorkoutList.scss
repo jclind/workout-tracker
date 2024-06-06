@@ -122,6 +122,10 @@
       }
     }
   }
+  .workout-list-loading {
+    filter: brightness(50%);
+    pointer-events: none;
+  }
 }
 
 @keyframes upAndDown {
